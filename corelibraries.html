@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LinuxToys developer documentation." />
+  <meta name="theme-color" content="#0a0c10" />
+  <title>Documentation — LinuxToys for Developers</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/linuxtoys.svg" type="image/svg+xml">
+
+  <!-- Keep the shared portal stylesheet first, then the documentation additions. -->
+  <link rel="stylesheet" href="home/styles.css" />
+  <link rel="stylesheet" href="docs/docs-reader.css" />
+
+  <!-- Code highlighting theme. -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github-dark.min.css"
+  >
+  
+</head>
+<body>
+  <div class="page-shell docs-shell">
+    <header class="site-header docs-header">
+      <a class="brand" href="index.html" aria-label="LinuxToys Developer Portal home">
+        <img class="brand-logo" src="assets/linuxtoys.svg" alt="" aria-hidden="true">
+        <span class="brand-copy">
+          <strong>LinuxToys</strong>
+          <span data-ui-i18n="brandPortal">Developer Portal</span>
+        </span>
+      </a>
+
+      <div class="header-actions">
+        <a class="header-link" href="index.html" data-ui-i18n="backHome">Overview</a>
+        <a class="header-link" href="documentation.html" data-ui-i18n="docsLanding">Documentation</a>
+        <a class="header-link" href="repositorylists.html" data-ui-i18n="repoLists">Repository Lists</a>
+        <div class="language-switcher" role="group" aria-label="Language selector">
+          <button class="lang-button" type="button" data-lang="en" aria-pressed="false">EN</button>
+          <button class="lang-button" type="button" data-lang="pt-BR" aria-pressed="false">PT-BR</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="docs-main" id="top">
+      <button class="mobile-toc-toggle" id="mobile-toc-toggle" type="button" aria-expanded="false" aria-controls="docs-sidebar">
+        <span class="mobile-toc-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        </span>
+        <span data-ui-i18n="onThisPage">On this page</span>
+        <span class="mobile-toc-current" id="mobile-toc-current"></span>
+        <svg class="mobile-toc-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+      </button>
+
+      <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation navigation">
+        <div class="toc-panel">
+          <div class="toc-kicker" data-ui-i18n="onThisPage">On this page</div>
+          <nav class="toc" id="toc"></nav>
+        </div>
+      </aside>
+
+      <article class="markdown-panel" aria-live="polite">
+        <div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>
+
+        <div class="docs-status" id="docs-status">
+          <div class="docs-spinner" aria-hidden="true"></div>
+          <span data-ui-i18n="loading">Loading documentation…</span>
+        </div>
+
+        <div class="markdown-body" id="markdown-content" hidden></div>
+      </article>
+    </main>
+
+    <footer class="site-footer docs-footer">
+      <div>
+        <strong>LinuxToys</strong>
+        <span data-ui-i18n="brandPortal">Developer Portal</span>
+      </div>
+      <p data-ui-i18n="footerText">A simpler way to ship software across Linux.</p>
+    </footer>
+  </div>
+
+  <!-- Markdown parser, sanitizer, and code highlighter. -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
+  <script src="docs/docs-reader-corelibraries.js"></script>
+</body>
+</html>

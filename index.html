@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ship your Linux application through LinuxToys with a fast, declarative, cross-distro distribution workflow." />
+  <meta name="theme-color" content="#0a0c10" />
+  <title>LinuxToys for Developers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/linuxtoys.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="home/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="LinuxToys Developer Portal home">
+        <img class="brand-logo" src="assets/linuxtoys.svg" alt="" aria-hidden="true">
+        <span class="brand-copy">
+          <strong>LinuxToys</strong>
+          <span data-i18n="brandPortal">Developer Portal</span>
+        </span>
+      </a>
+
+      <div class="header-actions">
+        <a class="header-link" href="documentation.html" data-i18n="navStart">Get started</a>
+        <a class="header-link" href="https://linux.toys" data-i18n="navMainsite">Meet LinuxToys</a>
+        <div class="language-switcher" role="group" aria-label="Language selector">
+          <button class="lang-button active" type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button class="lang-button" type="button" data-lang="pt-BR" aria-pressed="false">PT-BR</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <h1 data-i18n="heroTitle">Ship your app without shipping the complexity.</h1>
+          <p class="hero-lead" data-i18n="heroLead">LinuxToys gives developers a simple, declarative way to distribute applications across dozens of Linux distributions while keeping installation behavior under their control.</p>
+          <div class="hero-stats" aria-label="LinuxToys developer highlights">
+            <div class="stat">
+              <strong>30+</strong>
+              <span data-i18n="statDistros">Linux distributions</span>
+            </div>
+            <div class="stat">
+              <strong data-i18n="statTimeValue">~1 min</strong>
+              <span data-i18n="statTime">for the simplest setup</span>
+            </div>
+            <div class="stat">
+              <strong data-i18n="statUsersValue">Thousands</strong>
+              <span data-i18n="statUsers">of recurring users</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-panel" aria-label="Example developer configuration">
+          <div class="panel-topbar">
+            <span></span><span></span><span></span>
+            <div data-i18n="panelLabel">Repository entry</div>
+          </div>
+          <pre><code>{
+  <span class="key">"name"</span>: <span class="value">"YourApp"</span>,
+  <span class="key">"description"</span>: <span class="value">"YourApp's short description."</span>,
+  <span class="key">"repo"</span>: <span class="value">"github.com/you/yourapp"</span>,
+  <span class="key">"category"</span>: <span class="value">"office"</span>,
+  <span class="key">"icon"</span>: <span class="value">"./yourapp.svg"</span>,
+}</code></pre>
+          <div class="panel-note">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span data-i18n="panelNote">That can be enough to start shipping.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section intro-section" id="features">
+        <div class="section-heading">
+          <div class="eyebrow" data-i18n="featuresEyebrow">Why developers use LinuxToys</div>
+          <h2 data-i18n="featuresTitle">Distribution that feels like part of your release process.</h2>
+          <p data-i18n="featuresLead">From a single AppImage to custom install workflows, LinuxToys scales with the needs of your project while preserving a consistent experience for users.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card feature-card-wide">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M13 3 4 14h7l-1 7 9-12h-7l1-6Z"/></svg>
+            </div>
+            <div>
+              <h3 data-i18n="easyTitle">Ship in minutes</h3>
+              <p data-i18n="easyText">The simplest LinuxToys integration needs little more than a GitHub repository and a released AppImage. There is no packaging maze to solve before you can reach users.</p>
+              <a href="repositorylists.html#minimal-examples" class="feature-link"><span data-i18n="easyLink">Learn about the quick start</span><span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 5h16M7 10h10M9 15h6M11 20h2"/></svg>
+            </div>
+            <div>
+              <h3 data-i18n="declarativeTitle">Declarative deployment</h3>
+              <p data-i18n="declarativeText">You define how your application should be installed. LinuxToys turns that declaration into a repeatable deployment flow, replacing scattered installation instructions with a consistent experience.</p>
+              <a href="documentation.html#declarative-deployment" class="feature-link"><span data-i18n="declarativeLink">Explore deployment definitions</span><span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M5.6 5.6a9 9 0 0 0 12.8 12.8M18.4 5.6A9 9 0 0 0 5.6 18.4"/></svg>
+            </div>
+            <div>
+              <h3 data-i18n="reachTitle">Massive Linux reach</h3>
+              <p data-i18n="reachText">LinuxToys runs across more than 30 Linux distributions and serves thousands of recurring users, helping your application reach a broad range of systems from one integration point.</p>
+              <a href="documentation.html#multi-distro" class="feature-link"><span data-i18n="reachLink">See platform coverage</span><span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card-wide">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4V5Zm4 4h6m-6 3h4"/></svg>
+            </div>
+            <div>
+              <h3 data-i18n="feedbackTitle">A direct feedback loop</h3>
+              <p data-i18n="feedbackText">When LinuxToys becomes an official distributor of your GitHub-hosted app, users can send useful reports through its bug reporting flow and issue tracker, helping upstream developers see real-world problems faster.</p>
+              <a href="documentation.html#official-support" class="feature-link"><span data-i18n="feedbackLink">Learn about official distribution</span><span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card-wide">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m8 9-4 3 4 3m8-6 4 3-4 3M14 5l-4 14"/></svg>
+            </div>
+            <div>
+              <h3 data-i18n="scriptsTitle">Powerful when you need custom logic</h3>
+              <p data-i18n="scriptsText">Use pre-install, post-install, or complete procedure scripts when your application needs more than a package download. LinuxToys core libraries simplify common operations and automatically track them so users can cleanly revert an installation later.</p>
+              <a href="corelibraries.html" class="feature-link"><span data-i18n="scriptsLink">Build custom install procedures</span><span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section workflow-section" id="how-it-works">
+        <div class="section-heading compact">
+          <div class="eyebrow" data-i18n="workflowEyebrow">A simple path to distribution</div>
+          <h2 data-i18n="workflowTitle">From release to LinuxToys in three steps.</h2>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">01</div>
+            <h3 data-i18n="step1Title">Publish</h3>
+            <p data-i18n="step1Text">Release your application through the channel that already fits your project, such as GitHub Releases.</p>
+          </div>
+          <div class="step-divider" aria-hidden="true"></div>
+          <div class="step">
+            <div class="step-number">02</div>
+            <h3 data-i18n="step2Title">Declare</h3>
+            <p data-i18n="step2Text">Describe the package or procedure LinuxToys should use, with optional compatibility rules and hooks.</p>
+          </div>
+          <div class="step-divider" aria-hidden="true"></div>
+          <div class="step">
+            <div class="step-number">03</div>
+            <h3 data-i18n="step3Title">Reach users</h3>
+            <p data-i18n="step3Text">LinuxToys handles the user-facing installation flow across supported distributions and tracks what was changed.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-section">
+        <div>
+          <div class="eyebrow" data-i18n="ctaEyebrow">Ready to integrate?</div>
+          <h2 data-i18n="ctaTitle">Your Linux distribution story can start with one file.</h2>
+          <p data-i18n="ctaText">Start with the minimal configuration today, then expand into compatibility rules, hooks, and fully custom procedures only when your application needs them.</p>
+        </div>
+        <a href="documentation.html" class="button button-primary button-large" data-i18n="ctaButton">Open the developer quick start</a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <strong>LinuxToys</strong>
+        <span data-i18n="footerTagline">Developer Portal</span>
+      </div>
+      <p data-i18n="footerText">A simpler way to ship software across Linux.</p>
+    </footer>
+  </div>
+
+  <script src="home/script.js"></script>
+</body>
+</html>
