@@ -1,92 +1,152 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="LinuxToys developer documentation." />
-  <meta name="theme-color" content="#0a0c10" />
-  <title>Documentation — LinuxToys for Developers</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Reference for LinuxToys core libraries and helpers used to build advanced installation and system-integration procedures." name="description"/>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="assets/linuxtoys.svg" type="image/svg+xml">
+<meta property="og:image" content="https://dev.linux.toys/assets/card.webp">
+<meta property="og:image:type" content="image/webp">
+<meta property="og:image:alt" content="LinuxToys Developer Portal">
 
-  <!-- Keep the shared portal stylesheet first, then the documentation additions. -->
-  <link rel="stylesheet" href="home/styles.css" />
-  <link rel="stylesheet" href="docs/docs-reader.css" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://dev.linux.toys/assets/card.webp">
+<meta name="twitter:image:alt" content="LinuxToys Developer Portal">
 
-  <!-- Code highlighting theme. -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github-dark.min.css"
-  >
-  
-</head>
+<meta content="#0a0c10" name="theme-color"/>
+<title>Core Libraries — LinuxToys for Developers</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="assets/linuxtoys.svg" rel="icon" type="image/svg+xml"/>
+<!-- Keep the shared portal stylesheet first, then the documentation additions. -->
+<link href="home/styles.css" rel="stylesheet">
+<link href="docs/docs-reader.css" rel="stylesheet">
+<!-- Code highlighting theme. -->
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github-dark.min.css" rel="stylesheet"/>
+<script>
+    (() => {
+      const saved = localStorage.getItem("linuxtoys-dev-lang");
+      const browserLanguages = navigator.languages?.length ? navigator.languages : [navigator.language];
+      const prefersPortuguese = browserLanguages.some(lang => lang?.toLowerCase().startsWith("pt"));
+      if (saved === "pt-BR" || (!saved && prefersPortuguese)) {
+        location.replace("corelibraries.pt-BR.html" + location.search + location.hash);
+      }
+    })();
+  </script>
+</link></link><meta content="article" property="og:type"/><meta content="LinuxToys Developer Portal" property="og:site_name"/><meta content="Core Libraries — LinuxToys for Developers" property="og:title"/><meta content="Reference for LinuxToys core libraries and helpers used to build advanced installation and system-integration procedures." property="og:description"/><meta content="https://dev.linux.toys/corelibraries.html" property="og:url"/><meta content="en_US" property="og:locale"/><meta content="pt_BR" property="og:locale:alternate"/><meta content="summary" name="twitter:card"/><meta content="Core Libraries — LinuxToys for Developers" name="twitter:title"/><meta content="Reference for LinuxToys core libraries and helpers used to build advanced installation and system-integration procedures." name="twitter:description"/><link href="https://dev.linux.toys/corelibraries.html" rel="canonical"/><link href="https://dev.linux.toys/corelibraries.html" hreflang="en" rel="alternate"/><link href="https://dev.linux.toys/corelibraries.pt-BR.html" hreflang="pt-BR" rel="alternate"/><link href="https://dev.linux.toys/corelibraries.html" hreflang="x-default" rel="alternate"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://dev.linux.toys/#organization",
+      "name": "LinuxToys",
+      "url": "https://dev.linux.toys/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://dev.linux.toys/assets/linuxtoys.svg"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://dev.linux.toys/#website",
+      "url": "https://dev.linux.toys/",
+      "name": "LinuxToys Developer Portal",
+      "publisher": {
+        "@id": "https://dev.linux.toys/#organization"
+      }
+    },
+    {
+      "@type": "TechArticle",
+      "@id": "https://dev.linux.toys/corelibraries.html#article",
+      "url": "https://dev.linux.toys/corelibraries.html",
+      "headline": "Core Libraries — LinuxToys for Developers",
+      "description": "Reference for LinuxToys core libraries and helpers used to build advanced installation and system-integration procedures.",
+      "inLanguage": "en",
+      "isPartOf": {
+        "@id": "https://dev.linux.toys/#website"
+      },
+      "author": {
+        "@id": "https://dev.linux.toys/#organization"
+      },
+      "publisher": {
+        "@id": "https://dev.linux.toys/#organization"
+      },
+      "mainEntityOfPage": "https://dev.linux.toys/corelibraries.html"
+    }
+  ]
+}</script></head>
 <body>
-  <div class="page-shell docs-shell">
-    <header class="site-header docs-header">
-      <a class="brand" href="index.html" aria-label="LinuxToys Developer Portal home">
-        <img class="brand-logo" src="assets/linuxtoys.svg" alt="" aria-hidden="true">
-        <span class="brand-copy">
-          <strong>LinuxToys</strong>
-          <span data-ui-i18n="brandPortal">Developer Portal</span>
-        </span>
-      </a>
-
-      <div class="header-actions">
-        <a class="header-link" href="index.html" data-ui-i18n="backHome">Overview</a>
-        <a class="header-link" href="documentation.html" data-ui-i18n="docsLanding">Documentation</a>
-        <a class="header-link" href="repositorylists.html" data-ui-i18n="repoLists">Repository Lists</a>
-        <div class="language-switcher" role="group" aria-label="Language selector">
-          <button class="lang-button" type="button" data-lang="en" aria-pressed="false">EN</button>
-          <button class="lang-button" type="button" data-lang="pt-BR" aria-pressed="false">PT-BR</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="docs-main" id="top">
-      <button class="mobile-toc-toggle" id="mobile-toc-toggle" type="button" aria-expanded="false" aria-controls="docs-sidebar">
-        <span class="mobile-toc-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-        </span>
-        <span data-ui-i18n="onThisPage">On this page</span>
-        <span class="mobile-toc-current" id="mobile-toc-current"></span>
-        <svg class="mobile-toc-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
-      </button>
-
-      <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation navigation">
-        <div class="toc-panel">
-          <div class="toc-kicker" data-ui-i18n="onThisPage">On this page</div>
-          <nav class="toc" id="toc"></nav>
-        </div>
-      </aside>
-
-      <article class="markdown-panel" aria-live="polite">
-        <div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>
-
-        <div class="docs-status" id="docs-status">
-          <div class="docs-spinner" aria-hidden="true"></div>
-          <span data-ui-i18n="loading">Loading documentation…</span>
-        </div>
-
-        <div class="markdown-body" id="markdown-content" hidden></div>
-      </article>
-    </main>
-
-    <footer class="site-footer docs-footer">
-      <div>
-        <strong>LinuxToys</strong>
-        <span data-ui-i18n="brandPortal">Developer Portal</span>
-      </div>
-      <p data-ui-i18n="footerText">A simpler way to ship software across Linux.</p>
-    </footer>
-  </div>
-
-  <!-- Markdown parser, sanitizer, and code highlighter. -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
-  <script src="docs/docs-reader-corelibraries.js"></script>
+<div class="page-shell docs-shell">
+<header class="site-header docs-header">
+<a aria-label="LinuxToys Developer Portal home" class="brand" href="index.html">
+<img alt="" aria-hidden="true" class="brand-logo" src="assets/linuxtoys.svg"/>
+<span class="brand-copy">
+<strong>LinuxToys</strong>
+<span data-ui-i18n="brandPortal">Developer Portal</span>
+</span>
+</a>
+<div class="header-actions">
+<a class="header-link" data-ui-i18n="backHome" href="index.html">Overview</a>
+<a class="header-link" data-ui-i18n="docsLanding" href="documentation.html">Documentation</a>
+<a class="header-link" data-ui-i18n="repoLists" href="repositorylists.html">Repository Lists</a>
+<div aria-label="Language selector" class="language-switcher" role="group">
+<button aria-pressed="false" class="lang-button" data-lang="en" type="button">EN</button>
+<button aria-pressed="false" class="lang-button" data-lang="pt-BR" type="button">PT-BR</button>
+</div>
+</div>
+</header>
+<main class="docs-main" id="top">
+<button aria-controls="docs-sidebar" aria-expanded="false" class="mobile-toc-toggle" id="mobile-toc-toggle" type="button">
+<span aria-hidden="true" class="mobile-toc-icon">
+<svg viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+</span>
+<span data-ui-i18n="onThisPage">On this page</span>
+<span class="mobile-toc-current" id="mobile-toc-current"></span>
+<svg aria-hidden="true" class="mobile-toc-chevron" viewbox="0 0 24 24"><path d="m7 9 5 5 5-5"></path></svg>
+</button>
+<aside aria-label="Documentation navigation" class="docs-sidebar" id="docs-sidebar">
+<div class="toc-panel">
+<div class="toc-kicker" data-ui-i18n="onThisPage">On this page</div>
+<nav class="toc" id="toc"></nav>
+</div>
+</aside>
+<article aria-live="polite" class="markdown-panel">
+<div aria-hidden="true" class="reading-progress"><span id="reading-progress-bar"></span></div>
+<div class="docs-status" id="docs-status">
+<div aria-hidden="true" class="docs-spinner"></div>
+<span data-ui-i18n="loading">Loading documentation…</span>
+</div>
+<div class="markdown-body" hidden="" id="markdown-content"></div>
+</article>
+</main>
+<footer class="site-footer docs-footer">
+<div>
+<strong>LinuxToys</strong>
+<span data-ui-i18n="brandPortal">Developer Portal</span>
+</div>
+<p data-ui-i18n="footerText">A simpler way to ship software across Linux.</p>
+</footer>
+</div>
+<!-- Markdown parser, sanitizer, and code highlighter. -->
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
+<script>
+    document.querySelectorAll(".lang-button").forEach(button => {
+      button.addEventListener("click", event => {
+        const requested = button.dataset.lang;
+        const target = requested === "pt-BR" ? "corelibraries.pt-BR.html" : "corelibraries.html";
+        const current = "corelibraries.html";
+        if (target === current) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        localStorage.setItem("linuxtoys-dev-lang", requested);
+        location.href = target + location.search + location.hash;
+      }, true);
+    });
+  </script>
+<script src="docs/docs-reader-corelibraries.js"></script>
 </body>
 </html>

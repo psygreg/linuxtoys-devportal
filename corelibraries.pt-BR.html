@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="Get started with LinuxToys developer documentation and choose the distribution workflow that fits your application." name="description"/>
+<meta content="Referência das bibliotecas centrais e funções auxiliares do LinuxToys para criar procedimentos avançados de instalação e integração com o sistema." name="description"/>
 
 <meta property="og:image" content="https://dev.linux.toys/assets/card.webp">
 <meta property="og:image:type" content="image/webp">
@@ -15,7 +15,7 @@
 <meta name="twitter:image:alt" content="LinuxToys Developer Portal">
 
 <meta content="#0a0c10" name="theme-color"/>
-<title>Documentation — LinuxToys for Developers</title>
+<title>Bibliotecas Centrais — LinuxToys para Desenvolvedores</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
@@ -26,16 +26,10 @@
 <!-- Code highlighting theme. -->
 <link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github-dark.min.css" rel="stylesheet"/>
 <script>
-    (() => {
-      const saved = localStorage.getItem("linuxtoys-dev-lang");
-      const browserLanguages = navigator.languages?.length ? navigator.languages : [navigator.language];
-      const prefersPortuguese = browserLanguages.some(lang => lang?.toLowerCase().startsWith("pt"));
-      if (saved === "pt-BR" || (!saved && prefersPortuguese)) {
-        location.replace("documentation.pt-BR.html" + location.search + location.hash);
-      }
-    })();
+    localStorage.setItem("linuxtoys-dev-lang", "pt-BR");
+    document.documentElement.lang = "pt-BR";
   </script>
-</link></link><meta content="article" property="og:type"/><meta content="LinuxToys Developer Portal" property="og:site_name"/><meta content="Documentation — LinuxToys for Developers" property="og:title"/><meta content="Get started with LinuxToys developer documentation and choose the distribution workflow that fits your application." property="og:description"/><meta content="https://dev.linux.toys/documentation.html" property="og:url"/><meta content="en_US" property="og:locale"/><meta content="pt_BR" property="og:locale:alternate"/><meta content="summary" name="twitter:card"/><meta content="Documentation — LinuxToys for Developers" name="twitter:title"/><meta content="Get started with LinuxToys developer documentation and choose the distribution workflow that fits your application." name="twitter:description"/><link href="https://dev.linux.toys/documentation.html" rel="canonical"/><link href="https://dev.linux.toys/documentation.html" hreflang="en" rel="alternate"/><link href="https://dev.linux.toys/documentation.pt-BR.html" hreflang="pt-BR" rel="alternate"/><link href="https://dev.linux.toys/documentation.html" hreflang="x-default" rel="alternate"/><script type="application/ld+json">{
+</link></link><meta content="article" property="og:type"/><meta content="LinuxToys Developer Portal" property="og:site_name"/><meta content="Bibliotecas Centrais — LinuxToys para Desenvolvedores" property="og:title"/><meta content="Referência das bibliotecas centrais e funções auxiliares do LinuxToys para criar procedimentos avançados de instalação e integração com o sistema." property="og:description"/><meta content="https://dev.linux.toys/corelibraries.pt-BR.html" property="og:url"/><meta content="pt_BR" property="og:locale"/><meta content="en_US" property="og:locale:alternate"/><meta content="summary" name="twitter:card"/><meta content="Bibliotecas Centrais — LinuxToys para Desenvolvedores" name="twitter:title"/><meta content="Referência das bibliotecas centrais e funções auxiliares do LinuxToys para criar procedimentos avançados de instalação e integração com o sistema." name="twitter:description"/><link href="https://dev.linux.toys/corelibraries.pt-BR.html" rel="canonical"/><link href="https://dev.linux.toys/corelibraries.html" hreflang="en" rel="alternate"/><link href="https://dev.linux.toys/corelibraries.pt-BR.html" hreflang="pt-BR" rel="alternate"/><link href="https://dev.linux.toys/corelibraries.html" hreflang="x-default" rel="alternate"/><script type="application/ld+json">{
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -59,11 +53,11 @@
     },
     {
       "@type": "TechArticle",
-      "@id": "https://dev.linux.toys/documentation.html#article",
-      "url": "https://dev.linux.toys/documentation.html",
-      "headline": "Documentation — LinuxToys for Developers",
-      "description": "Get started with LinuxToys developer documentation and choose the distribution workflow that fits your application.",
-      "inLanguage": "en",
+      "@id": "https://dev.linux.toys/corelibraries.pt-BR.html#article",
+      "url": "https://dev.linux.toys/corelibraries.pt-BR.html",
+      "headline": "Bibliotecas Centrais — LinuxToys para Desenvolvedores",
+      "description": "Referência das bibliotecas centrais e funções auxiliares do LinuxToys para criar procedimentos avançados de instalação e integração com o sistema.",
+      "inLanguage": "pt-BR",
       "isPartOf": {
         "@id": "https://dev.linux.toys/#website"
       },
@@ -73,14 +67,14 @@
       "publisher": {
         "@id": "https://dev.linux.toys/#organization"
       },
-      "mainEntityOfPage": "https://dev.linux.toys/documentation.html"
+      "mainEntityOfPage": "https://dev.linux.toys/corelibraries.pt-BR.html"
     }
   ]
 }</script></head>
 <body>
 <div class="page-shell docs-shell">
 <header class="site-header docs-header">
-<a aria-label="LinuxToys Developer Portal home" class="brand" href="index.html">
+<a aria-label="LinuxToys Developer Portal home" class="brand" href="index.pt-BR.html">
 <img alt="" aria-hidden="true" class="brand-logo" src="assets/linuxtoys.svg"/>
 <span class="brand-copy">
 <strong>LinuxToys</strong>
@@ -88,9 +82,9 @@
 </span>
 </a>
 <div class="header-actions">
-<a class="header-link" data-ui-i18n="backHome" href="index.html">Overview</a>
-<a class="header-link" data-ui-i18n="repoLists" href="repositorylists.html">Repository Lists</a>
-<a class="header-link" data-ui-i18n="coreLibs" href="corelibraries.html">Core Libraries</a>
+<a class="header-link" data-ui-i18n="backHome" href="index.pt-BR.html">Overview</a>
+<a class="header-link" data-ui-i18n="docsLanding" href="documentation.pt-BR.html">Documentation</a>
+<a class="header-link" data-ui-i18n="repoLists" href="repositorylists.pt-BR.html">Repository Lists</a>
 <div aria-label="Language selector" class="language-switcher" role="group">
 <button aria-pressed="false" class="lang-button" data-lang="en" type="button">EN</button>
 <button aria-pressed="false" class="lang-button" data-lang="pt-BR" type="button">PT-BR</button>
@@ -137,8 +131,8 @@
     document.querySelectorAll(".lang-button").forEach(button => {
       button.addEventListener("click", event => {
         const requested = button.dataset.lang;
-        const target = requested === "pt-BR" ? "documentation.pt-BR.html" : "documentation.html";
-        const current = "documentation.html";
+        const target = requested === "pt-BR" ? "corelibraries.pt-BR.html" : "corelibraries.html";
+        const current = "corelibraries.pt-BR.html";
         if (target === current) return;
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -147,6 +141,6 @@
       }, true);
     });
   </script>
-<script src="docs/docs-reader.js"></script>
+<script src="docs/docs-reader-corelibraries.js"></script>
 </body>
 </html>

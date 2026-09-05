@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="Ship your Linux application through LinuxToys with a fast, declarative, cross-distro distribution workflow." name="description"/>
+<meta content="Distribua seu aplicativo Linux pelo LinuxToys com um fluxo de distribuição rápido, declarativo e compatível com várias distribuições." name="description"/>
 
 <meta property="og:image" content="https://dev.linux.toys/assets/card.webp">
 <meta property="og:image:type" content="image/webp">
@@ -15,23 +15,17 @@
 <meta name="twitter:image:alt" content="LinuxToys Developer Portal">
 
 <meta content="#0a0c10" name="theme-color"/>
-<title>LinuxToys for Developers</title>
+<title>LinuxToys para Desenvolvedores</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="assets/linuxtoys.svg" rel="icon" type="image/svg+xml"/>
 <link href="home/styles.css" rel="stylesheet">
 <script>
-    (() => {
-      const saved = localStorage.getItem("linuxtoys-dev-lang");
-      const browserLanguages = navigator.languages?.length ? navigator.languages : [navigator.language];
-      const prefersPortuguese = browserLanguages.some(lang => lang?.toLowerCase().startsWith("pt"));
-      if (saved === "pt-BR" || (!saved && prefersPortuguese)) {
-        location.replace("index.pt-BR.html" + location.search + location.hash);
-      }
-    })();
+    localStorage.setItem("linuxtoys-dev-lang", "pt-BR");
+    document.documentElement.lang = "pt-BR";
   </script>
-</link><meta content="website" property="og:type"/><meta content="LinuxToys Developer Portal" property="og:site_name"/><meta content="LinuxToys for Developers" property="og:title"/><meta content="Ship your Linux application through LinuxToys with a fast, declarative, cross-distro distribution workflow." property="og:description"/><meta content="https://dev.linux.toys/" property="og:url"/><meta content="en_US" property="og:locale"/><meta content="pt_BR" property="og:locale:alternate"/><meta content="summary" name="twitter:card"/><meta content="LinuxToys for Developers" name="twitter:title"/><meta content="Ship your Linux application through LinuxToys with a fast, declarative, cross-distro distribution workflow." name="twitter:description"/><link href="https://dev.linux.toys/" rel="canonical"/><link href="https://dev.linux.toys/" hreflang="en" rel="alternate"/><link href="https://dev.linux.toys/index.pt-BR.html" hreflang="pt-BR" rel="alternate"/><link href="https://dev.linux.toys/" hreflang="x-default" rel="alternate"/><script type="application/ld+json">{
+</link><meta content="website" property="og:type"/><meta content="LinuxToys Developer Portal" property="og:site_name"/><meta content="LinuxToys para Desenvolvedores" property="og:title"/><meta content="Distribua seu aplicativo Linux pelo LinuxToys com um fluxo de distribuição rápido, declarativo e compatível com várias distribuições." property="og:description"/><meta content="https://dev.linux.toys/index.pt-BR.html" property="og:url"/><meta content="pt_BR" property="og:locale"/><meta content="en_US" property="og:locale:alternate"/><meta content="summary" name="twitter:card"/><meta content="LinuxToys para Desenvolvedores" name="twitter:title"/><meta content="Distribua seu aplicativo Linux pelo LinuxToys com um fluxo de distribuição rápido, declarativo e compatível com várias distribuições." name="twitter:description"/><link href="https://dev.linux.toys/index.pt-BR.html" rel="canonical"/><link href="https://dev.linux.toys/" hreflang="en" rel="alternate"/><link href="https://dev.linux.toys/index.pt-BR.html" hreflang="pt-BR" rel="alternate"/><link href="https://dev.linux.toys/" hreflang="x-default" rel="alternate"/><script type="application/ld+json">{
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -47,10 +41,10 @@
     {
       "@type": "WebSite",
       "@id": "https://dev.linux.toys/#website",
-      "url": "https://dev.linux.toys/",
-      "name": "LinuxToys for Developers",
-      "description": "Ship your Linux application through LinuxToys with a fast, declarative, cross-distro distribution workflow.",
-      "inLanguage": "en",
+      "url": "https://dev.linux.toys/index.pt-BR.html",
+      "name": "LinuxToys para Desenvolvedores",
+      "description": "Distribua seu aplicativo Linux pelo LinuxToys com um fluxo de distribuição rápido, declarativo e compatível com várias distribuições.",
+      "inLanguage": "pt-BR",
       "publisher": {
         "@id": "https://dev.linux.toys/#organization"
       }
@@ -68,7 +62,7 @@
 </span>
 </a>
 <div class="header-actions">
-<a class="header-link" data-i18n="navStart" href="documentation.html">Get started</a>
+<a class="header-link" data-i18n="navStart" href="documentation.pt-BR.html">Get started</a>
 <a class="header-link" data-i18n="navMainsite" href="https://linux.toys">Meet LinuxToys</a>
 <div aria-label="Language selector" class="language-switcher" role="group">
 <button aria-pressed="true" class="lang-button active" data-lang="en" type="button">EN</button>
@@ -128,7 +122,7 @@
 <div>
 <h3 data-i18n="easyTitle">Ship in minutes</h3>
 <p data-i18n="easyText">The simplest LinuxToys integration needs little more than a GitHub repository and a released AppImage. There is no packaging maze to solve before you can reach users.</p>
-<a class="feature-link" href="repositorylists.html#minimal-examples"><span data-i18n="easyLink">Learn about the quick start</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="repositorylists.pt-BR.html#minimal-examples"><span data-i18n="easyLink">Learn about the quick start</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 <article class="feature-card">
@@ -138,7 +132,7 @@
 <div>
 <h3 data-i18n="declarativeTitle">Declarative deployment</h3>
 <p data-i18n="declarativeText">You define how your application should be installed. LinuxToys turns that declaration into a repeatable deployment flow, replacing scattered installation instructions with a consistent experience.</p>
-<a class="feature-link" href="documentation.html#declarative-deployment"><span data-i18n="declarativeLink">Explore deployment definitions</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="documentation.pt-BR.html#declarative-deployment"><span data-i18n="declarativeLink">Explore deployment definitions</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 <article class="feature-card">
@@ -148,7 +142,7 @@
 <div>
 <h3 data-i18n="reachTitle">Massive Linux reach</h3>
 <p data-i18n="reachText">LinuxToys runs across more than 30 Linux distributions and serves thousands of recurring users, helping your application reach a broad range of systems from one integration point.</p>
-<a class="feature-link" href="documentation.html#multi-distro"><span data-i18n="reachLink">See platform coverage</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="documentation.pt-BR.html#multi-distro"><span data-i18n="reachLink">See platform coverage</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 <article class="feature-card feature-card-wide">
@@ -158,7 +152,7 @@
 <div>
 <h3 data-i18n="feedbackTitle">A direct feedback loop</h3>
 <p data-i18n="feedbackText">When LinuxToys becomes an official distributor of your GitHub-hosted app, users can send useful reports through its bug reporting flow and issue tracker, helping upstream developers see real-world problems faster.</p>
-<a class="feature-link" href="documentation.html#official-support"><span data-i18n="feedbackLink">Learn about official distribution</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="documentation.pt-BR.html#official-support"><span data-i18n="feedbackLink">Learn about official distribution</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 <article class="feature-card feature-card-wide">
@@ -168,7 +162,7 @@
 <div>
 <h3 data-i18n="scriptsTitle">Powerful when you need custom logic</h3>
 <p data-i18n="scriptsText">Use pre-install, post-install, or complete procedure scripts when your application needs more than a package download. LinuxToys core libraries simplify common operations and automatically track them so users can cleanly revert an installation later.</p>
-<a class="feature-link" href="corelibraries.html"><span data-i18n="scriptsLink">Build custom install procedures</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="corelibraries.pt-BR.html"><span data-i18n="scriptsLink">Build custom install procedures</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 </div>
@@ -204,7 +198,7 @@
 <h2 data-i18n="ctaTitle">Your Linux distribution story can start with one file.</h2>
 <p data-i18n="ctaText">Start with the minimal configuration today, then expand into compatibility rules, hooks, and fully custom procedures only when your application needs them.</p>
 </div>
-<a class="button button-primary button-large" data-i18n="ctaButton" href="documentation.html">Open the developer quick start</a>
+<a class="button button-primary button-large" data-i18n="ctaButton" href="documentation.pt-BR.html">Open the developer quick start</a>
 </section>
 </main>
 <footer class="site-footer">
@@ -220,7 +214,7 @@
       button.addEventListener("click", event => {
         const requested = button.dataset.lang;
         const target = requested === "pt-BR" ? "index.pt-BR.html" : "index.html";
-        const current = "index.html";
+        const current = "index.pt-BR.html";
         if (target === current) return;
         event.preventDefault();
         event.stopImmediatePropagation();

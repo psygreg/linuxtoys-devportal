@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://dev.linux.toys/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/index.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/" />
+  </url>
+  <url>
+    <loc>https://dev.linux.toys/index.pt-BR.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/index.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/" />
+  </url>
+  <url>
+    <loc>https://dev.linux.toys/documentation.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/documentation.html" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/documentation.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/documentation.html" />
+  </url>
+  <url>
+    <loc>https://dev.linux.toys/documentation.pt-BR.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/documentation.html" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/documentation.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/documentation.html" />
+  </url>
+  <url>
+    <loc>https://dev.linux.toys/corelibraries.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/corelibraries.html" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/corelibraries.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/corelibraries.html" />
+  </url>
+  <url>
+    <loc>https://dev.linux.toys/corelibraries.pt-BR.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/corelibraries.html" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/corelibraries.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/corelibraries.html" />
+  </url>
+  <url>
+    <loc>https://dev.linux.toys/repositorylists.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/repositorylists.html" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/repositorylists.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/repositorylists.html" />
+  </url>
+  <url>
+    <loc>https://dev.linux.toys/repositorylists.pt-BR.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dev.linux.toys/repositorylists.html" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://dev.linux.toys/repositorylists.pt-BR.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dev.linux.toys/repositorylists.html" />
+  </url>
+</urlset>
