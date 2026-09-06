@@ -498,7 +498,7 @@ A URL entry is only displayed when LinuxToys can resolve one of its provided pac
 
 The `tar` type is intended for applications distributed as **prebuilt binary tarballs** through GitHub or Codeberg releases. It allows LinuxToys to install software that does not provide a native package, Flatpak, or AppImage, but ships a ready-to-run application as a `.tar.gz` or `.tar.xz` archive.
 
-> **Note:** `tar` is intended for binary application releases, not source archives.
+> **Note:** `tar` is intended for binary application releases, not source archives, and **mandates** a post-install script to finish setting it up.
 
 ### GitHub and Codeberg Releases
 
