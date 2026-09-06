@@ -200,6 +200,15 @@ Os tipos atualmente utilizáveis são:
 
 `repository` é reservado pelo parser, mas a instalação através de repositórios de terceiros ainda não foi implementada. Entradas que utilizem esse tipo são atualmente rejeitadas e não são exibidas.
 
+Também é possível associar tipos a determinados valores de `os`. Por exemplo, se você quiser usar um pacote `native` para o **Arch Linux** e seus derivados, com `git` para outros sistemas:
+
+```json
+"type": {
+  "arch": "native",
+  "all": "git"
+}
+```
+
 ### `git`
 
 Essa é a opção padrão e mais simples.
