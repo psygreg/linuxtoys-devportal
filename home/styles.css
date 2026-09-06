@@ -421,3 +421,34 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
   object-fit: contain;
   flex-shrink: 0;
 }
+
+.github-button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: #d8dee8;
+  background: rgba(255,255,255,.035);
+  transition:
+    transform .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    background .2s ease;
+}
+
+.github-button:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  border-color: var(--border-strong);
+  background: rgba(255,255,255,.07);
+}
+
+.github-button svg {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+  stroke: none;
+}
