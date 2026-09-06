@@ -1145,7 +1145,7 @@ pkg_fromurl \
     "https://example.org/foo-data.deb"
 ```
 
-A função cria um diretório temporário de download, baixa cada URL com `curl` e então passa o arquivo resultante para `pkg_appimage` ou `pkg_fromfile`, dependendo do tipo.
+A função cria um diretório temporário para os downloads, baixa cada URL utilizando `curl` e, em seguida, passa o arquivo resultante para `pkg_appimage` ou `pkg_fromfile`, dependendo de seu tipo.
 
 Isso geralmente é preferível a combinar manualmente:
 
@@ -1154,11 +1154,34 @@ wget ...
 sudo dpkg -i ...
 ```
 
-porque o LinuxToys mantém seu comportamento normal de gerenciamento de pacotes e transações.
+pois o LinuxToys mantém seu comportamento normal de gerenciamento de pacotes e transações.
+
+#### Instalando Aplicativos em Tarballs
+
+Para aplicativos não empacotados distribuídos como arquivos `.tar.gz` ou `.tar.xz` binários pré-compilados, passe o argumento `--tar`:
+
+```bash
+pkg_fromurl --tar \
+    "https://example.org/releases/example-linux-x86_64.tar.xz"
+```
+
+Nesse modo, o arquivo baixado é passado para o manipulador de tarballs do LinuxToys em vez do instalador normal de pacotes.
+
+O aplicativo é extraído em:
+
+```text
+~/.local/linuxtoys/apps
+```
+
+Se o arquivo já contiver todo o seu conteúdo dentro de um único diretório de nível superior, esse diretório será utilizado diretamente. Caso contrário, o LinuxToys criará um diretório para o aplicativo com base no nome do tarball.
+
+Executar novamente a instalação substitui o diretório anterior do aplicativo em vez de mesclar arquivos com ele, permitindo que o mesmo comando seja utilizado para atualizações sem deixar arquivos obsoletos para trás.
+
+`--tarball` também é aceito como um alias para `--tar`.
 
 ---
 
-## Instalando a Versão Mais Recente do GitHub/Codeberg
+## Instalando o Release Mais Recente do GitHub/Codeberg
 
 ### `pkg_fromrelease`
 
@@ -1169,7 +1192,7 @@ pkg_fromrelease \
     "https://github.com/example/example"
 ```
 
-Um glob opcional para o asset pode restringir o resultado:
+Um glob opcional para o asset pode ser utilizado para restringir o resultado:
 
 ```bash
 pkg_fromrelease \
@@ -1177,11 +1200,40 @@ pkg_fromrelease \
     "*desktop*"
 ```
 
-O auxiliar consulta a release estável mais recente, detecta a arquitetura da máquina e o formato de pacote nativo, filtra assets inadequados e seleciona um pacote instalável da release antes de passá-lo para `pkg_fromurl`.
+O helper consulta o release estável mais recente, detecta a arquitetura da máquina e o formato de pacote nativo, filtra assets inadequados e seleciona um pacote instalável do release antes de passá-lo para `pkg_fromurl`.
 
 Os formatos de release reconhecidos incluem AppImage, Flatpak e o formato de pacote nativo apropriado.
 
-Em x86-64, assets de release x86 de 32 bits podem ser usados como alternativa somente quando não existir um candidato adequado de 64 bits ou independente de arquitetura.
+Em x86-64, assets de release para x86 de 32 bits podem ser utilizados como fallback apenas quando não houver um candidato adequado de 64 bits ou independente de arquitetura.
+
+#### Instalando Tarballs de Releases
+
+Para projetos que distribuem um aplicativo pré-compilado como um asset `.tar.gz` ou `.tar.xz` de um release, use `--tar`:
+
+```bash
+pkg_fromrelease --tar \
+    "https://github.com/example/example"
+```
+
+Um glob para o asset ainda pode ser fornecido quando necessário:
+
+```bash
+pkg_fromrelease --tar \
+    "https://github.com/example/example" \
+    "*linux*"
+```
+
+Com `--tar`, a seleção do release é restrita a assets `.tar.gz` e `.tar.xz` compatíveis. O arquivo selecionado é então passado para `pkg_fromurl` no modo tarball e instalado em:
+
+```text
+~/.local/linuxtoys/apps
+```
+
+Esse modo é destinado a **tarballs binários pré-compilados de aplicativos**, e não a arquivos de código-fonte. Os arquivos de código-fonte gerados automaticamente pelo GitHub não são considerados, pois não são assets enviados ao release, e assets identificados como arquivos de código-fonte são filtrados da seleção.
+
+A filtragem por arquitetura continua sendo aplicada no modo tarball, portanto arquivos binários específicos para cada arquitetura são selecionados de acordo com a máquina atual sempre que possível.
+
+`--tarball` também é aceito como um alias para `--tar`.
 
 ---
 

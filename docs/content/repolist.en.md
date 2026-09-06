@@ -494,6 +494,197 @@ A URL entry is only displayed when LinuxToys can resolve one of its provided pac
 
 ---
 
+## Tarball Applications
+
+The `tar` type is intended for applications distributed as **prebuilt binary tarballs** through GitHub or Codeberg releases. It allows LinuxToys to install software that does not provide a native package, Flatpak, or AppImage, but ships a ready-to-run application as a `.tar.gz` or `.tar.xz` archive.
+
+> **Note:** `tar` is intended for binary application releases, not source archives.
+
+### GitHub and Codeberg Releases
+
+For an application distributed as a tarball attached to a GitHub or Codeberg release, use:
+
+```json
+{
+  "name": "myapp",
+  "type": "tar",
+  "repo": "https://github.com/example/myapp"
+}
+```
+
+Internally, this causes LinuxToys to use the release installer in tarball mode:
+
+```bash
+pkg_fromrelease --tar "https://github.com/example/myapp"
+```
+
+The latest release is queried and LinuxToys looks specifically for a compatible `.tar.gz` or `.tar.xz` release asset.
+
+GitHub's automatically generated repository source archives are not considered, as they are not part of the release's uploaded asset list. Release assets identified as source-oriented archives are also filtered out. Developers should therefore provide the **compiled application tarball as an actual release asset**.
+
+Architecture information in asset names is respected. For example:
+
+```text
+myapp-2.4.0-x86_64.tar.xz
+myapp-2.4.0-aarch64.tar.xz
+myapp-2.4.0-source.tar.gz
+```
+
+On an x86-64 system, LinuxToys will select the `x86_64` application archive while excluding the incompatible architecture and source archive.
+
+### Direct URLs
+
+Tarballs hosted directly by the developer or project infrastructure can instead use the `url` type:
+
+```json
+{
+  "name": "myapp",
+  "type": "url",
+  "urls": {
+    "tar": "https://example.com/releases/myapp.tar.xz"
+  }
+}
+```
+
+This invokes the URL installer in tarball mode:
+
+```bash
+pkg_fromurl --tar "https://example.com/releases/myapp.tar.xz"
+```
+
+The URL may point directly to the archive or use an HTTP redirect. LinuxToys resolves the download filename before determining the archive format.
+
+The resolved file must be a supported tarball format.
+
+### Supported Formats
+
+The tarball handler currently accepts:
+
+```text
+.tar.gz
+.tar.xz
+```
+
+Other archive formats should not be declared using `tar`.
+
+### Archive Layout
+
+Developers may package the application either inside a single top-level directory or with the application files directly at the root of the archive.
+
+A tarball containing its own directory:
+
+```text
+MyApp/
+├── bin/
+│   └── myapp
+├── lib/
+└── resources/
+```
+
+is installed directly as:
+
+```text
+~/.local/linuxtoys/apps/MyApp/
+```
+
+LinuxToys detects the existing common top-level directory and does **not** create an additional wrapper such as `MyApp/MyApp/`.
+
+A tarball containing loose root-level files is also supported:
+
+```text
+myapp
+lib/
+resources/
+README.md
+```
+
+In this case, LinuxToys creates an application directory using the archive filename, excluding the `.tar.gz` or `.tar.xz` extension.
+
+For example:
+
+```text
+myapp-2.4.0.tar.xz
+```
+
+would produce:
+
+```text
+~/.local/linuxtoys/apps/myapp-2.4.0/
+```
+
+For this reason, developers are encouraged to ship the contents inside a sensibly named top-level directory when they need the installation directory to have a stable name across releases.
+
+### Updates
+
+Running the same tarball installation again is treated as an update.
+
+LinuxToys replaces the existing target directory with the newly extracted application rather than merging the new archive into the old installation. This ensures that files removed by upstream releases do not remain behind after an update.
+
+Developers distributing successive releases should therefore preferably keep the tarball's top-level application directory consistent between versions:
+
+```text
+myapp/
+```
+
+rather than:
+
+```text
+myapp-2.4.0/
+myapp-2.5.0/
+```
+
+A stable directory name allows subsequent releases to replace the previous installation cleanly.
+
+### OS-Specific Types
+
+`tar` can also be selected through the normal OS-specific `type` mapping. For example, a project may use a native Arch Linux package while distributing a binary tarball for other supported systems:
+
+```json
+{
+  "name": "myapp",
+  "type": {
+    "arch": "native",
+    "all": "tar"
+  },
+  "package-name": {
+    "arch": "myapp"
+  },
+  "repo": "https://github.com/example/myapp"
+}
+```
+
+On Arch Linux and derivatives, LinuxToys will use the native package. Other compatible systems will obtain the binary tarball from the project's releases.
+
+### Choosing Between `tar` and `url`
+
+Use:
+
+```json
+"type": "tar"
+```
+
+when the binary tarball is published as an asset of the project's GitHub or Codeberg releases and LinuxToys should automatically follow new releases.
+
+Use:
+
+```json
+"type": "url"
+```
+
+with:
+
+```json
+"urls": {
+  "tar": "https://example.com/application.tar.gz"
+}
+```
+
+when the archive is hosted at a URL supplied directly by the developer.
+
+In both cases, the archive must contain an already built, usable application. Compilation of source tarballs is outside the scope of the `tar` type.
+
+---
+
 ## Compatibility
 
 Repository-list entries can restrict themselves to particular operating systems, desktop environments, hardware, init systems, or container environments.

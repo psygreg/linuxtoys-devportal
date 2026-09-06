@@ -1156,6 +1156,29 @@ sudo dpkg -i ...
 
 because LinuxToys retains its normal package-management and transaction behavior.
 
+#### Installing Tarball Applications
+
+For unpackaged applications distributed as prebuilt `.tar.gz` or `.tar.xz` archives, pass the `--tar` argument:
+
+```bash
+pkg_fromurl --tar \
+    "https://example.org/releases/example-linux-x86_64.tar.xz"
+```
+
+In this mode, the downloaded file is passed to the LinuxToys tarball handler instead of the normal package installer.
+
+The application is extracted under:
+
+```text
+~/.local/linuxtoys/apps
+```
+
+If the archive already contains all of its contents within a single top-level directory, that directory is used directly. Otherwise, LinuxToys creates an application directory based on the tarball filename.
+
+Running the installation again replaces the previous application directory rather than merging files into it, allowing the same command to be used for updates without leaving obsolete files behind.
+
+`--tarball` is also accepted as an alias for `--tar`.
+
 ---
 
 ## Installing the Latest GitHub/Codeberg Release
@@ -1182,6 +1205,35 @@ The helper queries the latest stable release, detects the machine architecture a
 Recognized release formats include AppImage, Flatpak, and the appropriate native package format.
 
 On x86-64, 32-bit x86 release assets may be used as a fallback only when a suitable 64-bit or architecture-neutral candidate does not exist.
+
+#### Installing Release Tarballs
+
+For projects that distribute a prebuilt application as a `.tar.gz` or `.tar.xz` release asset, use `--tar`:
+
+```bash
+pkg_fromrelease --tar \
+    "https://github.com/example/example"
+```
+
+An asset glob can still be provided when necessary:
+
+```bash
+pkg_fromrelease --tar \
+    "https://github.com/example/example" \
+    "*linux*"
+```
+
+With `--tar`, release selection is restricted to compatible `.tar.gz` and `.tar.xz` assets. The selected archive is then passed to `pkg_fromurl` in tarball mode and installed under:
+
+```text
+~/.local/linuxtoys/apps
+```
+
+This mode is intended for **prebuilt binary application tarballs**, not source archives. Automatically generated GitHub source archives are not considered because they are not uploaded release assets, and release assets identified as source-oriented archives are filtered from selection.
+
+Architecture filtering continues to apply in tarball mode, so architecture-specific binary archives are selected according to the current machine where possible.
+
+`--tarball` is also accepted as an alias for `--tar`.
 
 ---
 

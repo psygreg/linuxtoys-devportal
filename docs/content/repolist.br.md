@@ -494,6 +494,197 @@ Uma entrada do tipo URL só é exibida quando o LinuxToys consegue resolver uma 
 
 ---
 
+## Aplicativos em Tarball
+
+O tipo `tar` é destinado a aplicativos distribuídos como **tarballs binários pré-compilados** por meio de releases do GitHub ou Codeberg. Ele permite que o LinuxToys instale softwares que não fornecem um pacote nativo, Flatpak ou AppImage, mas distribuem o aplicativo pronto para execução em um arquivo `.tar.gz` ou `.tar.xz`.
+
+> **Observação:** `tar` é destinado a releases binários de aplicativos, não a arquivos de código-fonte.
+
+### Releases do GitHub e Codeberg
+
+Para um aplicativo distribuído como um tarball anexado a um release do GitHub ou Codeberg, use:
+
+```json
+{
+  "name": "myapp",
+  "type": "tar",
+  "repo": "https://github.com/example/myapp"
+}
+```
+
+Internamente, isso faz com que o LinuxToys utilize o instalador de releases no modo tarball:
+
+```bash
+pkg_fromrelease --tar "https://github.com/example/myapp"
+```
+
+O release mais recente é consultado e o LinuxToys procura especificamente por um arquivo `.tar.gz` ou `.tar.xz` compatível entre seus assets.
+
+Os arquivos de código-fonte gerados automaticamente pelo GitHub não são considerados, pois não fazem parte da lista de assets enviados ao release. Assets de release identificados como arquivos de código-fonte também são filtrados. Portanto, os desenvolvedores devem fornecer o **tarball do aplicativo compilado como um asset propriamente dito do release**.
+
+As informações de arquitetura presentes nos nomes dos assets são respeitadas. Por exemplo:
+
+```text
+myapp-2.4.0-x86_64.tar.xz
+myapp-2.4.0-aarch64.tar.xz
+myapp-2.4.0-source.tar.gz
+```
+
+Em um sistema x86-64, o LinuxToys selecionará o arquivo `x86_64` do aplicativo, enquanto excluirá o arquivo destinado à arquitetura incompatível e o arquivo de código-fonte.
+
+### URLs Diretas
+
+Tarballs hospedados diretamente pelo desenvolvedor ou pela infraestrutura do projeto podem utilizar o tipo `url`:
+
+```json
+{
+  "name": "myapp",
+  "type": "url",
+  "urls": {
+    "tar": "https://example.com/releases/myapp.tar.xz"
+  }
+}
+```
+
+Isso chama o instalador por URL no modo tarball:
+
+```bash
+pkg_fromurl --tar "https://example.com/releases/myapp.tar.xz"
+```
+
+A URL pode apontar diretamente para o arquivo ou utilizar um redirecionamento HTTP. O LinuxToys resolve o nome do arquivo baixado antes de determinar o formato do pacote.
+
+O arquivo resolvido deve estar em um formato de tarball compatível.
+
+### Formatos Compatíveis
+
+Atualmente, o manipulador de tarballs aceita:
+
+```text
+.tar.gz
+.tar.xz
+```
+
+Outros formatos de arquivo não devem ser declarados utilizando `tar`.
+
+### Estrutura do Arquivo
+
+Os desenvolvedores podem empacotar o aplicativo dentro de um único diretório de nível superior ou colocar os arquivos do aplicativo diretamente na raiz do tarball.
+
+Um tarball que já contém seu próprio diretório:
+
+```text
+MyApp/
+├── bin/
+│   └── myapp
+├── lib/
+└── resources/
+```
+
+é instalado diretamente como:
+
+```text
+~/.local/linuxtoys/apps/MyApp/
+```
+
+O LinuxToys detecta o diretório comum de nível superior existente e **não** cria um diretório adicional desnecessário, como `MyApp/MyApp/`.
+
+Um tarball que contém arquivos soltos no nível raiz também é compatível:
+
+```text
+myapp
+lib/
+resources/
+README.md
+```
+
+Nesse caso, o LinuxToys cria um diretório para o aplicativo utilizando o nome do arquivo, excluindo a extensão `.tar.gz` ou `.tar.xz`.
+
+Por exemplo:
+
+```text
+myapp-2.4.0.tar.xz
+```
+
+resultaria em:
+
+```text
+~/.local/linuxtoys/apps/myapp-2.4.0/
+```
+
+Por esse motivo, recomenda-se que os desenvolvedores distribuam o conteúdo dentro de um diretório de nível superior com um nome adequado quando for necessário manter um nome de diretório de instalação estável entre diferentes releases.
+
+### Atualizações
+
+Executar novamente a mesma instalação por tarball é tratado como uma atualização.
+
+O LinuxToys substitui o diretório de destino existente pelo aplicativo recém-extraído, em vez de mesclar o novo arquivo com a instalação anterior. Isso garante que arquivos removidos pelo upstream em versões mais recentes não permaneçam no sistema após uma atualização.
+
+Portanto, desenvolvedores que distribuem releases sucessivos devem, preferencialmente, manter consistente o diretório de nível superior do tarball entre as versões:
+
+```text
+myapp/
+```
+
+em vez de:
+
+```text
+myapp-2.4.0/
+myapp-2.5.0/
+```
+
+Um nome de diretório estável permite que releases posteriores substituam corretamente a instalação anterior.
+
+### Tipos Específicos por Sistema Operacional
+
+O tipo `tar` também pode ser selecionado através do mapeamento normal de `type` específico por sistema operacional. Por exemplo, um projeto pode utilizar um pacote nativo no Arch Linux enquanto distribui um tarball binário para os demais sistemas compatíveis:
+
+```json
+{
+  "name": "myapp",
+  "type": {
+    "arch": "native",
+    "all": "tar"
+  },
+  "package-name": {
+    "arch": "myapp"
+  },
+  "repo": "https://github.com/example/myapp"
+}
+```
+
+No Arch Linux e derivados, o LinuxToys utilizará o pacote nativo. Nos demais sistemas compatíveis, obterá o tarball binário a partir dos releases do projeto.
+
+### Escolhendo entre `tar` e `url`
+
+Use:
+
+```json
+"type": "tar"
+```
+
+quando o tarball binário for publicado como um asset dos releases do projeto no GitHub ou Codeberg e o LinuxToys deva acompanhar automaticamente novos releases.
+
+Use:
+
+```json
+"type": "url"
+```
+
+com:
+
+```json
+"urls": {
+  "tar": "https://example.com/application.tar.gz"
+}
+```
+
+quando o arquivo estiver hospedado em uma URL fornecida diretamente pelo desenvolvedor.
+
+Em ambos os casos, o arquivo deve conter um aplicativo já compilado e pronto para uso. A compilação de tarballs contendo código-fonte está fora do escopo do tipo `tar`.
+
+---
+
 ## Compatibilidade
 
 Entradas de listas de repositórios podem ser limitadas a determinados sistemas operacionais, ambientes de desktop, hardware, sistemas de init ou ambientes containerizados.
