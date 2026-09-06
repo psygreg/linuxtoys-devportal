@@ -117,6 +117,114 @@ Caso tenha interesse em oferecer suporte oficial ao seu aplicativo através do L
 
 ---
 
+## Instalar com o LinuxToys
+
+O LinuxToys fornece um esquema de URI personalizado que permite que sites solicitem a instalação de softwares disponíveis através do LinuxToys. Isso possibilita que desenvolvedores upstream disponibilizem um botão **Instalar com o LinuxToys** diretamente em seus sites.
+
+A URI segue este formato:
+
+```text
+linuxtoys://install/<nome>
+```
+
+Por exemplo, uma entrada de lista de repositórios chamada `Hardinfo2` pode ser aberta com:
+
+```text
+linuxtoys://install/Hardinfo2
+```
+
+Nomes que contêm espaços devem utilizar a codificação percentual padrão de URIs. Por exemplo:
+
+```text
+linuxtoys://install/Amethyst%20Mod%20Manager
+```
+
+Abrir uma URI de instalação **não** instala imediatamente o software solicitado. O LinuxToys será aberto e apresentará o aplicativo solicitado ao usuário para confirmação antes de prosseguir.
+
+### Adicionando um botão "Instalar com o LinuxToys"
+
+Oferecemos uma imagem de botão padrão pronta para uso, por praticidade. A versão em inglês já pronta do botão pode ser obtida salvando a imagem abaixo. Utilizamos a fonte *Adwaita Sans Bold* para o texto.
+
+![Botão em inglês](/assets/installwithlinuxtoys_en.webp)
+
+Também oferecemos uma versão em branco do botão se quiser colocar o texto em outro idioma ou fonte. Se desejar, obtenha-a salvando a imagem abaixo.
+
+![Botão em branco](/assets/installwithlinuxtoys_base.webp)
+
+Um botão básico pode ser adicionado com:
+
+```html
+<a href="linuxtoys://install/Hardinfo2">
+    <img
+        src="/assets/installwithlinuxtoys-en.webp"
+        alt="Instalar com o LinuxToys"
+    >
+</a>
+```
+
+Dessa forma, a imagem do botão funciona como um link que inicia o LinuxToys.
+
+Você não **precisa** usar o botão padrão. O formato URI do LinuxToys pode ser utilizado em um botão ou link a seu critério.
+
+### Fornecendo uma alternativa para usuários sem o LinuxToys
+
+Os navegadores não fornecem uma maneira padronizada para que um link comum determine se um manipulador de URI personalizado está instalado. Se a página na qual o botão está sendo utilizado permitir JavaScript, uma pequena rotina alternativa pode redirecionar o visitante para o site do LinuxToys caso a URI não possa ser aberta:
+
+```html
+<a href="linuxtoys://install/Hardinfo2"
+   onclick="installWithLinuxToys(event, 'Hardinfo2')">
+    <img
+        src="/assets/installwithlinuxtoys-en.webp"
+        alt="Instalar com o LinuxToys"
+    >
+</a>
+
+<script>
+function installWithLinuxToys(event, name) {
+    event.preventDefault();
+
+    const uri = `linuxtoys://install/${encodeURIComponent(name)}`;
+    let pageHidden = false;
+
+    const onVisibilityChange = () => {
+        if (document.hidden) {
+            pageHidden = true;
+        }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    window.location.href = uri;
+
+    setTimeout(() => {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+
+        if (!pageHidden) {
+            window.location.href = "https://linux.toys/";
+        }
+    }, 1500);
+}
+</script>
+```
+
+Para utilizar o botão com outra entrada de lista de repositórios do LinuxToys, substitua `Hardinfo2` pelo seu `name`:
+
+```html
+<a href="linuxtoys://install/Amethyst%20Mod%20Manager"
+   onclick="installWithLinuxToys(event, 'Amethyst Mod Manager')">
+    <img
+        src="/assets/installwithlinuxtoys-en.webp"
+        alt="Instalar com o LinuxToys"
+    >
+</a>
+```
+
+`encodeURIComponent()` cuida da codificação de espaços e outros caracteres que possuem significado especial em URIs presentes no nome da entrada da lista de repositórios.
+
+> **Nota:** alguns renderizadores de Markdown, incluindo plataformas que sanitizam HTML incorporado, podem remover elementos `<script>` ou JavaScript inline. Nessas plataformas, utilize apenas o link `linuxtoys://` básico ou implemente a rotina alternativa no JavaScript do site que hospeda a documentação renderizada.
+
+---
+
 ## Qual documentação devo ler?
 
 A maneira mais fácil de decidir é começar pelo que você pretende distribuir.

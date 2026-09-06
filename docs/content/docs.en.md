@@ -117,6 +117,114 @@ If you are interested in providing official support for your application through
 
 ---
 
+## Install with LinuxToys
+
+LinuxToys provides a custom URI scheme that allows websites to request the installation of software available through LinuxToys. This makes it possible for upstream developers to provide an **Install with LinuxToys** button directly on their websites.
+
+The URI follows this format:
+
+```text
+linuxtoys://install/<name>
+```
+
+For example, a repository-list entry named `Hardinfo2` can be opened with:
+
+```text
+linuxtoys://install/Hardinfo2
+```
+
+Names containing spaces must use standard URI percent-encoding. For example:
+
+```text
+linuxtoys://install/Amethyst%20Mod%20Manager
+```
+
+Opening an installation URI does **not** immediately install the requested software. LinuxToys will open and present the requested application to the user for confirmation before proceeding.
+
+### Adding an "Install with LinuxToys" button
+
+We offer a standard button picture that you may use for simplicity sake. You can obtain a ready-to-go english version by saving the image below. We used the *Adwaita Sans Bold* font for its text.
+
+![English button](/assets/installwithlinuxtoys_en.webp)
+
+We also offer a blank version of this button if you wish to make it for another language or using a different font. If you wish, get it by saving the image below.
+
+![Blank button](/assets/installwithlinuxtoys_base.webp)
+
+A basic button can be added with:
+
+```html
+<a href="linuxtoys://install/Hardinfo2">
+    <img
+        src="/assets/installwithlinuxtoys-en.webp"
+        alt="Install with LinuxToys"
+    >
+</a>
+```
+
+This results in the button image acting as the link that launches LinuxToys.
+
+You don't **have** to use the standard button. The LinuxToys URI format can be used for a custom button or link at your discretion.
+
+### Providing a fallback for users without LinuxToys
+
+Web browsers do not provide a standard way for an ordinary link to determine whether a custom URI handler is installed. If the page where the button is being used permits JavaScript, a short fallback can redirect the visitor to the LinuxToys website when the URI cannot be opened:
+
+```html
+<a href="linuxtoys://install/Hardinfo2"
+   onclick="installWithLinuxToys(event, 'Hardinfo2')">
+    <img
+        src="/assets/installwithlinuxtoys-en.webp"
+        alt="Install with LinuxToys"
+    >
+</a>
+
+<script>
+function installWithLinuxToys(event, name) {
+    event.preventDefault();
+
+    const uri = `linuxtoys://install/${encodeURIComponent(name)}`;
+    let pageHidden = false;
+
+    const onVisibilityChange = () => {
+        if (document.hidden) {
+            pageHidden = true;
+        }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    window.location.href = uri;
+
+    setTimeout(() => {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+
+        if (!pageHidden) {
+            window.location.href = "https://linux.toys/";
+        }
+    }, 1500);
+}
+</script>
+```
+
+To use the button for another LinuxToys repository-list entry, replace `Hardinfo2` with its `name`:
+
+```html
+<a href="linuxtoys://install/Amethyst%20Mod%20Manager"
+   onclick="installWithLinuxToys(event, 'Amethyst Mod Manager')">
+    <img
+        src="/assets/installwithlinuxtoys-en.webp"
+        alt="Install with LinuxToys"
+    >
+</a>
+```
+
+`encodeURIComponent()` takes care of encoding spaces and other URI-sensitive characters in the repository-list name.
+
+> **Note:** Some Markdown renderers, including platforms that sanitize embedded HTML, may remove `<script>` elements or inline JavaScript. On such platforms, use the basic `linuxtoys://` link instead, or implement the fallback in the JavaScript of the website hosting the rendered documentation.
+
+---
+
 ## Which Documentation Should I Read?
 
 The easiest way to decide is to start from what you are trying to distribute.
