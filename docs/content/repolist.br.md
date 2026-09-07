@@ -498,7 +498,7 @@ Uma entrada do tipo URL só é exibida quando o LinuxToys consegue resolver uma 
 
 O tipo `tar` é destinado a aplicativos distribuídos como **tarballs binários pré-compilados** por meio de releases do GitHub ou Codeberg. Ele permite que o LinuxToys instale softwares que não fornecem um pacote nativo, Flatpak ou AppImage, mas distribuem o aplicativo pronto para execução em um arquivo `.tar.gz` ou `.tar.xz`.
 
-> **Observação:** `tar` é destinado a releases binários de aplicativos, não a arquivos de código-fonte, e requer, **obrigatoriamente**, um script pós-instalação para finalizar a configuração. Instalações deste tipo exportam a variável **`LINUXTOYS_TARBALL_DIR`** que aponta para o nome de diretório final da tarball extraída para uso no script pós-instalação.
+> **Observação:** `tar` é destinado a releases binários de aplicativos, não a arquivos de código-fonte, e requer, **obrigatoriamente**, um script pós-instalação para finalizar a configuração. Instalações deste tipo exportam a variável **`LINUXTOYS_TARBALL_DIR`** que aponta para o nome de diretório final da tarball extraída para uso no script pós-instalação. Se estiver distribuindo um aplicativo neste formato, pode ter interesse também em [criar um atalho `.desktop` para o menu de aplicativos automaticamente](corelibraries.pt-BR.html#app-shortcuts).
 
 ### Releases do GitHub e Codeberg
 

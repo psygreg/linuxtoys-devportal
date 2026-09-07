@@ -1634,6 +1634,86 @@ Monta um remoto do rclone como daemon e registra a montagem resultante.
 
 ---
 
+<a id="app-shortcuts"></a>
+
+## Criando Atalhos de Aplicativos
+
+### `desktop_shortcut`
+
+O LinuxToys fornece a função `desktop_shortcut` para criar entradas de aplicativos no ambiente gráfico para softwares instalados.
+
+A função utiliza automaticamente os metadados já disponíveis para o aplicativo sendo instalado, incluindo seu nome de exibição, descrição traduzida quando disponível e ícone. O arquivo `.desktop` resultante é instalado no diretório de aplicativos do usuário e participa do sistema de transações do LinuxToys, permitindo que seja removido automaticamente caso a instalação seja revertida.
+
+Para a maioria dos aplicativos, basta fornecer o comando usado para iniciar o programa:
+
+```bash
+desktop_shortcut "/opt/example/bin/example"
+```
+
+Argumentos podem ser incluídos diretamente no comando:
+
+```bash
+desktop_shortcut "/opt/example/bin/example --some-argument"
+```
+
+O LinuxToys utilizará esse comando como o valor `Exec=` do atalho.
+
+Por padrão, o `StartupWMClass` é inferido a partir do nome do executável. Por exemplo:
+
+```bash
+desktop_shortcut "/opt/example/bin/example"
+```
+
+utilizará `example` como a classe da janela de inicialização.
+
+### Especificando a Classe da Janela
+
+Alguns aplicativos são iniciados através de wrappers, comandos de ambiente ou outros comandos cujo nome do executável não corresponde à classe real da janela do aplicativo.
+
+Nesses casos, a classe pode ser especificada explicitamente com `--class`:
+
+```bash
+desktop_shortcut --class "ExampleApp" "env EXAMPLE_MODE=1 /opt/example/bin/example"
+```
+
+Isso gera um atalho contendo:
+
+```ini
+Exec=env EXAMPLE_MODE=1 /opt/example/bin/example
+StartupWMClass=ExampleApp
+```
+
+A opção `--class` também pode ser utilizada quando a classe real da janela de um aplicativo simplesmente for diferente do nome de seu executável:
+
+```bash
+desktop_shortcut --class "ExampleApp" "/opt/example/bin/example"
+```
+
+Ao utilizar `--class`, tanto a classe quanto o comando de inicialização devem ser fornecidos.
+
+### Metadados do Aplicativo
+
+Os desenvolvedores não precisam fornecer manualmente o nome, a descrição ou o ícone do aplicativo para `desktop_shortcut`. O LinuxToys fornece essas informações a partir dos metadados associados ao aplicativo que está sendo instalado.
+
+Isso permite que a entrada de aplicativo gerada utilize automaticamente:
+
+* o nome de exibição do aplicativo;
+* sua descrição, incluindo a descrição traduzida quando disponível;
+* seu ícone configurado;
+* uma identidade estável do aplicativo no LinuxToys para o nome do arquivo da entrada de aplicativo.
+
+Portanto, a função deve ser chamada enquanto o aplicativo estiver sendo instalado através do LinuxToys, em vez de ser utilizada como um gerador genérico e independente de arquivos `.desktop`.
+
+### Instalações de Binário Único
+
+A criação de atalhos de aplicativos é planejada para ser **invocada automaticamente em instalações de binário único**. Nesses casos, normalmente não será necessário que os desenvolvedores chamem `desktop_shortcut` manualmente.
+
+A invocação automática está planejada como parte do tratamento de instalações de binário único pelo LinuxToys e será documentada em maiores detalhes após essa integração ser implementada.
+
+O uso manual de `desktop_shortcut` continuará sendo útil para instalações com comandos de inicialização personalizados, localizações não convencionais de executáveis, wrappers ou outros casos nos quais o LinuxToys não consiga determinar automaticamente o atalho apropriado.
+
+---
+
 ## Substituições do Flatpak
 
 ### `flatpak_override`

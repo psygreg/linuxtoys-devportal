@@ -1634,6 +1634,86 @@ Mounts an rclone remote as a daemon and records the resulting mount.
 
 ---
 
+<a id="app-shortcuts"></a>
+
+## Creating Desktop Shortcuts
+
+### `desktop_shortcut`
+
+LinuxToys provides the `desktop_shortcut` helper for creating desktop application entries for installed software.
+
+The helper automatically uses the metadata already available for the application being installed, including its user-facing name, translated description when available, and icon. The resulting `.desktop` file is installed under the user's application directory and participates in LinuxToys' transaction system, allowing it to be removed automatically if the installation is reverted.
+
+For most applications, only the command used to launch the program needs to be provided:
+
+```bash
+desktop_shortcut "/opt/example/bin/example"
+```
+
+Arguments may be included directly in the command:
+
+```bash
+desktop_shortcut "/opt/example/bin/example --some-argument"
+```
+
+LinuxToys will use this command as the launcher's `Exec=` value.
+
+By default, `StartupWMClass` is inferred from the executable name. For example:
+
+```bash
+desktop_shortcut "/opt/example/bin/example"
+```
+
+will use `example` as the startup window class.
+
+### Specifying the Window Class
+
+Some applications are launched through wrappers, environment commands, or other commands whose executable name does not correspond to the application's actual window class.
+
+In these cases, the class can be explicitly provided with `--class`:
+
+```bash
+desktop_shortcut --class "ExampleApp" "env EXAMPLE_MODE=1 /opt/example/bin/example"
+```
+
+This produces a launcher using:
+
+```ini
+Exec=env EXAMPLE_MODE=1 /opt/example/bin/example
+StartupWMClass=ExampleApp
+```
+
+`--class` can also be used when an application's actual window class simply differs from its executable name:
+
+```bash
+desktop_shortcut --class "ExampleApp" "/opt/example/bin/example"
+```
+
+When using `--class`, both the class and the launch command are required.
+
+### Application Metadata
+
+Developers do not need to manually provide the application name, description, or icon to `desktop_shortcut`. LinuxToys supplies this information from the metadata associated with the currently installed application.
+
+This means the generated desktop entry can automatically use:
+
+* the application's user-facing name;
+* its description, including the translated description when one is available;
+* its configured icon;
+* a stable LinuxToys application identity for the desktop entry filename.
+
+The helper should therefore be called while the application is being installed through LinuxToys rather than used as a general-purpose standalone `.desktop` file generator.
+
+### Single-Binary Installations
+
+Desktop shortcut creation is intended to be **automatically invoked for single-binary installations**. In those cases, developers should normally not need to call `desktop_shortcut` themselves.
+
+Automatic invocation is planned as part of LinuxToys' single-binary installation handling and will be documented in greater detail once that integration is implemented.
+
+Manual use of `desktop_shortcut` remains useful for installations with custom launch commands, non-standard executable locations, wrappers, or other cases where LinuxToys cannot determine the appropriate launcher automatically.
+
+---
+
 ## Flatpak Overrides
 
 ### `flatpak_override`
