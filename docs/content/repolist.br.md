@@ -911,6 +911,52 @@ Em ambos os casos, o arquivo deve conter um aplicativo já compilado e pronto pa
 
 ---
 
+## Utilizando URLs de Download Dinâmicas
+
+As páginas de aplicativos não alteram a forma como um aplicativo é instalado. Portanto, elas podem ser combinadas com outras funcionalidades das listas de repositórios, incluindo URLs de download descobertas dinamicamente.
+
+Por exemplo:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://example.org",
+  "category": "office",
+  "icon": "./example.svg",
+  "type": "url",
+
+  "urls": {
+    "appimage": {
+      "env": "URL"
+    }
+  },
+
+  "overrides": {
+    "pre": {
+      "script": "./example-pre.sh"
+    }
+  },
+
+  "descriptions": "descriptions.json",
+  "screenshots": "screenshots/"
+}
+```
+
+O script de pré-instalação pode descobrir a URL atual de download e exportá-la:
+
+```bash
+#!/usr/bin/env bash
+
+# Determinar a URL apropriada da versão...
+export URL="https://example.org/releases/latest/example.AppImage"
+```
+
+O LinuxToys então expande essa variável de ambiente quando `pkg_fromurl` é chamado.
+
+Declarações de URLs dinâmicas exigem um hook de pré-instalação. Os nomes das variáveis de ambiente são declarados explicitamente utilizando a forma `{"env": "VARIABLE"}`, em vez de inserir variáveis do shell diretamente nas strings de URLs.
+
+---
+
 ## Compatibilidade
 
 Entradas de listas de repositórios podem ser limitadas a determinados sistemas operacionais, ambientes de desktop, hardware, sistemas de init ou ambientes containerizados.
@@ -1566,6 +1612,341 @@ Isso também permite unidades que não sejam serviços:
   ]
 }
 ```
+
+---
+
+## Páginas de Aplicativos
+
+Entradas de listas de repositórios podem, opcionalmente, fornecer uma **página de aplicativo**. Isso permite apresentar mais informações sobre um aplicativo antes da instalação, incluindo uma descrição mais longa, capturas de tela e links opcionais para compra ou doação.
+
+As páginas de aplicativos são destinadas a aplicativos que se beneficiam de uma apresentação mais completa do que a caixa de diálogo padrão de confirmação de instalação.
+
+Se nenhum dos campos relacionados à página de aplicativo for fornecido, o LinuxToys ignora completamente essa página e segue o fluxo normal de instalação.
+
+#### Exemplo Básico
+
+Uma entrada com uma página de aplicativo pode ser semelhante a esta:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://example.org",
+  "category": "office",
+  "icon": "./example.svg",
+  "type": "url",
+
+  "urls": {
+    "appimage": "https://example.org/releases/example.AppImage"
+  },
+
+  "description": "Uma descrição curta do aplicativo.",
+
+  "long-description": "Uma descrição mais longa contendo informações adicionais sobre o aplicativo e seus recursos.",
+
+  "screenshots": "screenshots/",
+
+  "donate": "https://example.org/donate"
+}
+```
+
+Quando o usuário seleciona essa entrada, o LinuxToys abre sua página de aplicativo em vez de exibir imediatamente a confirmação de instalação.
+
+A página mantém o cabeçalho padrão do LinuxToys contendo o nome do aplicativo, sua descrição curta, informações do repositório e ícone. A área principal exibe a descrição mais longa e o visualizador de capturas de tela.
+
+Selecionar **Instalar** continua pelo fluxo normal de instalação do LinuxToys.
+
+### Descrições Longas
+
+A `description` curta continua sendo o texto exibido pela interface normal do LinuxToys. A página do aplicativo pode fornecer adicionalmente uma descrição mais longa:
+
+```json
+"long-description": "Uma descrição detalhada do aplicativo, sua finalidade e seus principais recursos."
+```
+
+A forma com sublinhado também é aceita:
+
+```json
+"long_description": "Uma descrição detalhada."
+```
+
+Descrições longas também podem utilizar o sistema normal de traduções do LinuxToys:
+
+```json
+"description": "Descrição curta de fallback.",
+"description_tag": "example_desc",
+
+"long-description": "Descrição longa de fallback.",
+"long-description_tag": "example_long_desc"
+```
+
+No entanto, para entradas de repositório com descrições mais extensas, recomenda-se utilizar um catálogo de descrições local do repositório.
+
+### Traduções de Descrições Locais do Repositório
+
+Listas de repositórios podem manter suas descrições de aplicativos separadas dos arquivos principais de tradução do LinuxToys colocando um catálogo JSON de descrições junto ao arquivo da lista de repositório.
+
+Faça referência a ele com:
+
+```json
+"descriptions": "descriptions.json"
+```
+
+`description-file` também é aceito como um alias.
+
+O arquivo de descrições deve estar localizado no **mesmo diretório que o JSON da lista de repositório**.
+
+Por exemplo:
+
+```text
+scripts/lists/example/
+├── repository.json
+├── descriptions.json
+├── example.svg
+└── screenshots/
+    ├── main.webp
+    ├── editor.webp
+    └── settings.webp
+```
+
+Um arquivo `descriptions.json` utiliza esta estrutura:
+
+```json
+{
+  "description_tag": "example_desc",
+  "description_long_tag": "example_long",
+
+  "en": {
+    "example_desc": "A short description of the application.",
+    "example_long": "A longer description explaining the application and its main features."
+  },
+
+  "pt": {
+    "example_desc": "Uma descrição curta do aplicativo.",
+    "example_long": "Uma descrição mais longa explicando o aplicativo e seus principais recursos."
+  }
+}
+```
+
+`description_tag` identifica a descrição curta, enquanto `description_long_tag` identifica a descrição longa utilizada pela página do aplicativo.
+
+O LinuxToys procura primeiro pelo idioma atualmente selecionado e utiliza o inglês como fallback quando uma tradução apropriada não está disponível.
+
+Descrições inline e tags de tradução existentes continuam sendo suportadas, o que é útil durante a migração de um script existente do LinuxToys para uma entrada de lista de repositório.
+
+### Capturas de Tela
+
+Use `screenshots` para fornecer imagens para a página do aplicativo.
+
+Há duas maneiras de fazer isso.
+
+#### Diretório de Capturas de Tela
+
+O método mais simples é apontar para um diretório:
+
+```json
+"screenshots": "screenshots/"
+```
+
+O LinuxToys carrega automaticamente os arquivos de imagem suportados diretamente dentro desse diretório.
+
+Os formatos suportados são:
+
+* `.png`
+* `.jpg`
+* `.jpeg`
+* `.webp`
+* `.svg`
+
+Os arquivos são ordenados pelo nome, portanto os nomes dos arquivos também podem ser utilizados para controlar sua ordem:
+
+```text
+screenshots/
+├── 01-main.webp
+├── 02-editor.webp
+└── 03-settings.webp
+```
+
+#### Capturas de Tela Individuais
+
+Também é possível listar arquivos específicos:
+
+```json
+"screenshots": [
+  "screenshots/main.webp",
+  "screenshots/editor.webp",
+  "screenshots/settings.webp"
+]
+```
+
+Os caminhos das capturas de tela são relativos ao JSON da lista de repositório.
+
+Por segurança, os caminhos das capturas de tela devem permanecer dentro da hierarquia `scripts/lists`. Caminhos que resolvam para locais externos a ela são rejeitados.
+
+#### Visualizador de Capturas de Tela
+
+Quando várias capturas de tela estão disponíveis, o LinuxToys as apresenta em um visualizador circular.
+
+Os usuários podem navegar tanto para frente quanto para trás entre as imagens. Ao chegar a qualquer uma das extremidades, a navegação retorna para a outra extremidade:
+
+```text
+1 → 2 → 3 → 1
+```
+
+e:
+
+```text
+1 ← 2 ← 3 ← 1
+```
+
+As teclas de seta Esquerda e Direita do teclado também podem ser utilizadas enquanto a página do aplicativo estiver aberta.
+
+### Links para Doação
+
+Um link para doação pode ser adicionado com:
+
+```json
+"donate": "https://example.org/donate"
+```
+
+A forma de objeto também é aceita:
+
+```json
+"donate": {
+  "url": "https://example.org/donate"
+}
+```
+
+O LinuxToys exibe um botão **Doar** na página do aplicativo, que abre a URL especificada.
+
+Somente URLs HTTP ou HTTPS válidas são aceitas.
+
+### Aplicativos Pagos
+
+Aplicativos que precisam ser adquiridos em vez de simplesmente baixados podem fornecer um link de compra e preço:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99
+}
+```
+
+O preço é especificado como um valor numérico em **dólares americanos**.
+
+O LinuxToys exibe o preço diretamente no botão de compra, por exemplo:
+
+```text
+Comprar · $19.99
+```
+
+O botão de compra recebe destaque visual na página do aplicativo.
+
+Um URL de compra também pode ser fornecido sem um preço:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy"
+}
+```
+
+Nesse caso, o LinuxToys simplesmente exibe **Comprar**.
+
+Quando links de compra e doação são fornecidos simultaneamente, ambos os botões são exibidos, com a ação de compra recebendo o destaque principal.
+
+### Exemplo Completo
+
+Uma entrada de repositório mais completa pode, portanto, ser semelhante a esta:
+
+```json
+[
+  {
+    "name": "Example App",
+    "repo": "https://example.org",
+    "category": "office",
+    "icon": "./example.svg",
+
+    "type": "url",
+
+    "urls": {
+      "appimage": "https://example.org/releases/example.AppImage"
+    },
+
+    "descriptions": "descriptions.json",
+
+    "screenshots": "screenshots/",
+
+    "purchase": {
+      "url": "https://example.org/purchase",
+      "price": 14.99
+    },
+
+    "donate": "https://example.org/donate"
+  }
+]
+```
+
+Com a seguinte estrutura de diretórios:
+
+```text
+scripts/lists/example/
+├── repository.json
+├── descriptions.json
+├── example.svg
+└── screenshots/
+    ├── 01-main.webp
+    ├── 02-project.webp
+    └── 03-settings.webp
+```
+
+E:
+
+```json
+{
+  "description_tag": "example_desc",
+  "description_long_tag": "example_long",
+
+  "en": {
+    "example_desc": "A short description of Example App.",
+    "example_long": "A detailed explanation of Example App, its purpose, and the features available to the user."
+  },
+
+  "pt": {
+    "example_desc": "Uma descrição curta do Example App.",
+    "example_long": "Uma explicação detalhada do Example App, sua finalidade e os recursos disponíveis para o usuário."
+  }
+}
+```
+
+### Quando uma Página de Aplicativo é Exibida?
+
+Uma página de aplicativo é habilitada automaticamente quando a entrada fornece pelo menos um recurso de página de aplicativo:
+
+* uma descrição longa;
+* uma ou mais capturas de tela válidas;
+* uma URL de compra; ou
+* uma URL de doação.
+
+Não é necessário habilitá-la explicitamente com uma opção adicional.
+
+Se nenhum desses elementos estiver presente, selecionar o aplicativo segue o fluxo padrão de instalação do LinuxToys.
+
+### Comportamento em Checklists
+
+As páginas de aplicativos afetam apenas a ativação individual de um aplicativo.
+
+Se um aplicativo for selecionado individualmente em uma checklist, sua página de aplicativo será aberta normalmente quando estiver disponível.
+
+Quando o usuário realiza uma **instalação de múltiplos aplicativos por checklist**, as páginas de aplicativos são ignoradas intencionalmente. O LinuxToys segue diretamente para o fluxo normal de instalação em lote, evitando que várias páginas de aplicativos interrompam uma operação de checklist.
+
+Abrir a página de um aplicativo individual não limpa as seleções já feitas pelo usuário na checklist.
+
+### Recomendações
+
+Mantenha a descrição curta concisa, pois ela é utilizada na interface normal do LinuxToys e no cabeçalho da página do aplicativo. Utilize a descrição longa para fornecer contexto adicional, apresentar os principais recursos, informar sobre compatibilidade ou incluir outros detalhes que ajudem o usuário a decidir se deseja instalar o aplicativo.
+
+Para aplicativos com descrições longas traduzidas, dê preferência a um arquivo `descriptions.json` local do repositório. Isso mantém textos específicos do aplicativo fora dos arquivos principais de tradução do LinuxToys e permite que a lista de repositório, as capturas de tela, o ícone e as descrições sejam mantidos em conjunto.
+
+Uma página de aplicativo é opcional. Pacotes simples que precisam apenas de um nome e uma descrição curta geralmente devem continuar utilizando o fluxo padrão de instalação.
 
 ---
 

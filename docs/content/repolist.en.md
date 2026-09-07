@@ -911,6 +911,52 @@ In both cases, the archive must contain an already built, usable application. Co
 
 ---
 
+## Using Dynamic Download URLs
+
+Application pages do not change how an application is installed. They can therefore be combined with other repository-list functionality, including dynamically discovered download URLs.
+
+For example:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://example.org",
+  "category": "office",
+  "icon": "./example.svg",
+  "type": "url",
+
+  "urls": {
+    "appimage": {
+      "env": "URL"
+    }
+  },
+
+  "overrides": {
+    "pre": {
+      "script": "./example-pre.sh"
+    }
+  },
+
+  "descriptions": "descriptions.json",
+  "screenshots": "screenshots/"
+}
+```
+
+The pre-installation script can discover the current download URL and export it:
+
+```bash
+#!/usr/bin/env bash
+
+# Determine the appropriate release URL...
+export URL="https://example.org/releases/latest/example.AppImage"
+```
+
+LinuxToys then expands that environment variable when `pkg_fromurl` is invoked.
+
+Dynamic URL declarations require a pre-installation hook. Environment-variable names are explicitly declared using the `{"env": "VARIABLE"}` form rather than placing shell variables directly in URL strings.
+
+---
+
 ## Compatibility
 
 Repository-list entries can restrict themselves to particular operating systems, desktop environments, hardware, init systems, or container environments.
@@ -1566,6 +1612,343 @@ This allows non-service units as well:
   ]
 }
 ```
+
+---
+
+## Application Pages
+
+Repository-list entries can optionally provide an **application page**. This gives users more information about an application before installing it, including a longer description, screenshots, and optional purchase or donation links.
+
+Application pages are intended for applications that benefit from a richer presentation than the standard installation confirmation dialog.
+
+If none of the application-page fields are provided, LinuxToys skips the application page entirely and follows the normal installation flow.
+
+#### Basic Example
+
+An entry with an application page may look like this:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://example.org",
+  "category": "office",
+  "icon": "./example.svg",
+  "type": "url",
+
+  "urls": {
+    "appimage": "https://example.org/releases/example.AppImage"
+  },
+
+  "description": "A short description of the application.",
+
+  "long-description": "A longer description containing additional information about the application and its features.",
+
+  "screenshots": "screenshots/",
+
+  "donate": "https://example.org/donate"
+}
+```
+
+When the user selects this entry, LinuxToys opens its application page instead of immediately displaying the installation confirmation.
+
+The page retains the usual LinuxToys application header containing the application's name, short description, repository information, and icon. The main area displays the longer description and screenshot viewer.
+
+Selecting **Install** continues through the normal LinuxToys installation flow.
+
+### Long Descriptions
+
+The short `description` remains the text displayed throughout the normal LinuxToys interface. The application page can additionally provide a longer description:
+
+```json
+"long-description": "A detailed description of the application, its purpose, and its main features."
+```
+
+The underscore form is also accepted:
+
+```json
+"long_description": "A detailed description."
+```
+
+Long descriptions can also use the normal LinuxToys translation system:
+
+```json
+"description": "Short fallback description.",
+"description_tag": "example_desc",
+
+"long-description": "Long fallback description.",
+"long-description_tag": "example_long_desc"
+```
+
+For repository entries with substantial descriptions, however, a repository-local description catalog is recommended.
+
+### Repository-Local Description Translations
+
+Repository lists can keep their application descriptions separate from the main LinuxToys translation files by placing a JSON description catalog alongside the repository-list file.
+
+Reference it with:
+
+```json
+"descriptions": "descriptions.json"
+```
+
+`description-file` is also accepted as an alias.
+
+The description file must be located in the **same directory as the repository-list JSON**.
+
+For example:
+
+```text
+scripts/lists/example/
+├── repository.json
+├── descriptions.json
+├── example.svg
+└── screenshots/
+    ├── main.webp
+    ├── editor.webp
+    └── settings.webp
+```
+
+A `descriptions.json` file uses this structure:
+
+```json
+{
+  "description_tag": "example_desc",
+  "description_long_tag": "example_long",
+
+  "en": {
+    "example_desc": "A short description of the application.",
+    "example_long": "A longer description explaining the application and its main features."
+  },
+
+  "pt": {
+    "example_desc": "Uma descrição curta do aplicativo.",
+    "example_long": "Uma descrição mais longa explicando o aplicativo e seus principais recursos."
+  }
+}
+```
+
+`description_tag` identifies the short description, while `description_long_tag` identifies the long application-page description.
+
+LinuxToys first looks for the currently selected language and falls back to English when an appropriate translation is unavailable.
+
+Existing inline descriptions and translation tags remain supported, which is useful when migrating an existing LinuxToys script into a repository-list entry.
+
+### Screenshots
+
+Use `screenshots` to provide images for the application page.
+
+There are two ways to do this.
+
+#### Screenshot Directory
+
+The simplest method is to point to a directory:
+
+```json
+"screenshots": "screenshots/"
+```
+
+LinuxToys automatically loads the supported image files directly inside that directory.
+
+Supported formats are:
+
+* `.png`
+* `.jpg`
+* `.jpeg`
+* `.webp`
+* `.svg`
+
+The files are sorted by filename, so filenames can also be used to control their order:
+
+```text
+screenshots/
+├── 01-main.webp
+├── 02-editor.webp
+└── 03-settings.webp
+```
+
+#### Individual Screenshots
+
+Specific files can instead be listed:
+
+```json
+"screenshots": [
+  "screenshots/main.webp",
+  "screenshots/editor.webp",
+  "screenshots/settings.webp"
+]
+```
+
+Screenshot paths are relative to the repository-list JSON.
+
+For security, screenshot paths must remain within the `scripts/lists` hierarchy. Paths that resolve outside it are rejected.
+
+#### Screenshot Viewer
+
+When multiple screenshots are available, LinuxToys presents them as a circular viewer.
+
+Users can move both forwards and backwards through the images. Reaching either end wraps around to the other end:
+
+```text
+1 → 2 → 3 → 1
+```
+
+and:
+
+```text
+1 ← 2 ← 3 ← 1
+```
+
+The keyboard Left and Right arrow keys can also be used while the application page is open.
+
+### Donation Links
+
+A donation link can be added with:
+
+```json
+"donate": "https://example.org/donate"
+```
+
+The object form is also accepted:
+
+```json
+"donate": {
+  "url": "https://example.org/donate"
+}
+```
+
+LinuxToys displays a **Donate** button on the application page which opens the specified URL.
+
+Only valid HTTP or HTTPS URLs are accepted.
+
+### Paid Applications
+
+Applications that are purchased rather than freely downloaded can provide a purchase link and price:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99
+}
+```
+
+The price is specified as a numeric value in **US dollars**.
+
+LinuxToys displays the price directly in the purchase button, for example:
+
+```text
+Purchase · $19.99
+```
+
+The purchase button is visually highlighted on the application page.
+
+A purchase URL can also be supplied without a price:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy"
+}
+```
+
+In this case, LinuxToys simply displays **Purchase**.
+
+When both purchase and donation links are present, both buttons are displayed, with the purchase action receiving the primary emphasis.
+
+### Complete Example
+
+A more complete repository entry can therefore look like:
+
+```json
+[
+  {
+    "name": "Example App",
+    "repo": "https://example.org",
+    "category": "office",
+    "icon": "./example.svg",
+
+    "type": "url",
+
+    "urls": {
+      "appimage": "https://example.org/releases/example.AppImage"
+    },
+
+    "descriptions": "descriptions.json",
+
+    "screenshots": "screenshots/",
+
+    "purchase": {
+      "url": "https://example.org/purchase",
+      "price": 14.99
+    },
+
+    "donate": "https://example.org/donate"
+  }
+]
+```
+
+With the following directory structure:
+
+```text
+scripts/lists/example/
+├── repository.json
+├── descriptions.json
+├── example.svg
+└── screenshots/
+    ├── 01-main.webp
+    ├── 02-project.webp
+    └── 03-settings.webp
+```
+
+And:
+
+```json
+{
+  "description_tag": "example_desc",
+  "description_long_tag": "example_long",
+
+  "en": {
+    "example_desc": "A short description of Example App.",
+    "example_long": "A detailed explanation of Example App, its purpose, and the features available to the user."
+  },
+
+  "pt": {
+    "example_desc": "Uma descrição curta do Example App.",
+    "example_long": "Uma explicação detalhada do Example App, sua finalidade e os recursos disponíveis para o usuário."
+  }
+}
+```
+
+### When Is an Application Page Displayed?
+
+An application page is automatically enabled when the entry provides at least one application-page feature:
+
+* a long description;
+* one or more valid screenshots;
+* a purchase URL; or
+* a donation URL.
+
+You do not need to explicitly enable it with an additional option.
+
+If none of these are present, selecting the application follows the standard LinuxToys installation flow.
+
+### Checklist Behavior
+
+Application pages only affect the activation of an individual application.
+
+If an application is selected individually from a checklist, its application page opens normally when one is available.
+
+When the user performs a **multi-application checklist installation**, application pages are intentionally skipped. LinuxToys proceeds with the normal batch installation flow instead, preventing several application pages from interrupting a checklist operation.
+
+Opening an individual application's page does not clear the user's existing checklist selections.
+
+### Recommendations
+
+Keep the short description concise, since it is used in the normal LinuxToys interface and application-page header. Use the long description for additional context, major features, compatibility information, or other details that help the user decide whether to install the application.
+
+For applications with translated long descriptions, prefer a repository-local `descriptions.json`. This keeps application-specific text out of the main LinuxToys translation files and allows the repository list, screenshots, icon, and descriptions to be maintained together.
+
+Screenshots should be reasonably sized and compressed. WebP is particularly useful when several screenshots are shipped with a repository list.
+
+An application page is optional. Simple packages that only require a name and short description should generally continue using the standard installation flow.
 
 ---
 
