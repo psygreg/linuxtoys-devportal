@@ -1926,7 +1926,7 @@ The function checks that the target Flatpak exists and records the override for 
 
 ---
 
-## Calling Another LinuxToys Script
+## Calling Another LinuxToys Feature
 
 ### `call_script`
 
@@ -1948,6 +1948,12 @@ Arguments can be forwarded:
 
 ```bash
 call_script child-script --some-option value
+```
+
+This function can also be used to call features from repository lists, that use all-caps identifiers with `_` in place of spaces for the name.
+
+```bash
+call_script PRISM_LAUNCHER
 ```
 
 ### Child transaction behavior

@@ -1926,7 +1926,7 @@ A função verifica se o Flatpak alvo existe e registra a substituição para re
 
 ---
 
-## Chamando Outro Script do LinuxToys
+## Chamando Outro Recurso do LinuxToys
 
 ### `call_script`
 
@@ -1948,6 +1948,12 @@ Argumentos podem ser encaminhados:
 
 ```bash
 call_script child-script --some-option value
+```
+
+Esta função também pode ser usada para chamar recursos das listas de repositórios, que usam identificadores em maiúsculas e com `_` no lugar de espaços do nome.
+
+```bash
+call_script PRISM_LAUNCHER
 ```
 
 ### Comportamento das transações de scripts filhos
