@@ -12,6 +12,114 @@ The first step is choosing the appropriate integration method.
 
 ---
 
+<a id="quick-start"></a>
+
+## Quick Start
+
+LinuxToys repository lists support several distribution methods, so if you want to save time, you can get to it straight away. You generally do not need to learn all of them — choose the one that matches how your application is already packaged or released upstream.
+
+### Which One Should I Use?
+
+| Your current release workflow                          | Recommended method    |
+| ------------------------------------------------------ | --------------------- |
+| Available in distribution repositories                 | `native`              |
+| Published on Flathub                                   | `flathub`             |
+| Available as a standard package on a GitHub repository | `git`                 |
+| GitHub Releases provide one executable                 | `bin`                 |
+| You host a single executable at a direct URL           | `url` → `bin`         |
+| You host `.deb`, `.rpm`, AppImage, or similar packages | `url`                 |
+| You distribute a prebuilt multi-file archive           | `tar` / `url` → `tar` |
+
+Whenever possible, **follow the application's existing upstream release workflow**. LinuxToys' different repository-list methods exist to adapt to how software is already distributed, rather than requiring developers to create a LinuxToys-specific package format.
+
+Once you have identified the appropriate method, look for a shortcut to it below for its complete schema, compatibility options, hooks, translations, and advanced features.
+
+### Native Packages
+
+**Choose this if your application is available through Linux distribution repositories.**
+
+The `native` type lets LinuxToys install the appropriate package using the host distribution's package manager. Package names can be defined for different distributions when they differ between ecosystems.
+
+**Best for:** applications already packaged for distributions such as Arch Linux, Fedora, Debian, Ubuntu, openSUSE, and their derivatives.
+
+**Repository-list type:** `native`
+
+[Learn about native packages](repolist.en.md#native-packages)
+
+### Flathub
+
+**Choose this if your application is published on Flathub.**
+
+If you already distribute your application as a Flatpak through Flathub, LinuxToys can install it directly using its Flatpak application ID.
+
+This is usually the simplest option for applications whose primary Linux distribution method is Flathub.
+
+**Best for:** applications officially distributed through Flathub.
+
+**Repository-list type:** `flathub`
+
+[Learn about Flathub applications](repolist.en.md#flathub-package)
+
+### Git Releases
+
+**Choose this if your application publishes ready-made Linux packages through GitHub Releases.**
+
+The `git` type lets LinuxToys inspect the latest stable release of the upstream repository, automatically select the appropriate packaged asset for the user's system, download it, and install it.
+
+This is useful when you already publish installable Linux packages as release assets and want LinuxToys to follow your latest releases automatically, without maintaining a fixed download URL for every new version.
+
+**Best for:** projects publishing ready-made packages such as `.deb`, `.rpm`, AppImage, Flatpak bundles, or other supported package formats through GitHub Releases.
+
+**Repository-list type:** `git`
+
+[Learn about Git release installations](repolist.en.md#git-package)
+
+### Standalone Binaries
+
+**Choose this if your releases provide a single ready-to-run executable.**
+
+LinuxToys can download a standalone binary, install it under the user's local LinuxToys application directory, make it executable, and automatically create its application-menu shortcut.
+
+For GitHub Releases, use the `bin` type and provide the exact release asset filename. If the filename contains the release version, `$APP_GIT_VERSION` can be used as a placeholder.
+
+Standalone binaries available through a stable direct URL can instead be provided using the `bin` option under `urls`.
+
+**Best for:** self-contained applications distributed as one executable, including extensionless Linux binaries.
+
+**Repository-list type:** `bin` for GitHub Releases, or `url` with a `bin` URL.
+
+[Learn about single-binary applications](repolist.en.md#single-binary)
+
+### Direct URLs
+
+**Choose this if you publish ready-made packages outside distribution repositories.**
+
+The `url` type lets LinuxToys download installable files directly from upstream URLs. This is useful when you publish packages yourself instead of relying on the host distribution's repositories, typically the case for proprietary software.
+
+URL entries can also account for different distributions or systems when different downloads are required.
+
+**Best for:** upstream-hosted `.deb`, `.rpm`, AppImage, Flatpak bundles, and other supported downloadable package formats.
+
+**Repository-list type:** `url`
+
+[Learn about URL installations](repolist.en.md#url-fetching)
+
+### Tarballs
+
+**Choose this if your application is distributed as a prebuilt archive containing multiple files.**
+
+LinuxToys can download and extract application tarballs while keeping their contents together under the user's local LinuxToys application directory.
+
+Because the contents and required setup of archives vary between projects, tarball installations require a post-installation script to complete the application's setup.
+
+**Best for:** portable prebuilt applications distributed as `.tar.gz`, `.tar.xz`, or similar archives rather than a single executable.
+
+**Repository-list type:** `tar`, or `url` with a `tar` URL.
+
+[Learn about tarball installations](repolist.en.md#tarball-package)
+
+---
+
 <a id="multi-distro"></a>
 
 ## What LinuxToys Provides

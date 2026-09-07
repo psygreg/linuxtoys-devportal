@@ -209,6 +209,8 @@ Também é possível associar tipos a determinados valores de `os`. Por exemplo,
 }
 ```
 
+<a id="git-package"></a>
+
 ### `git`
 
 Essa é a opção padrão e mais simples.
@@ -241,6 +243,8 @@ Como `git` é o padrão, isto é equivalente:
   "category": "utilities"
 }
 ```
+
+<a id="flathub-package"></a>
 
 ### `flathub`
 
@@ -277,6 +281,8 @@ pkg_flat com.example.Application
 O LinuxToys instala todos os pacotes listados.
 
 Instalações Flatpak exigem implicitamente um sistema compatível com systemd e não podem ser realizadas dentro de um container.
+
+<a id="native-package"></a>
 
 ### `native`
 
@@ -399,6 +405,8 @@ Por exemplo:
 
 utiliza `example-cachyos` no CachyOS em vez do pacote genérico do Arch.
 
+<a id="url-fetching"></a>
+
 ### `url`
 
 O tipo `url` é destinado a desenvolvedores ou empresas que distribuem pacotes diretamente, como através de seu próprio CDN ou servidor de downloads.
@@ -493,6 +501,8 @@ instalará o DEB em sistemas da família Debian, o RPM em sistemas da família R
 Uma entrada do tipo URL só é exibida quando o LinuxToys consegue resolver uma das URLs fornecidas para o sistema atual.
 
 ---
+
+<a id="single-binary"></a>
 
 ## Aplicativos de Binário Único
 
@@ -707,6 +717,8 @@ quando:
 * ou você quiser explicitamente que o LinuxToys faça o download a partir de outra fonte.
 
 ---
+
+<a id="tarball-package"></a>
 
 ## Aplicativos em Tarball
 

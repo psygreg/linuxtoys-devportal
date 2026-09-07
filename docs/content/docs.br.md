@@ -12,6 +12,114 @@ O primeiro passo é escolher o método de integração adequado.
 
 ---
 
+<a id="quick-start"></a>
+
+## Início Rápido
+
+As listas de repositório do LinuxToys oferecem suporte a diversos métodos de distribuição, portanto, se quiser economizar tempo, você pode ir direto ao que precisa. Geralmente, não é necessário aprender todos eles — escolha aquele que corresponde à forma como seu aplicativo já é empacotado ou disponibilizado pelo upstream.
+
+### Qual Devo Usar?
+
+| Seu fluxo de lançamento atual                                             | Método recomendado    |
+| ------------------------------------------------------------------------- | --------------------- |
+| Disponível nos repositórios das distribuições                             | `native`              |
+| Publicado no Flathub                                                      | `flathub`             |
+| Disponível como um pacote padrão em um repositório do GitHub              | `git`                 |
+| Os Lançamentos do GitHub fornecem um único executável                     | `bin`                 |
+| Você hospeda um único executável em uma URL direta                        | `url` → `bin`         |
+| Você hospeda pacotes `.deb`, `.rpm`, AppImage ou similares                | `url`                 |
+| Você distribui um arquivo compactado pré-compilado com múltiplos arquivos | `tar` / `url` → `tar` |
+
+Sempre que possível, **siga o fluxo de lançamento upstream já existente do aplicativo**. Os diferentes métodos das listas de repositório do LinuxToys existem para se adaptar à forma como o software já é distribuído, em vez de exigir que os desenvolvedores criem um formato de pacote específico para o LinuxToys.
+
+Após identificar o método apropriado, procure abaixo pelo atalho correspondente para acessar seu esquema completo, opções de compatibilidade, hooks, traduções e recursos avançados.
+
+### Pacotes Nativos
+
+**Escolha esta opção se o seu aplicativo estiver disponível através dos repositórios das distribuições Linux.**
+
+O tipo `native` permite que o LinuxToys instale o pacote apropriado utilizando o gerenciador de pacotes da distribuição do sistema. Nomes de pacotes diferentes podem ser definidos para cada distribuição quando houver diferenças entre os ecossistemas.
+
+**Mais indicado para:** aplicativos já empacotados para distribuições como Arch Linux, Fedora, Debian, Ubuntu, openSUSE e suas derivadas.
+
+**Tipo da lista de repositório:** `native`
+
+[Saiba mais sobre pacotes nativos](repolist.br.md#native-package)
+
+### Flathub
+
+**Escolha esta opção se o seu aplicativo estiver publicado no Flathub.**
+
+Se você já distribui seu aplicativo como Flatpak através do Flathub, o LinuxToys pode instalá-lo diretamente utilizando seu ID de aplicativo Flatpak.
+
+Essa geralmente é a opção mais simples para aplicativos cujo principal método de distribuição no Linux é o Flathub.
+
+**Mais indicado para:** aplicativos distribuídos oficialmente através do Flathub.
+
+**Tipo da lista de repositório:** `flathub`
+
+[Saiba mais sobre aplicativos do Flathub](repolist.br.md#flathub-package)
+
+### Lançamentos do Git
+
+**Escolha esta opção se o seu aplicativo publica pacotes Linux prontos para uso através dos Lançamentos do GitHub.**
+
+O tipo `git` permite que o LinuxToys examine o lançamento estável mais recente do repositório upstream, selecione automaticamente o pacote apropriado para o sistema do usuário, faça seu download e o instale.
+
+Isso é útil quando você já publica pacotes Linux instaláveis como arquivos de lançamento e deseja que o LinuxToys acompanhe automaticamente os lançamentos mais recentes, sem precisar manter uma URL de download fixa para cada nova versão.
+
+**Mais indicado para:** projetos que publicam pacotes prontos para uso, como `.deb`, `.rpm`, AppImage, pacotes Flatpak ou outros formatos de pacote compatíveis através dos Lançamentos do GitHub.
+
+**Tipo da lista de repositório:** `git`
+
+[Saiba mais sobre instalações através de lançamentos do Git](repolist.br.md#git-package)
+
+### Binários Independentes
+
+**Escolha esta opção se os seus lançamentos fornecerem um único executável pronto para uso.**
+
+O LinuxToys pode baixar um binário independente, instalá-lo no diretório local de aplicativos do LinuxToys do usuário, torná-lo executável e criar automaticamente seu atalho no menu de aplicativos.
+
+Para Lançamentos do GitHub, utilize o tipo `bin` e forneça o nome exato do arquivo do lançamento. Se o nome do arquivo contiver a versão do lançamento, `$APP_GIT_VERSION` pode ser utilizado como marcador.
+
+Binários independentes disponíveis através de uma URL direta e estável podem ser fornecidos utilizando a opção `bin` dentro de `urls`.
+
+**Mais indicado para:** aplicativos autocontidos distribuídos como um único executável, incluindo binários Linux sem extensão.
+
+**Tipo da lista de repositório:** `bin` para Lançamentos do GitHub, ou `url` com uma URL `bin`.
+
+[Saiba mais sobre aplicativos de binário único](repolist.br.md#single-binary)
+
+### URLs Diretas
+
+**Escolha esta opção se você publica pacotes prontos para uso fora dos repositórios das distribuições.**
+
+O tipo `url` permite que o LinuxToys baixe arquivos instaláveis diretamente de URLs upstream. Isso é útil quando você mesmo publica os pacotes em vez de depender dos repositórios da distribuição do sistema, como normalmente ocorre com software proprietário.
+
+As entradas de URL também podem considerar diferentes distribuições ou sistemas quando downloads diferentes forem necessários.
+
+**Mais indicado para:** pacotes `.deb`, `.rpm`, AppImage, pacotes Flatpak e outros formatos de pacote compatíveis hospedados pelo upstream.
+
+**Tipo da lista de repositório:** `url`
+
+[Saiba mais sobre instalações através de URLs](repolist.br.md#url-fetching)
+
+### Tarballs
+
+**Escolha esta opção se o seu aplicativo for distribuído como um arquivo compactado pré-compilado contendo múltiplos arquivos.**
+
+O LinuxToys pode baixar e extrair tarballs de aplicativos, mantendo seu conteúdo agrupado no diretório local de aplicativos do LinuxToys do usuário.
+
+Como o conteúdo e as etapas de configuração necessárias para arquivos compactados variam entre projetos, instalações por tarball exigem um script de pós-instalação para concluir a configuração do aplicativo.
+
+**Mais indicado para:** aplicativos portáteis pré-compilados distribuídos como `.tar.gz`, `.tar.xz` ou arquivos compactados semelhantes, em vez de um único executável.
+
+**Tipo da lista de repositório:** `tar`, ou `url` com uma URL `tar`.
+
+[Saiba mais sobre instalações por tarball](repolist.br.md#tarball-package)
+
+---
+
 <a id="multi-distro"></a>
 
 ## O que o LinuxToys oferece
