@@ -32,7 +32,7 @@ LinuxToys repository lists support several distribution methods, so if you want 
 
 Whenever possible, **follow the application's existing upstream release workflow**. LinuxToys' different repository-list methods exist to adapt to how software is already distributed, rather than requiring developers to create a LinuxToys-specific package format.
 
-Once you have identified the appropriate method, look for a shortcut to it below for its complete schema, compatibility options, hooks, translations, and advanced features.
+Once you have identified the appropriate method, look for a shortcut to it below for its complete schema, compatibility options, hooks, translations, and advanced features. If you wish to set up a full app page, with a longer description, screenshots and donate or purchase button, check also [how to set up a LinuxToys app page](repositorylists.html#app-pages).
 
 ### Native Packages
 
@@ -44,7 +44,7 @@ The `native` type lets LinuxToys install the appropriate package using the host 
 
 **Repository-list type:** `native`
 
-[Learn about native packages](repolist.en.md#native-packages)
+[Learn about native packages](repositorylists.html#native-packages)
 
 ### Flathub
 
@@ -58,7 +58,7 @@ This is usually the simplest option for applications whose primary Linux distrib
 
 **Repository-list type:** `flathub`
 
-[Learn about Flathub applications](repolist.en.md#flathub-package)
+[Learn about Flathub applications](repositorylists.html#flathub-package)
 
 ### Git Releases
 
@@ -72,7 +72,7 @@ This is useful when you already publish installable Linux packages as release as
 
 **Repository-list type:** `git`
 
-[Learn about Git release installations](repolist.en.md#git-package)
+[Learn about Git release installations](repositorylists.html#git-package)
 
 ### Standalone Binaries
 
@@ -88,7 +88,7 @@ Standalone binaries available through a stable direct URL can instead be provide
 
 **Repository-list type:** `bin` for GitHub Releases, or `url` with a `bin` URL.
 
-[Learn about single-binary applications](repolist.en.md#single-binary)
+[Learn about single-binary applications](repositorylists.html#single-binary)
 
 ### Direct URLs
 
@@ -102,7 +102,7 @@ URL entries can also account for different distributions or systems when differe
 
 **Repository-list type:** `url`
 
-[Learn about URL installations](repolist.en.md#url-fetching)
+[Learn about URL installations](repositorylists.html#url-fetching)
 
 ### Tarballs
 
@@ -116,7 +116,7 @@ Because the contents and required setup of archives vary between projects, tarba
 
 **Repository-list type:** `tar`, or `url` with a `tar` URL.
 
-[Learn about tarball installations](repolist.en.md#tarball-package)
+[Learn about tarball installations](repositorylists.html#tarball-package)
 
 ---
 

@@ -1615,6 +1615,8 @@ This allows non-service units as well:
 
 ---
 
+<a id="app-pages"></a>
+
 ## Application Pages
 
 Repository-list entries can optionally provide an **application page**. This gives users more information about an application before installing it, including a longer description, screenshots, and optional purchase or donation links.

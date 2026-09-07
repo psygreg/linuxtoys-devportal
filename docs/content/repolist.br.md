@@ -1615,6 +1615,8 @@ Isso também permite unidades que não sejam serviços:
 
 ---
 
+<a id="app-pages"></a>
+
 ## Páginas de Aplicativos
 
 Entradas de listas de repositórios podem, opcionalmente, fornecer uma **página de aplicativo**. Isso permite apresentar mais informações sobre um aplicativo antes da instalação, incluindo uma descrição mais longa, capturas de tela e links opcionais para compra ou doação.

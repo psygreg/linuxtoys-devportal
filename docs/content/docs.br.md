@@ -32,7 +32,7 @@ As listas de repositório do LinuxToys oferecem suporte a diversos métodos de d
 
 Sempre que possível, **siga o fluxo de lançamento upstream já existente do aplicativo**. Os diferentes métodos das listas de repositório do LinuxToys existem para se adaptar à forma como o software já é distribuído, em vez de exigir que os desenvolvedores criem um formato de pacote específico para o LinuxToys.
 
-Após identificar o método apropriado, procure abaixo pelo atalho correspondente para acessar seu esquema completo, opções de compatibilidade, hooks, traduções e recursos avançados.
+Após identificar o método apropriado, procure abaixo pelo atalho correspondente para acessar seu esquema completo, opções de compatibilidade, hooks, traduções e recursos avançados. Se desejar uma página de aplicativo mais completa, com uma descrição mais longa, capturas de tela do aplicativo em ação e botão de doação ou compra, veja também [como configurar uma página de aplicativo do LinuxToys](repositorylists.pt-BR.html#app-pages).
 
 ### Pacotes Nativos
 
@@ -44,7 +44,7 @@ O tipo `native` permite que o LinuxToys instale o pacote apropriado utilizando o
 
 **Tipo da lista de repositório:** `native`
 
-[Saiba mais sobre pacotes nativos](repolist.br.md#native-package)
+[Saiba mais sobre pacotes nativos](repositorylists.pt-BR.html#native-package)
 
 ### Flathub
 
@@ -58,7 +58,7 @@ Essa geralmente é a opção mais simples para aplicativos cujo principal métod
 
 **Tipo da lista de repositório:** `flathub`
 
-[Saiba mais sobre aplicativos do Flathub](repolist.br.md#flathub-package)
+[Saiba mais sobre aplicativos do Flathub](repositorylists.pt-BR.html#flathub-package)
 
 ### Lançamentos do Git
 
@@ -72,7 +72,7 @@ Isso é útil quando você já publica pacotes Linux instaláveis como arquivos 
 
 **Tipo da lista de repositório:** `git`
 
-[Saiba mais sobre instalações através de lançamentos do Git](repolist.br.md#git-package)
+[Saiba mais sobre instalações através de lançamentos do Git](repositorylists.pt-BR.html#git-package)
 
 ### Binários Independentes
 
@@ -88,7 +88,7 @@ Binários independentes disponíveis através de uma URL direta e estável podem
 
 **Tipo da lista de repositório:** `bin` para Lançamentos do GitHub, ou `url` com uma URL `bin`.
 
-[Saiba mais sobre aplicativos de binário único](repolist.br.md#single-binary)
+[Saiba mais sobre aplicativos de binário único](repositorylists.pt-BR.html#single-binary)
 
 ### URLs Diretas
 
@@ -102,7 +102,7 @@ As entradas de URL também podem considerar diferentes distribuições ou sistem
 
 **Tipo da lista de repositório:** `url`
 
-[Saiba mais sobre instalações através de URLs](repolist.br.md#url-fetching)
+[Saiba mais sobre instalações através de URLs](repositorylists.pt-BR.html#url-fetching)
 
 ### Tarballs
 
@@ -116,7 +116,7 @@ Como o conteúdo e as etapas de configuração necessárias para arquivos compac
 
 **Tipo da lista de repositório:** `tar`, ou `url` com uma URL `tar`.
 
-[Saiba mais sobre instalações por tarball](repolist.br.md#tarball-package)
+[Saiba mais sobre instalações por tarball](repositorylists.pt-BR.html#tarball-package)
 
 ---
 
