@@ -494,6 +494,220 @@ Uma entrada do tipo URL só é exibida quando o LinuxToys consegue resolver uma 
 
 ---
 
+## Aplicativos de Binário Único
+
+O LinuxToys pode instalar aplicativos distribuídos como um **único binário executável**, sem exigir um pacote nativo, AppImage, Flatpak ou tarball.
+
+Isso é útil para aplicativos cujos lançamentos upstream fornecem executáveis independentes, como:
+
+```text
+myapp
+myapp-linux-x86_64
+myapp-v1.4.2-linux-amd64
+```
+
+Quando o LinuxToys instala um aplicativo de binário único, ele automaticamente:
+
+* cria um diretório para o aplicativo em:
+
+  ```text
+  ~/.local/linuxtoys/apps/<nome do aplicativo>/
+  ```
+
+* copia o binário baixado para esse diretório;
+
+* marca o binário como executável;
+
+* cria um atalho no menu de aplicativos usando o nome, a descrição e o ícone da lista de repositório;
+
+* registra a instalação no sistema de transações do LinuxToys para que ela possa ser revertida normalmente.
+
+Em listas de repositório, binários únicos podem ser instalados a partir de um lançamento do GitHub ou diretamente de uma URL.
+
+### Instalando um Binário a Partir de um Lançamento do GitHub
+
+Use:
+
+```json
+"type": "bin"
+```
+
+O campo `repo` deve apontar para o repositório do aplicativo no GitHub, enquanto `package-name` deve conter o **nome exato do arquivo do lançamento** que contém o executável.
+
+Por exemplo:
+
+```json
+{
+  "name": "Example App",
+  "description": "A standalone example application.",
+  "category": "utilities",
+  "repo": "https://github.com/example/example",
+  "type": "bin",
+  "package-name": "example-linux-x86_64",
+  "icon": "example.svg"
+}
+```
+
+O LinuxToys obterá o lançamento estável mais recente do GitHub, localizará o arquivo solicitado, fará seu download e o instalará como um aplicativo independente.
+
+### O Nome do Arquivo Binário Deve Ser Informado Explicitamente
+
+Ao contrário de formatos de pacote como `.deb`, `.rpm` ou `.AppImage`, binários independentes frequentemente **não possuem uma extensão que permita identificá-los**.
+
+Por isso, o LinuxToys não pode determinar com segurança qual arquivo do lançamento corresponde ao binário do aplicativo de forma automática.
+
+Desenvolvedores utilizando `"type": "bin"` devem, portanto, fornecer o nome exato do arquivo do lançamento através de `package-name`.
+
+Por exemplo, se um lançamento contém:
+
+```text
+example-linux-x86_64
+example-linux-aarch64
+example.sha256
+source.tar.gz
+```
+
+a entrada da lista de repositório deve selecionar explicitamente:
+
+```json
+"package-name": "example-linux-x86_64"
+```
+
+Curingas não devem ser utilizados para arquivos binários de lançamentos.
+
+### Versões de Lançamento no Nome do Binário
+
+Alguns projetos incluem a versão do lançamento diretamente no nome do arquivo binário.
+
+Por exemplo, um lançamento upstream com a tag:
+
+```text
+v2.4.1
+```
+
+pode conter:
+
+```text
+example-v2.4.1-linux-x86_64
+```
+
+Para esses casos, o LinuxToys disponibiliza:
+
+```text
+$APP_GIT_VERSION
+```
+
+dentro do nome do arquivo binário.
+
+Portanto, é possível escrever:
+
+```json
+{
+  "name": "Example App",
+  "description": "A standalone example application.",
+  "category": "utilities",
+  "repo": "https://github.com/example/example",
+  "type": "bin",
+  "package-name": "example-$APP_GIT_VERSION-linux-x86_64"
+}
+```
+
+O LinuxToys determinará primeiro a versão do lançamento estável mais recente e substituirá `$APP_GIT_VERSION` antes de localizar o arquivo.
+
+Isso evita a necessidade de atualizar a entrada da lista de repositório sempre que o upstream publicar uma nova versão.
+
+> `APP_GIT_VERSION` corresponde à tag do lançamento no GitHub. Portanto, se o upstream utilizar tags como `v2.4.1`, o `v` fará parte do valor.
+
+### Instalando um Binário Diretamente de uma URL
+
+Um binário independente também pode ser instalado através do tipo regular `"url"` das listas de repositório.
+
+Use a chave `bin` dentro de `urls`:
+
+```json
+{
+  "name": "Example App",
+  "description": "A standalone example application.",
+  "category": "utilities",
+  "repo": "https://example.org",
+  "type": "url",
+  "urls": {
+    "bin": "https://example.org/releases/example-linux-x86_64"
+  },
+  "icon": "example.svg"
+}
+```
+
+O LinuxToys fará o download do arquivo através do seu mecanismo normal de downloads por URL e, em seguida, o instalará utilizando o mesmo procedimento para aplicativos de binário único.
+
+Isso é especialmente útil para projetos que publicam executáveis independentes fora dos Lançamentos do GitHub.
+
+### Entradas Específicas por Arquitetura
+
+Caso o upstream publique binários separados para diferentes arquiteturas de CPU, a entrada do repositório deve selecionar o arquivo correto para os sistemas suportados pela entrada.
+
+Por exemplo:
+
+```text
+example-linux-x86_64
+example-linux-aarch64
+```
+
+Uma entrada de repositório destinada somente a sistemas x86-64 deve referenciar:
+
+```json
+"package-name": "example-linux-x86_64"
+```
+
+e utilizar as restrições apropriadas de hardware ou compatibilidade das listas de repositório quando necessário.
+
+O LinuxToys pode utilizar informações de arquitetura presentes nos nomes dos arquivos do lançamento ao localizar os arquivos, mas o desenvolvedor ainda deve identificar explicitamente o binário desejado.
+
+### Integração com o Menu de Aplicativos
+
+Instalações de binário único recebem automaticamente um atalho no menu de aplicativos.
+
+O atalho utiliza os mesmos metadados já fornecidos pela entrada do repositório:
+
+* `name` se torna o nome de exibição do aplicativo;
+* a `description` traduzida, quando disponível, se torna a descrição do aplicativo;
+* `icon` se torna o ícone do aplicativo;
+* o executável instalado se torna o comando utilizado pelo atalho.
+
+Consequentemente, desenvolvedores de listas de repositório normalmente **não precisam** fornecer um script de pós-instalação apenas para criar um arquivo `.desktop` para um aplicativo independente.
+
+O binário é instalado em:
+
+```text
+~/.local/linuxtoys/apps/<nome do aplicativo>/
+```
+
+e o atalho gerado aponta para a cópia instalada, e não para o arquivo temporário utilizado durante o download.
+
+### Escolhendo Entre `bin` e `url`
+
+Use `"type": "bin"` quando:
+
+* o aplicativo estiver hospedado nos Lançamentos do GitHub;
+* o upstream distribuir o aplicativo como um único arquivo executável;
+* for possível identificar o arquivo do lançamento pelo seu nome exato.
+
+Use `"type": "url"` com:
+
+```json
+"urls": {
+  "bin": "..."
+}
+```
+
+quando:
+
+* o executável independente estiver disponível através de uma URL direta e estável;
+* o projeto não utilizar os Lançamentos do GitHub para distribuição;
+* ou você quiser explicitamente que o LinuxToys faça o download a partir de outra fonte.
+
+---
+
 ## Aplicativos em Tarball
 
 O tipo `tar` é destinado a aplicativos distribuídos como **tarballs binários pré-compilados** por meio de releases do GitHub ou Codeberg. Ele permite que o LinuxToys instale softwares que não fornecem um pacote nativo, Flatpak ou AppImage, mas distribuem o aplicativo pronto para execução em um arquivo `.tar.gz` ou `.tar.xz`.

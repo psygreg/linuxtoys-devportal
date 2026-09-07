@@ -494,6 +494,220 @@ A URL entry is only displayed when LinuxToys can resolve one of its provided pac
 
 ---
 
+## Single-Binary Applications
+
+LinuxToys can install applications distributed as a **single executable binary**, without requiring a native package, AppImage, Flatpak, or tarball.
+
+This is useful for applications whose upstream releases provide standalone executables such as:
+
+```text
+myapp
+myapp-linux-x86_64
+myapp-v1.4.2-linux-amd64
+```
+
+When LinuxToys installs a single-binary application, it automatically:
+
+* creates an application directory under:
+
+  ```text
+  ~/.local/linuxtoys/apps/<application name>/
+  ```
+
+* copies the downloaded binary into that directory;
+
+* marks the binary as executable;
+
+* creates an application-menu shortcut using the repository-list name, description, and icon;
+
+* registers the installation with LinuxToys' transaction system so it can be reverted normally.
+
+For repository lists, single binaries can be installed either from a GitHub release or directly from a URL.
+
+### Installing a Binary from a GitHub Release
+
+Use:
+
+```json
+"type": "bin"
+```
+
+The `repo` field must point to the application's GitHub repository, while `package-name` must contain the **exact name of the release asset** containing the executable.
+
+For example:
+
+```json
+{
+  "name": "Example App",
+  "description": "A standalone example application.",
+  "category": "utilities",
+  "repo": "https://github.com/example/example",
+  "type": "bin",
+  "package-name": "example-linux-x86_64",
+  "icon": "example.svg"
+}
+```
+
+LinuxToys will obtain the latest stable GitHub release, locate the requested asset, download it, and install it as a standalone application.
+
+### The Binary Filename Must Be Explicit
+
+Unlike package formats such as `.deb`, `.rpm`, or `.AppImage`, standalone binaries frequently have **no identifying file extension**.
+
+Because of this, LinuxToys cannot safely determine which release asset is the application's binary automatically.
+
+Developers using `"type": "bin"` must therefore provide the exact release filename through `package-name`.
+
+For example, if a release contains:
+
+```text
+example-linux-x86_64
+example-linux-aarch64
+example.sha256
+source.tar.gz
+```
+
+the repository entry should explicitly select:
+
+```json
+"package-name": "example-linux-x86_64"
+```
+
+Wildcards should not be used for binary release assets.
+
+### Release Versions in Binary Filenames
+
+Some projects include the release version directly in the binary filename.
+
+For example, an upstream release tagged:
+
+```text
+v2.4.1
+```
+
+might contain:
+
+```text
+example-v2.4.1-linux-x86_64
+```
+
+For this case, LinuxToys provides:
+
+```text
+$APP_GIT_VERSION
+```
+
+inside the binary asset name.
+
+You can therefore write:
+
+```json
+{
+  "name": "Example App",
+  "description": "A standalone example application.",
+  "category": "utilities",
+  "repo": "https://github.com/example/example",
+  "type": "bin",
+  "package-name": "example-$APP_GIT_VERSION-linux-x86_64"
+}
+```
+
+LinuxToys will determine the latest stable release version first and substitute `$APP_GIT_VERSION` before locating the asset.
+
+This avoids having to update the repository-list entry whenever upstream publishes a new version.
+
+> `APP_GIT_VERSION` corresponds to the GitHub release tag. If upstream uses tags such as `v2.4.1`, the `v` is therefore part of the value.
+
+### Installing a Binary Directly from a URL
+
+A standalone binary can also be installed through the regular `"url"` repository-list type.
+
+Use the `bin` key under `urls`:
+
+```json
+{
+  "name": "Example App",
+  "description": "A standalone example application.",
+  "category": "utilities",
+  "repo": "https://example.org",
+  "type": "url",
+  "urls": {
+    "bin": "https://example.org/releases/example-linux-x86_64"
+  },
+  "icon": "example.svg"
+}
+```
+
+LinuxToys will download the file through its normal URL download mechanism and then install it using the same single-binary installation procedure.
+
+This is especially useful for projects that publish standalone executables outside GitHub Releases.
+
+### Architecture-Specific Entries
+
+If upstream publishes separate binaries for different CPU architectures, the repository entry should select the correct asset for the systems the entry supports.
+
+For example:
+
+```text
+example-linux-x86_64
+example-linux-aarch64
+```
+
+A repository entry intended only for x86-64 systems should reference:
+
+```json
+"package-name": "example-linux-x86_64"
+```
+
+and use the appropriate repository-list hardware or compatibility restrictions when necessary.
+
+LinuxToys may use architecture information present in release filenames while locating assets, but the developer should still identify the intended binary explicitly.
+
+### Application Menu Integration
+
+Single-binary installations automatically receive an application-menu shortcut.
+
+The shortcut uses the same metadata already provided by the repository entry:
+
+* `name` becomes the application display name;
+* the translated `description`, when available, becomes the application description;
+* `icon` becomes the application icon;
+* the installed executable becomes the shortcut's launch command.
+
+As a result, repository-list developers normally do **not** need to provide a post-install script merely to create a `.desktop` file for a standalone application.
+
+The binary is installed under:
+
+```text
+~/.local/linuxtoys/apps/<application name>/
+```
+
+and the generated shortcut points to the installed copy rather than the temporary downloaded file.
+
+### Choosing Between `bin` and `url`
+
+Use `"type": "bin"` when:
+
+* the application is hosted on GitHub Releases;
+* upstream distributes one executable file;
+* you can identify the release asset by its exact filename.
+
+Use `"type": "url"` with:
+
+```json
+"urls": {
+  "bin": "..."
+}
+```
+
+when:
+
+* the standalone executable is available from a stable direct URL;
+* the project does not use GitHub Releases for distribution;
+* or you explicitly want LinuxToys to download from another source.
+
+---
+
 ## Tarball Applications
 
 The `tar` type is intended for applications distributed as **prebuilt binary tarballs** through GitHub or Codeberg releases. It allows LinuxToys to install software that does not provide a native package, Flatpak, or AppImage, but ships a ready-to-run application as a `.tar.gz` or `.tar.xz` archive.

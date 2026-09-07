@@ -1237,6 +1237,170 @@ A filtragem por arquitetura continua sendo aplicada no modo tarball, portanto ar
 
 ---
 
+## Instalando Aplicativos de Binário Único
+
+### `pkg_binary`
+
+`pkg_binary` instala um aplicativo distribuído como um único arquivo executável.
+
+```bash
+pkg_binary "/caminho/para/aplicativo"
+```
+
+A função:
+
+* cria um diretório específico para o aplicativo em:
+
+  ```text
+  ~/.local/linuxtoys/apps/$LINUXTOYS_APP_NAME/
+  ```
+
+* copia o binário fornecido para esse diretório;
+
+* torna o arquivo instalado executável;
+
+* cria um atalho no menu de aplicativos utilizando `desktop_shortcut`;
+
+* integra os arquivos criados ao sistema de transações do LinuxToys para que a instalação possa ser revertida.
+
+A função espera que os metadados do aplicativo do LinuxToys já estejam disponíveis no ambiente do script. Em particular, `$LINUXTOYS_APP_NAME` é utilizado para o diretório de instalação, enquanto `desktop_shortcut` obtém o nome, a descrição, o ícone e outras informações do atalho a partir dos metadados correspondentes do LinuxToys.
+
+O argumento deve apontar para um arquivo existente:
+
+```bash
+pkg_binary "$HOME/Downloads/example"
+```
+
+Para a maioria das instalações, no entanto, os desenvolvedores não precisam baixar o arquivo manualmente. `pkg_binary` é integrado a `pkg_fromurl` e `pkg_fromrelease`.
+
+### Instalando um Binário a Partir de uma URL
+
+`pkg_fromurl` aceita a opção `--bin`:
+
+```bash
+pkg_fromurl --bin \
+    "https://example.org/releases/example-linux-x86_64"
+```
+
+O arquivo é baixado utilizando os mecanismos normais de `pkg_fromurl` e, em seguida, é passado automaticamente para `pkg_binary`.
+
+Isso também significa que a detecção normal de nome de arquivo realizada por `pkg_fromurl`, incluindo nomes obtidos através de redirecionamentos ou cabeçalhos de download, continua disponível.
+
+Apenas uma URL pode ser fornecida ao utilizar `--bin`.
+
+`--bin` e `--tar` são mutuamente exclusivos.
+
+### Instalando um Binário a Partir de um Lançamento do GitHub
+
+`pkg_fromrelease` pode localizar e instalar um executável independente a partir do lançamento estável mais recente do GitHub:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    "example-linux-x86_64"
+```
+
+Ao contrário da descoberta normal de pacotes, binários únicos podem não possuir uma extensão reconhecível. Por isso, `--bin` exige o **nome exato do arquivo do lançamento** como segundo argumento.
+
+Por exemplo, considerando um lançamento que contenha:
+
+```text
+example-linux-x86_64
+example-linux-aarch64
+example.sha256
+source.tar.gz
+```
+
+instale o executável para x86-64 com:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    "example-linux-x86_64"
+```
+
+O arquivo selecionado é baixado através de `pkg_fromurl --bin` e, em seguida, instalado por `pkg_binary`.
+
+`--bin` e `--tar` são mutuamente exclusivos.
+
+### `$APP_GIT_VERSION`
+
+`pkg_fromrelease` disponibiliza a tag do lançamento estável mais recente selecionado através de:
+
+```bash
+$APP_GIT_VERSION
+```
+
+Isso é especialmente útil para projetos que incluem a versão do lançamento no nome dos arquivos.
+
+Por exemplo, se a tag do lançamento mais recente for:
+
+```text
+v2.4.1
+```
+
+e seu executável for chamado:
+
+```text
+example-v2.4.1-linux-x86_64
+```
+
+a instalação pode ser escrita como:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    'example-$APP_GIT_VERSION-linux-x86_64'
+```
+
+`pkg_fromrelease` resolve primeiro o lançamento mais recente e substitui o token literal `$APP_GIT_VERSION` no nome solicitado pelo valor da tag do lançamento.
+
+> **Importante:** coloque o nome do arquivo contendo `$APP_GIT_VERSION` entre **aspas simples** ao chamar a função diretamente. Caso contrário, o shell poderá expandir a variável antes que `pkg_fromrelease` tenha determinado a versão do lançamento.
+
+`APP_GIT_VERSION` contém o `tag_name` do lançamento do GitHub sem modificações. Por exemplo, uma tag `v2.4.1` resulta em:
+
+```bash
+APP_GIT_VERSION="v2.4.1"
+```
+
+A variável também é exportada após a seleção do lançamento, ficando disponível para comandos subsequentes no script.
+
+### Utilizando `pkg_binary` Diretamente
+
+Embora os auxiliares de download sejam os pontos de entrada mais comuns, `pkg_binary` também pode ser utilizado com um binário obtido através de outro mecanismo:
+
+```bash
+download_somehow "$TMPDIR/example"
+
+pkg_binary "$TMPDIR/example"
+```
+
+Não é necessário criar manualmente o diretório do aplicativo, copiar o executável, alterar suas permissões ou criar seu arquivo `.desktop`.
+
+Isso é preferível a implementar essas operações de forma independente, pois `pkg_binary` fornece uma estrutura de instalação consistente e integra o aplicativo resultante aos mecanismos de transações e atalhos de área de trabalho do LinuxToys.
+
+### Referência das Funções
+
+```bash
+pkg_binary BINARY_FILE
+
+pkg_fromurl --bin URL
+
+pkg_fromrelease --bin REPOSITORY_URL EXACT_ASSET_NAME
+```
+
+Para arquivos de lançamentos do GitHub que contenham a versão no nome:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    'example-$APP_GIT_VERSION-linux-x86_64'
+```
+
+Para aplicativos distribuídos como um único binário, prefira essas funções em vez de copiar manualmente executáveis para o diretório pessoal do usuário e construir arquivos `.desktop`.
+
+---
+
 ## Integração de AppImage
 
 ### `pkg_appimage`

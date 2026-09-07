@@ -1237,6 +1237,170 @@ Architecture filtering continues to apply in tarball mode, so architecture-speci
 
 ---
 
+## Single-Binary Applications
+
+### `pkg_binary`
+
+`pkg_binary` installs an application distributed as a single executable file.
+
+```bash
+pkg_binary "/path/to/application"
+```
+
+The function:
+
+* creates an application-specific directory under:
+
+  ```text
+  ~/.local/linuxtoys/apps/$LINUXTOYS_APP_NAME/
+  ```
+
+* copies the provided binary into it;
+
+* makes the installed file executable;
+
+* creates an application-menu shortcut using `desktop_shortcut`;
+
+* integrates the created files with the LinuxToys transaction system so the installation can be reverted.
+
+The function expects the LinuxToys application metadata to already be available in the script environment. In particular, `$LINUXTOYS_APP_NAME` is used for the installation directory, while `desktop_shortcut` obtains the application's name, description, icon and other shortcut information from the corresponding LinuxToys metadata.
+
+The argument must point to an existing file:
+
+```bash
+pkg_binary "$HOME/Downloads/example"
+```
+
+For most installations, however, developers should not need to download the file themselves. `pkg_binary` is integrated with `pkg_fromurl` and `pkg_fromrelease`.
+
+### Installing a Binary from a URL
+
+`pkg_fromurl` accepts the `--bin` option:
+
+```bash
+pkg_fromurl --bin \
+    "https://example.org/releases/example-linux-x86_64"
+```
+
+The file is downloaded using the normal `pkg_fromurl` mechanisms and then passed automatically to `pkg_binary`.
+
+This also means that the usual filename detection performed by `pkg_fromurl`, including names obtained from redirects or download headers, remains available.
+
+Only one URL may be supplied when `--bin` is used.
+
+`--bin` and `--tar` are mutually exclusive.
+
+### Installing a Binary from a GitHub Release
+
+`pkg_fromrelease` can locate and install a standalone executable from the latest stable GitHub release:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    "example-linux-x86_64"
+```
+
+Unlike normal package discovery, single binaries may not have a recognizable extension. Therefore, `--bin` requires the **exact release asset filename** as its second argument.
+
+For example, given a release containing:
+
+```text
+example-linux-x86_64
+example-linux-aarch64
+example.sha256
+source.tar.gz
+```
+
+install the x86-64 executable with:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    "example-linux-x86_64"
+```
+
+The selected asset is downloaded through `pkg_fromurl --bin` and subsequently installed by `pkg_binary`.
+
+`--bin` and `--tar` are mutually exclusive.
+
+### `$APP_GIT_VERSION`
+
+`pkg_fromrelease` exposes the tag of the selected latest stable release through:
+
+```bash
+$APP_GIT_VERSION
+```
+
+This is particularly useful for projects that include their release version in asset filenames.
+
+For example, if the latest release tag is:
+
+```text
+v2.4.1
+```
+
+and its executable is named:
+
+```text
+example-v2.4.1-linux-x86_64
+```
+
+the installation can be written as:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    'example-$APP_GIT_VERSION-linux-x86_64'
+```
+
+`pkg_fromrelease` resolves the latest release first and replaces the literal `$APP_GIT_VERSION` token in the requested asset name with the release tag.
+
+> **Important:** quote an asset name containing `$APP_GIT_VERSION` with **single quotes** when calling the function directly. Otherwise, the shell may expand the variable before `pkg_fromrelease` has discovered the release version.
+
+`APP_GIT_VERSION` contains the release's GitHub `tag_name` as-is. For example, a `v2.4.1` tag produces:
+
+```bash
+APP_GIT_VERSION="v2.4.1"
+```
+
+The variable is also exported after release selection, making it available to subsequent commands in the script.
+
+### Using `pkg_binary` Directly
+
+Although the download helpers are the usual entry points, `pkg_binary` can also be used with a binary obtained through another mechanism:
+
+```bash
+download_somehow "$TMPDIR/example"
+
+pkg_binary "$TMPDIR/example"
+```
+
+There is no need to manually create the application directory, copy the executable, change its permissions, or create its `.desktop` file.
+
+This is preferable to implementing those operations independently, since `pkg_binary` provides a consistent installation layout and integrates the resulting application with LinuxToys' transaction and desktop-shortcut mechanisms.
+
+### Function Reference
+
+```bash
+pkg_binary BINARY_FILE
+
+pkg_fromurl --bin URL
+
+pkg_fromrelease --bin REPOSITORY_URL EXACT_ASSET_NAME
+```
+
+For versioned GitHub release assets:
+
+```bash
+pkg_fromrelease --bin \
+    "https://github.com/example/example" \
+    'example-$APP_GIT_VERSION-linux-x86_64'
+```
+
+For single-binary applications, prefer these functions over manually copying executables into the user's home directory and constructing `.desktop` files.
+
+---
+
 ## AppImage Integration
 
 ### `pkg_appimage`
