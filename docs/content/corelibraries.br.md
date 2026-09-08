@@ -1181,11 +1181,11 @@ Executar novamente a instalação substitui o diretório anterior do aplicativo 
 
 ---
 
-## Instalando o Release Mais Recente do GitHub/Codeberg
+## Instalando o Release Mais Recente do GitHub, Codeberg ou Gitlab
 
 ### `pkg_fromrelease`
 
-Para projetos que publicam pacotes instaláveis em releases do GitHub ou Codeberg:
+Para projetos que publicam pacotes instaláveis em releases do GitHub, Codeberg ou Gitlab:
 
 ```bash
 pkg_fromrelease \
@@ -1290,9 +1290,9 @@ Apenas uma URL pode ser fornecida ao utilizar `--bin`.
 
 `--bin` e `--tar` são mutuamente exclusivos.
 
-### Instalando um Binário a Partir de um Lançamento do GitHub
+### Instalando um Binário a Partir de um Lançamento do GitHub, Codeberg ou Gitlab
 
-`pkg_fromrelease` pode localizar e instalar um executável independente a partir do lançamento estável mais recente do GitHub:
+`pkg_fromrelease` pode localizar e instalar um executável independente a partir do lançamento estável mais recente do GitHub, Codeberg ou Gitlab:
 
 ```bash
 pkg_fromrelease --bin \
@@ -1389,7 +1389,7 @@ pkg_fromurl --bin URL
 pkg_fromrelease --bin REPOSITORY_URL EXACT_ASSET_NAME
 ```
 
-Para arquivos de lançamentos do GitHub que contenham a versão no nome:
+Para arquivos de lançamentos do GitHub, Codeberg ou Gitlab que contenham a versão no nome:
 
 ```bash
 pkg_fromrelease --bin \

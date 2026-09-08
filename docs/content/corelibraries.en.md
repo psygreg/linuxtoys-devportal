@@ -1181,11 +1181,11 @@ Running the installation again replaces the previous application directory rathe
 
 ---
 
-## Installing the Latest GitHub/Codeberg Release
+## Installing the Latest GitHub, Codeberg or GitLab Release
 
 ### `pkg_fromrelease`
 
-For projects that publish installable packages in GitHub or Codeberg releases:
+For projects that publish installable packages in GitHub, Codeberg or GitLab releases:
 
 ```bash
 pkg_fromrelease \
@@ -1290,9 +1290,9 @@ Only one URL may be supplied when `--bin` is used.
 
 `--bin` and `--tar` are mutually exclusive.
 
-### Installing a Binary from a GitHub Release
+### Installing a Binary from a GitHub, Codeberg or GitLab Release
 
-`pkg_fromrelease` can locate and install a standalone executable from the latest stable GitHub release:
+`pkg_fromrelease` can locate and install a standalone executable from the latest stable GitHub, Codeberg or GitLab release:
 
 ```bash
 pkg_fromrelease --bin \
@@ -1357,7 +1357,7 @@ pkg_fromrelease --bin \
 
 > **Important:** quote an asset name containing `$APP_GIT_VERSION` with **single quotes** when calling the function directly. Otherwise, the shell may expand the variable before `pkg_fromrelease` has discovered the release version.
 
-`APP_GIT_VERSION` contains the release's GitHub `tag_name` as-is. For example, a `v2.4.1` tag produces:
+`APP_GIT_VERSION` contains the release's GitHub, Codeberg or GitLab `tag_name` as-is. For example, a `v2.4.1` tag produces:
 
 ```bash
 APP_GIT_VERSION="v2.4.1"

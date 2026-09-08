@@ -532,9 +532,9 @@ Quando o LinuxToys instala um aplicativo de binário único, ele automaticamente
 
 * registra a instalação no sistema de transações do LinuxToys para que ela possa ser revertida normalmente.
 
-Em listas de repositório, binários únicos podem ser instalados a partir de um lançamento do GitHub ou diretamente de uma URL.
+Em listas de repositório, binários únicos podem ser instalados a partir de um lançamento do GitHub, Codeberg ou GitLab ou diretamente de uma URL.
 
-### Instalando um Binário a Partir de um Lançamento do GitHub
+### Instalando um Binário a Partir de um Lançamento do GitHub, Codeberg ou GitLab
 
 Use:
 
@@ -542,7 +542,7 @@ Use:
 "type": "bin"
 ```
 
-O campo `repo` deve apontar para o repositório do aplicativo no GitHub, enquanto `package-name` deve conter o **nome exato do arquivo do lançamento** que contém o executável.
+O campo `repo` deve apontar para o repositório do aplicativo, enquanto `package-name` deve conter o **nome exato do arquivo do lançamento** que contém o executável.
 
 Por exemplo:
 
@@ -558,7 +558,7 @@ Por exemplo:
 }
 ```
 
-O LinuxToys obterá o lançamento estável mais recente do GitHub, localizará o arquivo solicitado, fará seu download e o instalará como um aplicativo independente.
+O LinuxToys obterá o lançamento estável mais recente, localizará o arquivo solicitado, fará seu download e o instalará como um aplicativo independente.
 
 ### O Nome do Arquivo Binário Deve Ser Informado Explicitamente
 
@@ -626,7 +626,7 @@ O LinuxToys determinará primeiro a versão do lançamento estável mais recente
 
 Isso evita a necessidade de atualizar a entrada da lista de repositório sempre que o upstream publicar uma nova versão.
 
-> `APP_GIT_VERSION` corresponde à tag do lançamento no GitHub. Portanto, se o upstream utilizar tags como `v2.4.1`, o `v` fará parte do valor.
+> `APP_GIT_VERSION` corresponde à tag do lançamento no GitHub, Codeberg ou GitLab. Portanto, se o upstream utilizar tags como `v2.4.1`, o `v` fará parte do valor.
 
 ### Instalando um Binário Diretamente de uma URL
 
@@ -722,13 +722,13 @@ quando:
 
 ## Aplicativos em Tarball
 
-O tipo `tar` é destinado a aplicativos distribuídos como **tarballs binários pré-compilados** por meio de releases do GitHub ou Codeberg. Ele permite que o LinuxToys instale softwares que não fornecem um pacote nativo, Flatpak ou AppImage, mas distribuem o aplicativo pronto para execução em um arquivo `.tar.gz` ou `.tar.xz`.
+O tipo `tar` é destinado a aplicativos distribuídos como **tarballs binários pré-compilados** por meio de releases do GitHub, Codeberg ou GitLab. Ele permite que o LinuxToys instale softwares que não fornecem um pacote nativo, Flatpak ou AppImage, mas distribuem o aplicativo pronto para execução em um arquivo `.tar.gz` ou `.tar.xz`.
 
 > **Observação:** `tar` é destinado a releases binários de aplicativos, não a arquivos de código-fonte, e requer, **obrigatoriamente**, um script pós-instalação para finalizar a configuração. Instalações deste tipo exportam a variável **`LINUXTOYS_TARBALL_DIR`** que aponta para o nome de diretório final da tarball extraída para uso no script pós-instalação. Se estiver distribuindo um aplicativo neste formato, pode ter interesse também em [criar um atalho `.desktop` para o menu de aplicativos automaticamente](corelibraries.pt-BR.html#app-shortcuts).
 
-### Releases do GitHub e Codeberg
+### Releases do GitHub, Codeberg e GitLab
 
-Para um aplicativo distribuído como um tarball anexado a um release do GitHub ou Codeberg, use:
+Para um aplicativo distribuído como um tarball anexado a um release do GitHub, Codeberg ou GitLab, use:
 
 ```json
 {

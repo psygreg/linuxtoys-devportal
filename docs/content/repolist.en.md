@@ -532,9 +532,9 @@ When LinuxToys installs a single-binary application, it automatically:
 
 * registers the installation with LinuxToys' transaction system so it can be reverted normally.
 
-For repository lists, single binaries can be installed either from a GitHub release or directly from a URL.
+For repository lists, single binaries can be installed either from a GitHub, Codeberg or GitLab release or directly from a URL.
 
-### Installing a Binary from a GitHub Release
+### Installing a Binary from a GitHub, Codeberg or GitLab Release
 
 Use:
 
@@ -542,7 +542,7 @@ Use:
 "type": "bin"
 ```
 
-The `repo` field must point to the application's GitHub repository, while `package-name` must contain the **exact name of the release asset** containing the executable.
+The `repo` field must point to the application's repository, while `package-name` must contain the **exact name of the release asset** containing the executable.
 
 For example:
 
@@ -558,7 +558,7 @@ For example:
 }
 ```
 
-LinuxToys will obtain the latest stable GitHub release, locate the requested asset, download it, and install it as a standalone application.
+LinuxToys will obtain the latest stable release, locate the requested asset, download it, and install it as a standalone application.
 
 ### The Binary Filename Must Be Explicit
 
@@ -726,9 +726,9 @@ The `tar` type is intended for applications distributed as **prebuilt binary tar
 
 > **Note:** `tar` is intended for binary application releases, not source archives, and **mandates** a post-install script to finish setting it up. Installations of this kind export a **`LINUXTOYS_TARBALL_DIR`** variable pointing towards the final directory name after the tarball is extracted for your convenience in the post-install script. If you are distributing an application in this format, you might also be interested in [creating a `.desktop` app menu shortcut automatically](corelibraries.html#app-shortcuts).
 
-### GitHub and Codeberg Releases
+### GitHub, Codeberg and GitLab Releases
 
-For an application distributed as a tarball attached to a GitHub or Codeberg release, use:
+For an application distributed as a tarball attached to a GitHub, Codeberg or GitLab release, use:
 
 ```json
 {
