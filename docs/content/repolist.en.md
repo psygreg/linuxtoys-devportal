@@ -1833,7 +1833,7 @@ Applications that are purchased rather than freely downloaded can provide a purc
 }
 ```
 
-The price is specified as a numeric value in **US dollars**.
+The `price` field defines the application's base price and is always specified as a numeric value in **US dollars (USD)**.
 
 LinuxToys displays the price directly in the purchase button, for example:
 
@@ -1842,6 +1842,56 @@ Purchase · $19.99
 ```
 
 The purchase button is visually highlighted on the application page.
+
+#### Localized Prices
+
+In addition to the base price in US dollars, developers can provide prices for other currencies through the `prices` field:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99,
+  "prices": {
+    "BRL": 59.90,
+    "EUR": 17.99,
+    "GBP": 15.99
+  }
+}
+```
+
+The keys in `prices` correspond to the international currency codes reported by the system's `locale int_curr_symbol`, such as `BRL`, `EUR`, and `GBP`.
+
+When LinuxToys finds a currency matching the system's locale, it uses the corresponding localized price instead of the base price. The currency symbol displayed on the button is automatically obtained from `locale currency_symbol`.
+
+For example, on a system whose locale reports `BRL`, the configuration above may be displayed as:
+
+```text
+Purchase · R$59.90
+```
+
+On a system configured for `EUR`:
+
+```text
+Purchase · €17.99
+```
+
+There is no need to add a `USD` entry to `prices`. The `price` field already represents the price in US dollars and serves as the **mandatory fallback**.
+
+If the system's currency is not present in `prices`, if its monetary locale information cannot be determined, or if `locale` is unavailable, LinuxToys automatically uses the base USD price and the `$` symbol.
+
+This allows an entry to provide localized pricing only for markets where it is desired:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99,
+  "prices": {
+    "BRL": 59.90
+  }
+}
+```
+
+In this example, users whose locale reports `BRL` receive the localized `R$59.90` price, while all other users receive the base `$19.99` price.
 
 A purchase URL can also be supplied without a price:
 
@@ -1866,22 +1916,132 @@ A more complete repository entry can therefore look like:
     "repo": "https://example.org",
     "category": "office",
     "icon": "./example.svg",
-
     "type": "url",
-
     "urls": {
       "appimage": "https://example.org/releases/example.AppImage"
     },
-
     "descriptions": "descriptions.json",
-
     "screenshots": "screenshots/",
-
     "purchase": {
       "url": "https://example.org/purchase",
-      "price": 14.99
+      "price": 14.99,
+      "prices": {
+        "BRL": 44.90,
+        "EUR": 12.99
+      }
     },
+    "donate": "https://example.org/donate"
+  }
+]
+```
+### Paid Applications
 
+Applications that are purchased rather than freely downloaded can provide a purchase link and price:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99
+}
+```
+
+The `price` field defines the application's base price and is always specified as a numeric value in **US dollars (USD)**.
+
+LinuxToys displays the price directly in the purchase button, for example:
+
+```text
+Purchase · $19.99
+```
+
+The purchase button is visually highlighted on the application page.
+
+#### Localized Prices
+
+In addition to the base price in US dollars, developers can provide prices for other currencies through the `prices` field:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99,
+  "prices": {
+    "BRL": 59.90,
+    "EUR": 17.99,
+    "GBP": 15.99
+  }
+}
+```
+
+The keys in `prices` correspond to the international currency codes reported by the system's `locale int_curr_symbol`, such as `BRL`, `EUR`, and `GBP`.
+
+When LinuxToys finds a currency matching the system's locale, it uses the corresponding localized price instead of the base price. The currency symbol displayed on the button is automatically obtained from `locale currency_symbol`.
+
+For example, on a system whose locale reports `BRL`, the configuration above may be displayed as:
+
+```text
+Purchase · R$59.90
+```
+
+On a system configured for `EUR`:
+
+```text
+Purchase · €17.99
+```
+
+There is no need to add a `USD` entry to `prices`. The `price` field already represents the price in US dollars and serves as the **mandatory fallback**.
+
+If the system's currency is not present in `prices`, if its monetary locale information cannot be determined, or if `locale` is unavailable, LinuxToys automatically uses the base USD price and the `$` symbol.
+
+This allows an entry to provide localized pricing only for markets where it is desired:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99,
+  "prices": {
+    "BRL": 59.90
+  }
+}
+```
+
+In this example, users whose locale reports `BRL` receive the localized `R$59.90` price, while all other users receive the base `$19.99` price.
+
+A purchase URL can also be supplied without a price:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy"
+}
+```
+
+In this case, LinuxToys simply displays **Purchase**.
+
+When both purchase and donation links are present, both buttons are displayed, with the purchase action receiving the primary emphasis.
+
+### Complete Example
+
+A more complete repository entry can therefore look like:
+
+```json
+[
+  {
+    "name": "Example App",
+    "repo": "https://example.org",
+    "category": "office",
+    "icon": "./example.svg",
+    "type": "url",
+    "urls": {
+      "appimage": "https://example.org/releases/example.AppImage"
+    },
+    "descriptions": "descriptions.json",
+    "screenshots": "screenshots/",
+    "purchase": {
+      "url": "https://example.org/purchase",
+      "price": 14.99,
+      "prices": {
+        "BRL": 44.90,
+        "EUR": 12.99
+      }
+    },
     "donate": "https://example.org/donate"
   }
 ]
