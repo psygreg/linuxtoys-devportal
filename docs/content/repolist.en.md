@@ -1676,12 +1676,47 @@ Long descriptions can also use the normal LinuxToys translation system:
 ```json
 "description": "Short fallback description.",
 "description_tag": "example_desc",
-
 "long-description": "Long fallback description.",
 "long-description_tag": "example_long_desc"
 ```
 
 For repository entries with substantial descriptions, however, a repository-local description catalog is recommended.
+
+#### Markdown Long Descriptions
+
+Developers can use a Markdown file instead of supplying the long description directly. To opt into Markdown formatting, set the long description to a relative path ending in `.md`:
+
+```json
+"long-description": "description.md"
+```
+
+LinuxToys detects the `.md` extension, loads the referenced file, and renders its contents as Markdown on the application page.
+
+Markdown descriptions support standard formatting such as:
+
+```markdown
+# Example Application
+
+A **powerful** application with support for:
+
+- Feature one
+- Feature two
+- Feature three
+
+## Additional Information
+
+Visit the [project website](https://example.org) for more information.
+```
+
+To keep application pages visually consistent, Markdown headings of all levels are displayed using a restrained heading size equivalent to `####`. This allows developers to use normal Markdown document structure without producing excessively large text in the LinuxToys interface.
+
+Markdown is entirely optional. A normal text value continues to be displayed as plain text:
+
+```json
+"long-description": "This remains an ordinary plain-text long description."
+```
+
+Markdown descriptions can also be used with translated long-description tags. This allows each language to provide its own `.md` document, as described below.
 
 ### Repository-Local Description Translations
 
@@ -1703,6 +1738,8 @@ For example:
 scripts/lists/example/
 ├── repository.json
 ├── descriptions.json
+├── description.en.md
+├── description.pt-BR.md
 ├── example.svg
 └── screenshots/
     ├── main.webp
@@ -1710,18 +1747,16 @@ scripts/lists/example/
     └── settings.webp
 ```
 
-A `descriptions.json` file uses this structure:
+A `descriptions.json` file can use plain-text long descriptions:
 
 ```json
 {
   "description_tag": "example_desc",
   "description_long_tag": "example_long",
-
   "en": {
     "example_desc": "A short description of the application.",
     "example_long": "A longer description explaining the application and its main features."
   },
-
   "pt": {
     "example_desc": "Uma descrição curta do aplicativo.",
     "example_long": "Uma descrição mais longa explicando o aplicativo e seus principais recursos."
@@ -1731,7 +1766,51 @@ A `descriptions.json` file uses this structure:
 
 `description_tag` identifies the short description, while `description_long_tag` identifies the long application-page description.
 
-LinuxToys first looks for the currently selected language and falls back to English when an appropriate translation is unavailable.
+The same long-description tag can instead point to a Markdown file for each language:
+
+```json
+{
+  "description_tag": "example_desc",
+  "description_long_tag": "example_long",
+  "en": {
+    "example_desc": "A short description of the application.",
+    "example_long": "description.en.md"
+  },
+  "pt-BR": {
+    "example_desc": "Uma descrição curta do aplicativo.",
+    "example_long": "description.pt-BR.md"
+  }
+}
+```
+
+In this case, LinuxToys first resolves `example_long` according to the selected language and then loads the `.md` file referenced by that translation. This allows each translation to provide a complete independently formatted Markdown description.
+
+Markdown paths are resolved relative to the repository-list file. They can also point to files inside subdirectories belonging to the repository entry, allowing a layout such as:
+
+```text
+scripts/lists/example/
+├── repository.json
+├── descriptions.json
+└── descriptions/
+    ├── description.en.md
+    └── description.pt-BR.md
+```
+
+with:
+
+```json
+{
+  "description_long_tag": "example_long",
+  "en": {
+    "example_long": "descriptions/description.en.md"
+  },
+  "pt-BR": {
+    "example_long": "descriptions/description.pt-BR.md"
+  }
+}
+```
+
+LinuxToys first looks for the currently selected language and falls back to English when an appropriate translation is unavailable. This applies equally to plain-text and Markdown long descriptions.
 
 Existing inline descriptions and translation tags remain supported, which is useful when migrating an existing LinuxToys script into a repository-list entry.
 
@@ -1934,9 +2013,13 @@ A more complete repository entry can therefore look like:
   }
 ]
 ```
-### Paid Applications
+### Paid Applications and Subscriptions
 
-Applications that are purchased rather than freely downloaded can provide a purchase link and price:
+Applications that require payment can provide a purchase link together with pricing information. LinuxToys distinguishes between a **one-time purchase price** and a **subscription price**, and applications may provide either or both.
+
+#### One-Time Purchase
+
+For applications sold through a one-time purchase, use `price`:
 
 ```json
 "purchase": {
@@ -1945,7 +2028,7 @@ Applications that are purchased rather than freely downloaded can provide a purc
 }
 ```
 
-The `price` field defines the application's base price and is always specified as a numeric value in **US dollars (USD)**.
+The price is specified as a numeric value in **US dollars**.
 
 LinuxToys displays the price directly in the purchase button, for example:
 
@@ -1953,11 +2036,7 @@ LinuxToys displays the price directly in the purchase button, for example:
 Purchase · $19.99
 ```
 
-The purchase button is visually highlighted on the application page.
-
-#### Localized Prices
-
-In addition to the base price in US dollars, developers can provide prices for other currencies through the `prices` field:
+Localized prices can be provided using `prices`:
 
 ```json
 "purchase": {
@@ -1965,47 +2044,79 @@ In addition to the base price in US dollars, developers can provide prices for o
   "price": 19.99,
   "prices": {
     "BRL": 59.90,
-    "EUR": 17.99,
-    "GBP": 15.99
+    "EUR": 17.99
   }
 }
 ```
 
-The keys in `prices` correspond to the international currency codes reported by the system's `locale int_curr_symbol`, such as `BRL`, `EUR`, and `GBP`.
+Each key in `prices` is an ISO currency code. LinuxToys uses the system's monetary locale to select the appropriate localized price when one is available. If no matching localized price is provided, the base `price` in US dollars is used.
 
-When LinuxToys finds a currency matching the system's locale, it uses the corresponding localized price instead of the base price. The currency symbol displayed on the button is automatically obtained from `locale currency_symbol`.
+Localized prices are specified directly by the developer; LinuxToys does not perform currency conversion.
 
-For example, on a system whose locale reports `BRL`, the configuration above may be displayed as:
+#### Subscriptions
 
-```text
-Purchase · R$59.90
-```
-
-On a system configured for `EUR`:
-
-```text
-Purchase · €17.99
-```
-
-There is no need to add a `USD` entry to `prices`. The `price` field already represents the price in US dollars and serves as the **mandatory fallback**.
-
-If the system's currency is not present in `prices`, if its monetary locale information cannot be determined, or if `locale` is unavailable, LinuxToys automatically uses the base USD price and the `$` symbol.
-
-This allows an entry to provide localized pricing only for markets where it is desired:
+For applications offered through a subscription, use `sub_price` instead:
 
 ```json
 "purchase": {
-  "url": "https://example.org/buy",
-  "price": 19.99,
-  "prices": {
-    "BRL": 59.90
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99
+}
+```
+
+This is displayed as a subscription action:
+
+```text
+Subscribe · $9.99
+```
+
+Subscription prices support localization in exactly the same way as one-time purchase prices, using `sub_prices`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99,
+  "sub_prices": {
+    "BRL": 29.90,
+    "EUR": 8.99
   }
 }
 ```
 
-In this example, users whose locale reports `BRL` receive the localized `R$59.90` price, while all other users receive the base `$19.99` price.
+`sub_price` is the base subscription price in **US dollars**, while `sub_prices` provides developer-defined localized prices for other currencies.
 
-A purchase URL can also be supplied without a price:
+The subscription period itself is determined by the application's purchase page. LinuxToys only displays the supplied subscription price and does not assume whether it represents a monthly, yearly, or other billing interval.
+
+#### Offering Both Options
+
+An application may provide both a one-time purchase and a subscription option:
+
+```json
+"purchase": {
+  "url": "https://example.org/pricing",
+  "price": 49.99,
+  "prices": {
+    "BRL": 149.90,
+    "EUR": 44.99
+  },
+  "sub_price": 9.99,
+  "sub_prices": {
+    "BRL": 29.90,
+    "EUR": 8.99
+  }
+}
+```
+
+In this case, LinuxToys displays both actions:
+
+```text
+Purchase · $49.99
+Subscribe · $9.99
+```
+
+Each price is localized independently using its respective `prices` or `sub_prices` mapping.
+
+A purchase URL can also be supplied without pricing information:
 
 ```json
 "purchase": {
@@ -2015,7 +2126,7 @@ A purchase URL can also be supplied without a price:
 
 In this case, LinuxToys simply displays **Purchase**.
 
-When both purchase and donation links are present, both buttons are displayed, with the purchase action receiving the primary emphasis.
+When purchase, subscription, and donation options are available, LinuxToys can display them alongside the application's normal installation action, allowing developers to direct users toward the appropriate way of supporting or obtaining the application.
 
 ### Complete Example
 
@@ -2035,17 +2146,24 @@ A more complete repository entry can therefore look like:
     "descriptions": "descriptions.json",
     "screenshots": "screenshots/",
     "purchase": {
-      "url": "https://example.org/purchase",
+      "url": "https://example.org/pricing",
       "price": 14.99,
       "prices": {
         "BRL": 44.90,
         "EUR": 12.99
+      },
+      "sub_price": 4.99,
+      "sub_prices": {
+        "BRL": 14.90,
+        "EUR": 4.49
       }
     },
     "donate": "https://example.org/donate"
   }
 ]
 ```
+
+This example offers the application through both a **one-time purchase** and a **subscription**, with localized prices for Brazilian real and euro users, while also providing a separate donation option.
 
 With the following directory structure:
 

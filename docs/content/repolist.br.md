@@ -1659,7 +1659,7 @@ Selecionar **Instalar** continua pelo fluxo normal de instalação do LinuxToys.
 
 ### Descrições Longas
 
-A `description` curta continua sendo o texto exibido pela interface normal do LinuxToys. A página do aplicativo pode fornecer adicionalmente uma descrição mais longa:
+A `description` curta continua sendo o texto exibido em toda a interface normal do LinuxToys. A página do aplicativo pode fornecer adicionalmente uma descrição mais longa:
 
 ```json
 "long-description": "Uma descrição detalhada do aplicativo, sua finalidade e seus principais recursos."
@@ -1671,21 +1671,56 @@ A forma com sublinhado também é aceita:
 "long_description": "Uma descrição detalhada."
 ```
 
-Descrições longas também podem utilizar o sistema normal de traduções do LinuxToys:
+Descrições longas também podem usar o sistema normal de traduções do LinuxToys:
 
 ```json
 "description": "Descrição curta de fallback.",
 "description_tag": "example_desc",
-
 "long-description": "Descrição longa de fallback.",
 "long-description_tag": "example_long_desc"
 ```
 
-No entanto, para entradas de repositório com descrições mais extensas, recomenda-se utilizar um catálogo de descrições local do repositório.
+No entanto, para entradas de repositório com descrições mais substanciais, recomenda-se usar um catálogo de descrições local do repositório.
+
+#### Descrições Longas em Markdown
+
+Desenvolvedores podem usar um arquivo Markdown em vez de fornecer a descrição longa diretamente. Para optar pela formatação Markdown, defina a descrição longa como um caminho relativo terminado em `.md`:
+
+```json
+"long-description": "description.md"
+```
+
+O LinuxToys detecta a extensão `.md`, carrega o arquivo referenciado e renderiza seu conteúdo como Markdown na página do aplicativo.
+
+Descrições em Markdown oferecem suporte a formatações padrão, como:
+
+```markdown
+# Aplicativo de Exemplo
+
+Um aplicativo **poderoso** com suporte a:
+
+- Recurso um
+- Recurso dois
+- Recurso três
+
+## Informações Adicionais
+
+Visite o [site do projeto](https://example.org) para mais informações.
+```
+
+Para manter a consistência visual das páginas de aplicativos, cabeçalhos Markdown de todos os níveis são exibidos usando um tamanho mais contido, equivalente a `####`. Isso permite que desenvolvedores utilizem a estrutura normal de documentos Markdown sem produzir textos excessivamente grandes na interface do LinuxToys.
+
+O uso de Markdown é inteiramente opcional. Um valor de texto normal continua sendo exibido como texto simples:
+
+```json
+"long-description": "Isto continua sendo uma descrição longa comum em texto simples."
+```
+
+Descrições em Markdown também podem ser usadas com tags de tradução para descrições longas. Isso permite que cada idioma forneça seu próprio documento `.md`, conforme descrito abaixo.
 
 ### Traduções de Descrições Locais do Repositório
 
-Listas de repositórios podem manter suas descrições de aplicativos separadas dos arquivos principais de tradução do LinuxToys colocando um catálogo JSON de descrições junto ao arquivo da lista de repositório.
+Listas de repositórios podem manter as descrições de seus aplicativos separadas dos arquivos principais de tradução do LinuxToys colocando um catálogo de descrições JSON junto ao arquivo da lista de repositório.
 
 Faça referência a ele com:
 
@@ -1703,6 +1738,8 @@ Por exemplo:
 scripts/lists/example/
 ├── repository.json
 ├── descriptions.json
+├── description.en.md
+├── description.pt-BR.md
 ├── example.svg
 └── screenshots/
     ├── main.webp
@@ -1710,18 +1747,16 @@ scripts/lists/example/
     └── settings.webp
 ```
 
-Um arquivo `descriptions.json` utiliza esta estrutura:
+Um arquivo `descriptions.json` pode usar descrições longas em texto simples:
 
 ```json
 {
   "description_tag": "example_desc",
   "description_long_tag": "example_long",
-
   "en": {
     "example_desc": "A short description of the application.",
     "example_long": "A longer description explaining the application and its main features."
   },
-
   "pt": {
     "example_desc": "Uma descrição curta do aplicativo.",
     "example_long": "Uma descrição mais longa explicando o aplicativo e seus principais recursos."
@@ -1729,11 +1764,55 @@ Um arquivo `descriptions.json` utiliza esta estrutura:
 }
 ```
 
-`description_tag` identifica a descrição curta, enquanto `description_long_tag` identifica a descrição longa utilizada pela página do aplicativo.
+`description_tag` identifica a descrição curta, enquanto `description_long_tag` identifica a descrição longa exibida na página do aplicativo.
 
-O LinuxToys procura primeiro pelo idioma atualmente selecionado e utiliza o inglês como fallback quando uma tradução apropriada não está disponível.
+A mesma tag de descrição longa pode, em vez disso, apontar para um arquivo Markdown diferente para cada idioma:
 
-Descrições inline e tags de tradução existentes continuam sendo suportadas, o que é útil durante a migração de um script existente do LinuxToys para uma entrada de lista de repositório.
+```json
+{
+  "description_tag": "example_desc",
+  "description_long_tag": "example_long",
+  "en": {
+    "example_desc": "A short description of the application.",
+    "example_long": "description.en.md"
+  },
+  "pt-BR": {
+    "example_desc": "Uma descrição curta do aplicativo.",
+    "example_long": "description.pt-BR.md"
+  }
+}
+```
+
+Nesse caso, o LinuxToys primeiro resolve `example_long` de acordo com o idioma selecionado e, em seguida, carrega o arquivo `.md` referenciado por essa tradução. Isso permite que cada tradução forneça uma descrição completa em Markdown com formatação independente.
+
+Os caminhos dos arquivos Markdown são resolvidos relativamente ao arquivo da lista de repositório. Eles também podem apontar para arquivos dentro de subdiretórios pertencentes à entrada do repositório, permitindo uma estrutura como:
+
+```text
+scripts/lists/example/
+├── repository.json
+├── descriptions.json
+└── descriptions/
+    ├── description.en.md
+    └── description.pt-BR.md
+```
+
+com:
+
+```json
+{
+  "description_long_tag": "example_long",
+  "en": {
+    "example_long": "descriptions/description.en.md"
+  },
+  "pt-BR": {
+    "example_long": "descriptions/description.pt-BR.md"
+  }
+}
+```
+
+O LinuxToys primeiro procura pelo idioma atualmente selecionado e recorre ao inglês quando uma tradução apropriada não está disponível. Isso se aplica igualmente a descrições longas em texto simples e em Markdown.
+
+Descrições inline e tags de tradução existentes continuam sendo suportadas, o que é útil ao migrar um script existente do LinuxToys para uma entrada de lista de repositório.
 
 ### Capturas de Tela
 
@@ -1822,9 +1901,13 @@ O LinuxToys exibe um botão **Doar** na página do aplicativo, que abre a URL es
 
 Somente URLs HTTP ou HTTPS válidas são aceitas.
 
-### Aplicativos Pagos
+### Aplicativos Pagos e Assinaturas
 
-Aplicativos que precisam ser adquiridos em vez de simplesmente baixados podem fornecer um link de compra e um preço:
+Aplicativos que exigem pagamento podem fornecer um link de compra juntamente com informações de preço. O LinuxToys diferencia entre um **preço de compra única** e um **preço de assinatura**, e os aplicativos podem oferecer uma dessas opções ou ambas.
+
+#### Compra Única
+
+Para aplicativos vendidos por meio de uma compra única, use `price`:
 
 ```json
 "purchase": {
@@ -1833,7 +1916,7 @@ Aplicativos que precisam ser adquiridos em vez de simplesmente baixados podem fo
 }
 ```
 
-O campo `price` define o preço base do aplicativo e é sempre especificado como um valor numérico em **dólares americanos (USD)**.
+O preço é especificado como um valor numérico em **dólares americanos**.
 
 O LinuxToys exibe o preço diretamente no botão de compra, por exemplo:
 
@@ -1841,11 +1924,7 @@ O LinuxToys exibe o preço diretamente no botão de compra, por exemplo:
 Comprar · $19.99
 ```
 
-O botão de compra recebe destaque visual na página do aplicativo.
-
-#### Preços Localizados
-
-Além do preço base em dólares americanos, o desenvolvedor pode fornecer preços específicos para outras moedas por meio do campo `prices`:
+Preços localizados podem ser fornecidos usando `prices`:
 
 ```json
 "purchase": {
@@ -1853,47 +1932,79 @@ Além do preço base em dólares americanos, o desenvolvedor pode fornecer preç
   "price": 19.99,
   "prices": {
     "BRL": 59.90,
-    "EUR": 17.99,
-    "GBP": 15.99
+    "EUR": 17.99
   }
 }
 ```
 
-As chaves de `prices` correspondem aos códigos internacionais de moeda fornecidos pelo `locale int_curr_symbol` do sistema, como `BRL`, `EUR` e `GBP`.
+Cada chave em `prices` é um código de moeda ISO. O LinuxToys usa a configuração monetária do sistema para selecionar o preço localizado apropriado quando houver um disponível. Caso nenhum preço localizado correspondente seja fornecido, o `price` base em dólares americanos será utilizado.
 
-Quando o LinuxToys encontra uma moeda correspondente à configuração regional do sistema, utiliza o preço localizado em vez do preço base. O símbolo monetário exibido no botão é obtido automaticamente por meio do `locale currency_symbol`.
+Os preços localizados são especificados diretamente pelo desenvolvedor; o LinuxToys não realiza conversão de moedas.
 
-Por exemplo, em um sistema cuja configuração regional informe `BRL`, a configuração acima pode ser exibida como:
+#### Assinaturas
 
-```text
-Comprar · R$59.90
-```
-
-Já em um sistema configurado para `EUR`:
-
-```text
-Comprar · €17.99
-```
-
-Não é necessário adicionar uma entrada `USD` a `prices`. O campo `price` já representa o preço em dólares americanos e funciona como **fallback obrigatório**.
-
-Se a moeda do sistema não estiver presente em `prices`, se as informações monetárias da configuração regional não puderem ser determinadas ou se `locale` não estiver disponível, o LinuxToys utiliza automaticamente o preço base em USD e o símbolo `$`.
-
-Dessa forma, uma entrada pode oferecer preços localizados apenas para os mercados em que isso for desejado:
+Para aplicativos oferecidos por meio de uma assinatura, use `sub_price`:
 
 ```json
 "purchase": {
-  "url": "https://example.org/buy",
-  "price": 19.99,
-  "prices": {
-    "BRL": 59.90
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99
+}
+```
+
+Isso é exibido como uma opção de assinatura:
+
+```text
+Assinar · $9.99
+```
+
+Os preços de assinatura oferecem suporte à localização da mesma forma que os preços de compra única, usando `sub_prices`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99,
+  "sub_prices": {
+    "BRL": 29.90,
+    "EUR": 8.99
   }
 }
 ```
 
-Nesse exemplo, usuários com `BRL` recebem o preço localizado de `R$59.90`, enquanto todos os demais recebem o preço base de `$19.99`.
+`sub_price` é o preço base da assinatura em **dólares americanos**, enquanto `sub_prices` fornece preços localizados definidos pelo desenvolvedor para outras moedas.
 
-Um URL de compra também pode ser fornecido sem um preço:
+O período da assinatura é determinado pela própria página de compra do aplicativo. O LinuxToys apenas exibe o preço de assinatura fornecido e não presume se ele representa um período mensal, anual ou qualquer outro intervalo de cobrança.
+
+#### Oferecendo Ambas as Opções
+
+Um aplicativo pode oferecer tanto uma compra única quanto uma opção de assinatura:
+
+```json
+"purchase": {
+  "url": "https://example.org/pricing",
+  "price": 49.99,
+  "prices": {
+    "BRL": 149.90,
+    "EUR": 44.99
+  },
+  "sub_price": 9.99,
+  "sub_prices": {
+    "BRL": 29.90,
+    "EUR": 8.99
+  }
+}
+```
+
+Nesse caso, o LinuxToys exibe ambas as opções:
+
+```text
+Comprar · $49.99
+Assinar · $9.99
+```
+
+Cada preço é localizado de forma independente usando seu respectivo mapeamento `prices` ou `sub_prices`.
+
+Um URL de compra também pode ser fornecido sem informações de preço:
 
 ```json
 "purchase": {
@@ -1903,11 +2014,11 @@ Um URL de compra também pode ser fornecido sem um preço:
 
 Nesse caso, o LinuxToys simplesmente exibe **Comprar**.
 
-Quando links de compra e doação são fornecidos simultaneamente, ambos os botões são exibidos, com a ação de compra recebendo o destaque principal.
+Quando opções de compra, assinatura e doação estão disponíveis, o LinuxToys pode exibi-las juntamente com a ação normal de instalação do aplicativo, permitindo que os desenvolvedores direcionem os usuários à forma apropriada de apoiar ou obter o aplicativo.
 
 ### Exemplo Completo
 
-Uma entrada de repositório mais completa pode, portanto, ser semelhante a esta:
+Uma entrada de repositório mais completa pode, portanto, ter a seguinte aparência:
 
 ```json
 [
@@ -1923,17 +2034,24 @@ Uma entrada de repositório mais completa pode, portanto, ser semelhante a esta:
     "descriptions": "descriptions.json",
     "screenshots": "screenshots/",
     "purchase": {
-      "url": "https://example.org/purchase",
+      "url": "https://example.org/pricing",
       "price": 14.99,
       "prices": {
         "BRL": 44.90,
         "EUR": 12.99
+      },
+      "sub_price": 4.99,
+      "sub_prices": {
+        "BRL": 14.90,
+        "EUR": 4.49
       }
     },
     "donate": "https://example.org/donate"
   }
 ]
 ```
+
+Este exemplo oferece o aplicativo tanto por meio de uma **compra única** quanto de uma **assinatura**, com preços localizados para usuários que utilizam real brasileiro e euro, além de fornecer uma opção separada de doação.
 
 Com a seguinte estrutura de diretórios:
 
