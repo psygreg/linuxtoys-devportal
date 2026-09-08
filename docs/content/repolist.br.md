@@ -1881,6 +1881,57 @@ e:
 
 As teclas de seta Esquerda e Direita do teclado também podem ser utilizadas enquanto a página do aplicativo estiver aberta.
 
+### Identificação do Desenvolvedor
+
+Uma entrada pode especificar o nome do desenvolvedor, equipe ou empresa responsável pelo aplicativo usando `developer`:
+
+```json
+"developer": "Example Company"
+```
+
+Quando disponível, o nome do desenvolvedor é exibido na página do aplicativo, permitindo que os usuários identifiquem facilmente quem desenvolve ou mantém o software.
+
+Para aplicativos hospedados no GitHub, esse campo é opcional. Se `developer` não for especificado, o LinuxToys utiliza automaticamente o nome do usuário ou organização proprietária do repositório no GitHub.
+
+Por exemplo:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://github.com/example-company/example-app"
+}
+```
+
+resultará em:
+
+```text
+example-company
+```
+
+como nome do desenvolvedor.
+
+O campo `developer` pode ser usado para substituir esse valor automático por um nome mais apropriado para apresentação:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://github.com/example-company/example-app",
+  "developer": "Example Company"
+}
+```
+
+Isso é particularmente útil quando o nome público de uma pessoa, projeto ou empresa é diferente do nome de sua conta ou organização no GitHub.
+
+A detecção automática se aplica apenas a repositórios hospedados no GitHub. Para outras fontes, defina `developer` explicitamente caso queira que um nome de desenvolvedor seja exibido.
+
+#### Indicador de Suporte Oficial
+
+Quando um aplicativo faz parte do índice oficial do LinuxToys, um indicador de verificação é exibido ao lado do nome do desenvolvedor em sua página de aplicativo.
+
+Esse indicador identifica aplicativos com suporte oficial no LinuxToys. Ele é determinado pelo próprio índice oficial e **não pode ser habilitado por meio da entrada da lista de repositório**.
+
+Portanto, definir `developer` controla apenas o nome apresentado e não concede ou implica status de suporte oficial. [Consulte como adquirir status de suporte oficial aqui, se desejar](documentation.pt-BR.html#official-support).
+
 ### Links para Doação
 
 Um link para doação pode ser adicionado com:
@@ -2024,6 +2075,7 @@ Uma entrada de repositório mais completa pode, portanto, ter a seguinte aparên
 [
   {
     "name": "Example App",
+    "developer": "Example Company",
     "repo": "https://example.org",
     "category": "office",
     "icon": "./example.svg",

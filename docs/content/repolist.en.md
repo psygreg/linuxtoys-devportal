@@ -1881,6 +1881,57 @@ and:
 
 The keyboard Left and Right arrow keys can also be used while the application page is open.
 
+### Developer Identification
+
+A repository entry can specify the name of the developer, team, or company responsible for the application using `developer`:
+
+```json
+"developer": "Example Company"
+```
+
+When available, the developer name is displayed on the application page, allowing users to easily identify who develops or maintains the software.
+
+For applications hosted on GitHub, this field is optional. If `developer` is not specified, LinuxToys automatically uses the name of the GitHub user or organization that owns the repository.
+
+For example:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://github.com/example-company/example-app"
+}
+```
+
+will result in:
+
+```text
+example-company
+```
+
+being used as the developer name.
+
+The `developer` field can be used to override this automatic value with a more appropriate display name:
+
+```json
+{
+  "name": "Example App",
+  "repo": "https://github.com/example-company/example-app",
+  "developer": "Example Company"
+}
+```
+
+This is particularly useful when the public name of a person, project, or company differs from its GitHub account or organization name.
+
+Automatic detection applies only to repositories hosted on GitHub. For other repository sources, set `developer` explicitly if you want a developer name to be displayed.
+
+#### Official Support Indicator
+
+When an application is part of the official LinuxToys index, a verification indicator is displayed beside the developer name on its application page.
+
+This indicator identifies applications with official support in LinuxToys. Its status is determined by the official index itself and **cannot be enabled through a repository-list entry**.
+
+Therefore, setting `developer` only controls the displayed developer name and does not grant or imply official support status. [You can check how to obtain official support status here](documentation.html#official-support).
+
 ### Donation Links
 
 A donation link can be added with:
@@ -1992,6 +2043,7 @@ A more complete repository entry can therefore look like:
 [
   {
     "name": "Example App",
+    "developer": "Example Company",
     "repo": "https://example.org",
     "category": "office",
     "icon": "./example.svg",
