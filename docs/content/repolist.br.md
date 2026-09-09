@@ -1496,6 +1496,16 @@ O LinuxToys traduz cada entrada em uma chamada equivalente a:
 flatpak_override SCOPE TYPE SETTING TARGET
 ```
 
+#### Forçar Flatpaks em nível de sistema
+
+Alguns aplicativos Flatpak podem apresentar problemas ao serem executados no nível do usuário. Para esses casos, há uma opção de override disponível:
+
+```json
+"overrides": {
+    "skip-user": true
+}
+```
+
 ---
 
 ## Serviços systemd

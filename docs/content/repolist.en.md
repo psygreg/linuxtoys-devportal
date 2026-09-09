@@ -1496,6 +1496,16 @@ LinuxToys translates each entry into a call equivalent to:
 flatpak_override SCOPE TYPE SETTING TARGET
 ```
 
+#### Enforce system-level flatpaks
+
+Certain flatpak applications may have issues working on user level. For such cases, there's an override option available:
+
+```json
+"overrides": {
+    "skip-user": true
+}
+```
+
 ---
 
 ## systemd services
