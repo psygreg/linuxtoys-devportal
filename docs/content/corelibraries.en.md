@@ -1922,7 +1922,7 @@ talk-name
 talk-dbus
 ```
 
-The function checks that the target Flatpak exists and records the override for reversion.
+The function checks that the target Flatpak exists and records the override for reversion. If the target `APPLICATION` doesn't exist, it will echo a warning to the terminal viewer and return code 100 (cancellation) for this operation.
 
 ---
 

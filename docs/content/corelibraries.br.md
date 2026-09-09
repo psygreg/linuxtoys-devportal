@@ -1922,7 +1922,7 @@ talk-name
 talk-dbus
 ```
 
-A função verifica se o Flatpak alvo existe e registra a substituição para reversão.
+A função verifica se o Flatpak alvo existe e registra a substituição para reversão. Se o alvo `APPLICATION` não existir, ele produzirá um aviso no terminal e retornará o código 100 (cancelamento) para esta operação.
 
 ---
 
