@@ -403,7 +403,9 @@ Por exemplo:
 }
 ```
 
-utiliza `example-cachyos` no CachyOS em vez do pacote genérico do Arch.
+utiliza `example-cachyos` no CachyOS em vez do pacote genérico do Arch. 
+
+Lembre-se que **não é possível instalar pacotes nativos no SteamOS devido ao seu modelo de imutabilidade**, que só permite alterações em modo de desenvolvedor e todas as alterações são desfeitas na próxima atualização. Por isso, quaisquer entradas em listas de repositório que usem pacotes nativos sem opção por Flatpak ou AppImage automaticamente desqualificam o SteamOS.
 
 <a id="url-fetching"></a>
 
@@ -1000,6 +1002,7 @@ solus
 pika
 deepin
 manjaro
+steamos
 ```
 
 A entrada fica disponível quando pelo menos uma das chaves de compatibilidade de sistema solicitadas corresponde ao host.

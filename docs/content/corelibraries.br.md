@@ -177,6 +177,7 @@ solus
 zorin
 deepin
 pika
+steamos
 ```
 
 Não faça sua própria análise de `/etc/os-release` apenas para distinguir as famílias comumente suportadas. A biblioteca shell disponibiliza funções correspondentes para ramificações em tempo de execução, conforme descrito posteriormente neste documento.

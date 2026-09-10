@@ -177,6 +177,7 @@ solus
 zorin
 deepin
 pika
+steamos
 ```
 
 Do not perform your own `/etc/os-release` parsing simply to distinguish the common supported families. The shell library exposes matching functions for runtime branching as described later in this document.

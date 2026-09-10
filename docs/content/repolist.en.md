@@ -405,6 +405,8 @@ For example:
 
 uses `example-cachyos` on CachyOS rather than the generic Arch package.
 
+Keep in mind **it's not possible to install native packages in SteamOS**, since its immutability model only allows modifications in developer mode and such modifications will be undone at the next system update. For this reason, any entry from repository lists that use native packages without Flatpak or AppImage options are automatically disqualified from compatibility with SteamOS.
+
 <a id="url-fetching"></a>
 
 ### `url`
@@ -1000,6 +1002,7 @@ solus
 pika
 deepin
 manjaro
+steamos
 ```
 
 The entry is available when at least one requested OS compatibility key matches the host.
