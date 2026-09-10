@@ -1631,6 +1631,8 @@ Isso também permite unidades que não sejam serviços:
 
 Entradas de listas de repositórios podem, opcionalmente, fornecer uma **página de aplicativo**. Isso permite apresentar mais informações sobre um aplicativo antes da instalação, incluindo uma descrição mais longa, capturas de tela e links opcionais para compra ou doação.
 
+![Página de Aplicativo - exemplo](/assets/app-page-screenshot-br.webp)
+
 As páginas de aplicativos são destinadas a aplicativos que se beneficiam de uma apresentação mais completa do que a caixa de diálogo padrão de confirmação de instalação.
 
 Se nenhum dos campos relacionados à página de aplicativo for fornecido, o LinuxToys ignora completamente essa página e segue o fluxo normal de instalação.

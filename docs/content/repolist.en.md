@@ -1631,6 +1631,8 @@ This allows non-service units as well:
 
 Repository-list entries can optionally provide an **application page**. This gives users more information about an application before installing it, including a longer description, screenshots, and optional purchase or donation links.
 
+![App Page - example](/assets/app-page-screenshot.webp)
+
 Application pages are intended for applications that benefit from a richer presentation than the standard installation confirmation dialog.
 
 If none of the application-page fields are provided, LinuxToys skips the application page entirely and follows the normal installation flow.
