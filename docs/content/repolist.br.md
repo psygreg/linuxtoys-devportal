@@ -1989,11 +1989,23 @@ Somente URLs HTTP ou HTTPS válidas são aceitas.
 
 ### Aplicativos Pagos e Assinaturas
 
-Aplicativos que exigem pagamento podem fornecer um link de compra juntamente com informações de preço. O LinuxToys diferencia entre um **preço de compra única** e um **preço de assinatura**, e os aplicativos podem oferecer uma dessas opções ou ambas.
+Aplicativos que exigem pagamento podem oferecer opções de compra única, assinatura ou ambas através do campo `purchase`.
 
-#### Compra Única
+O LinuxToys oferece suporte a:
 
-Para aplicativos vendidos por meio de uma compra única, use `price`:
+* compras únicas;
+* assinaturas;
+* preços localizados;
+* múltiplos níveis de compra;
+* múltiplos níveis de assinatura;
+* múltiplos períodos de assinatura;
+* diferentes URLs de compra para níveis ou períodos de assinatura individuais.
+
+As ações de compra, assinatura e doação são exibidas separadamente na página do aplicativo, portanto um aplicativo pode oferecer qualquer combinação entre elas.
+
+#### Compras Únicas
+
+Para uma compra única simples, forneça uma `url` e um `price` base:
 
 ```json
 "purchase": {
@@ -2002,95 +2014,15 @@ Para aplicativos vendidos por meio de uma compra única, use `price`:
 }
 ```
 
-O preço é especificado como um valor numérico em **dólares americanos**.
+O `price` é um valor numérico especificado em **dólares americanos (USD)** e funciona como preço de contingência.
 
-O LinuxToys exibe o preço diretamente no botão de compra, por exemplo:
+O LinuxToys o exibe diretamente no botão de compra:
 
 ```text
 Comprar · $19.99
 ```
 
-Preços localizados podem ser fornecidos usando `prices`:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy",
-  "price": 19.99,
-  "prices": {
-    "BRL": 59.90,
-    "EUR": 17.99
-  }
-}
-```
-
-Cada chave em `prices` é um código de moeda ISO. O LinuxToys usa a configuração monetária do sistema para selecionar o preço localizado apropriado quando houver um disponível. Caso nenhum preço localizado correspondente seja fornecido, o `price` base em dólares americanos será utilizado.
-
-Os preços localizados são especificados diretamente pelo desenvolvedor; o LinuxToys não realiza conversão de moedas.
-
-#### Assinaturas
-
-Para aplicativos oferecidos por meio de uma assinatura, use `sub_price`:
-
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_price": 9.99
-}
-```
-
-Isso é exibido como uma opção de assinatura:
-
-```text
-Assinar · $9.99
-```
-
-Os preços de assinatura oferecem suporte à localização da mesma forma que os preços de compra única, usando `sub_prices`:
-
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_price": 9.99,
-  "sub_prices": {
-    "BRL": 29.90,
-    "EUR": 8.99
-  }
-}
-```
-
-`sub_price` é o preço base da assinatura em **dólares americanos**, enquanto `sub_prices` fornece preços localizados definidos pelo desenvolvedor para outras moedas.
-
-O período da assinatura é determinado pela própria página de compra do aplicativo. O LinuxToys apenas exibe o preço de assinatura fornecido e não presume se ele representa um período mensal, anual ou qualquer outro intervalo de cobrança.
-
-#### Oferecendo Ambas as Opções
-
-Um aplicativo pode oferecer tanto uma compra única quanto uma opção de assinatura:
-
-```json
-"purchase": {
-  "url": "https://example.org/pricing",
-  "price": 49.99,
-  "prices": {
-    "BRL": 149.90,
-    "EUR": 44.99
-  },
-  "sub_price": 9.99,
-  "sub_prices": {
-    "BRL": 29.90,
-    "EUR": 8.99
-  }
-}
-```
-
-Nesse caso, o LinuxToys exibe ambas as opções:
-
-```text
-Comprar · $49.99
-Assinar · $9.99
-```
-
-Cada preço é localizado de forma independente usando seu respectivo mapeamento `prices` ou `sub_prices`.
-
-Um URL de compra também pode ser fornecido sem informações de preço:
+Uma URL de compra também pode ser fornecida sem informações de preço:
 
 ```json
 "purchase": {
@@ -2100,11 +2032,400 @@ Um URL de compra também pode ser fornecido sem informações de preço:
 
 Nesse caso, o LinuxToys simplesmente exibe **Comprar**.
 
-Quando opções de compra, assinatura e doação estão disponíveis, o LinuxToys pode exibi-las juntamente com a ação normal de instalação do aplicativo, permitindo que os desenvolvedores direcionem os usuários à forma apropriada de apoiar ou obter o aplicativo.
+#### Preços Localizados
+
+Preços localizados podem ser fornecidos através de `prices`:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "price": 19.99,
+  "prices": {
+    "BRL": 59.90,
+    "EUR": 17.99,
+    "GBP": 15.99
+  }
+}
+```
+
+As chaves em `prices` correspondem aos códigos internacionais de moeda informados pelo `locale int_curr_symbol` do sistema, como `BRL`, `EUR` e `GBP`.
+
+Quando um preço localizado correspondente está disponível, o LinuxToys o utiliza no lugar do preço base em USD. O símbolo da moeda exibido é obtido através de `locale currency_symbol`.
+
+Por exemplo, um sistema cuja localidade monetária informa `BRL` pode exibir:
+
+```text
+Comprar · R$59.90
+```
+
+enquanto um sistema configurado para `EUR` pode exibir:
+
+```text
+Comprar · €17.99
+```
+
+Não é necessário fornecer uma entrada `USD` em `prices`. O `price` base já representa o preço em USD e serve como valor de contingência.
+
+Caso a moeda do usuário não esteja presente em `prices`, a localidade monetária não possa ser determinada ou o `locale` não esteja disponível, o LinuxToys utiliza o preço base em USD e o símbolo `$`.
+
+Os preços localizados são fornecidos diretamente pelo desenvolvedor. **O LinuxToys não realiza conversão de moedas.**
+
+#### Compras por Níveis
+
+Aplicativos com múltiplas edições ou níveis de compra podem utilizar `tiers`:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "tiers": [
+    {
+      "name": "Standard",
+      "price": 19.99,
+      "prices": {
+        "BRL": 59.90,
+        "EUR": 17.99
+      }
+    },
+    {
+      "name": "Pro",
+      "price": 39.99,
+      "prices": {
+        "BRL": 119.90,
+        "EUR": 35.99
+      }
+    }
+  ]
+}
+```
+
+Quando múltiplas opções de compra estão disponíveis, o LinuxToys exibe o menor preço disponível no botão principal:
+
+```text
+Comprar · a partir de $19.99
+```
+
+O botão se torna um menu suspenso através do qual o usuário pode selecionar o nível desejado.
+
+Cada nível oferece suporte ao mesmo mecanismo de preços localizados através do seu próprio campo `prices`.
+
+Um nível também pode fornecer sua própria `url`:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "tiers": [
+    {
+      "name": "Standard",
+      "price": 19.99,
+      "url": "https://example.org/buy/standard"
+    },
+    {
+      "name": "Pro",
+      "price": 39.99,
+      "url": "https://example.org/buy/pro"
+    }
+  ]
+}
+```
+
+Selecionar um nível abre sua respectiva URL. Caso um nível não forneça uma `url`, a `purchase.url` principal é utilizada como contingência.
+
+Isso permite que os desenvolvedores direcionem todas as opções para uma página de preços em comum ou enviem o usuário diretamente à página de compra da opção selecionada.
+
+### Assinaturas
+
+Para uma assinatura simples com um único preço, utilize `sub_price`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99
+}
+```
+
+O LinuxToys exibe:
+
+```text
+Assinar · $9.99
+```
+
+Preços de assinatura localizados podem ser fornecidos através de `sub_prices`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99,
+  "sub_prices": {
+    "BRL": 29.90,
+    "EUR": 8.99
+  }
+}
+```
+
+`sub_price` é o preço base em USD, enquanto `sub_prices` segue as mesmas regras de localização e contingência utilizadas por `price` e `prices`.
+
+#### Períodos de Assinatura
+
+Quando um aplicativo oferece vários períodos de cobrança, utilize `sub_periods`.
+
+Cada período especifica sua duração através de `months`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_periods": [
+    {
+      "months": 1,
+      "price": 9.99
+    },
+    {
+      "months": 6,
+      "price": 54.99
+    },
+    {
+      "months": 12,
+      "price": 99.99
+    }
+  ]
+}
+```
+
+O valor de `months` é um número inteiro positivo que representa a duração daquela opção de assinatura em meses.
+
+Quando múltiplos períodos estão disponíveis, o LinuxToys exibe o menor preço fornecido no botão de assinatura:
+
+```text
+Assinar · a partir de $9.99
+```
+
+O usuário pode então selecionar o período de cobrança desejado através do menu suspenso.
+
+Cada período também pode fornecer preços localizados:
+
+```json
+{
+  "months": 12,
+  "price": 99.99,
+  "prices": {
+    "BRL": 299.90,
+    "EUR": 89.99
+  }
+}
+```
+
+Um período de cobrança pode opcionalmente fornecer sua própria URL:
+
+```json
+{
+  "months": 12,
+  "price": 99.99,
+  "url": "https://example.org/subscribe/yearly"
+}
+```
+
+Caso nenhuma URL específica para o período seja fornecida, o LinuxToys utiliza a `purchase.url` principal como contingência.
+
+#### Assinaturas por Níveis
+
+Aplicativos podem combinar níveis de assinatura com períodos de cobrança através de `sub_tiers`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_tiers": [
+    {
+      "name": "Standard",
+      "periods": [
+        {
+          "months": 1,
+          "price": 4.99
+        },
+        {
+          "months": 12,
+          "price": 49.99
+        }
+      ]
+    },
+    {
+      "name": "Pro",
+      "periods": [
+        {
+          "months": 1,
+          "price": 9.99
+        },
+        {
+          "months": 12,
+          "price": 99.99
+        }
+      ]
+    }
+  ]
+}
+```
+
+O LinuxToys combina as informações de nível e período de cobrança no menu suspenso de assinatura, enquanto exibe antecipadamente o menor preço fornecido:
+
+```text
+Assinar · a partir de $4.99
+```
+
+Por exemplo, o menu pode conter opções correspondentes a:
+
+```text
+Standard · 1 mês · $4.99
+Standard · 12 meses · $49.99
+Pro · 1 mês · $9.99
+Pro · 12 meses · $99.99
+```
+
+Preços localizados podem ser especificados independentemente para cada período através de `prices`.
+
+#### URLs de Assinatura
+
+Níveis de assinatura e períodos de cobrança individuais podem opcionalmente fornecer suas próprias URLs.
+
+Uma URL para todo o nível pode ser especificada desta forma:
+
+```json
+{
+  "name": "Pro",
+  "url": "https://example.org/subscribe/pro",
+  "periods": [
+    {
+      "months": 1,
+      "price": 9.99
+    },
+    {
+      "months": 12,
+      "price": 99.99
+    }
+  ]
+}
+```
+
+Períodos individuais podem substituir essa URL:
+
+```json
+{
+  "name": "Pro",
+  "url": "https://example.org/subscribe/pro",
+  "periods": [
+    {
+      "months": 1,
+      "price": 9.99,
+      "url": "https://example.org/subscribe/pro/monthly"
+    },
+    {
+      "months": 12,
+      "price": 99.99,
+      "url": "https://example.org/subscribe/pro/yearly"
+    }
+  ]
+}
+```
+
+O LinuxToys determina o destino das opções de assinatura na seguinte ordem:
+
+1. a `url` do período de cobrança, quando fornecida;
+2. a `url` do nível de assinatura, quando fornecida;
+3. a `purchase.url` principal.
+
+Isso possibilita criar links diretos para opções individuais de compra sem a necessidade de criar entradas separadas no LinuxToys.
+
+#### Níveis de Assinatura sem Múltiplos Períodos
+
+Um nível de assinatura não precisa definir uma lista `periods`. Um nível com uma única opção de cobrança pode fornecer seu preço diretamente:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_tiers": [
+    {
+      "name": "Standard",
+      "months": 1,
+      "price": 4.99
+    },
+    {
+      "name": "Pro",
+      "months": 1,
+      "price": 9.99
+    }
+  ]
+}
+```
+
+Caso `months` seja omitido nesse tipo de nível, o LinuxToys o considera uma opção de um mês.
+
+### Oferecendo Compras e Assinaturas Simultaneamente
+
+Compras únicas e assinaturas são independentes e podem ser oferecidas pelo mesmo aplicativo:
+
+```json
+"purchase": {
+  "url": "https://example.org/pricing",
+  "tiers": [
+    {
+      "name": "Standard",
+      "price": 29.99
+    },
+    {
+      "name": "Pro",
+      "price": 49.99
+    }
+  ],
+  "sub_tiers": [
+    {
+      "name": "Standard",
+      "periods": [
+        {
+          "months": 1,
+          "price": 4.99
+        },
+        {
+          "months": 12,
+          "price": 49.99
+        }
+      ]
+    },
+    {
+      "name": "Pro",
+      "periods": [
+        {
+          "months": 1,
+          "price": 9.99
+        },
+        {
+          "months": 12,
+          "price": 99.99
+        }
+      ]
+    }
+  ]
+}
+```
+
+O LinuxToys mantém as duas ações separadas:
+
+```text
+Comprar · a partir de $29.99
+Assinar · a partir de $4.99
+```
+
+Cada botão fornece seu próprio menu suspenso quando múltiplas opções estão disponíveis.
+
+### Doações
+
+Links de doação permanecem independentes das opções pagas de compra e assinatura:
+
+```json
+"donate": "https://example.org/donate"
+```
+
+Portanto, um aplicativo pode oferecer simultaneamente as ações Comprar, Assinar e Doar.
 
 ### Exemplo Completo
 
-Uma entrada de repositório mais completa pode, portanto, ter a seguinte aparência:
+Uma entrada de repositório utilizando compras por níveis, assinaturas por níveis, preços localizados, URLs específicas para cada opção e doações pode ter a seguinte aparência:
 
 ```json
 [
@@ -2122,23 +2443,80 @@ Uma entrada de repositório mais completa pode, portanto, ter a seguinte aparên
     "screenshots": "screenshots/",
     "purchase": {
       "url": "https://example.org/pricing",
-      "price": 14.99,
-      "prices": {
-        "BRL": 44.90,
-        "EUR": 12.99
-      },
-      "sub_price": 4.99,
-      "sub_prices": {
-        "BRL": 14.90,
-        "EUR": 4.49
-      }
+      "tiers": [
+        {
+          "name": "Standard",
+          "price": 29.99,
+          "prices": {
+            "BRL": 149.90,
+            "EUR": 27.99
+          },
+          "url": "https://example.org/buy/standard"
+        },
+        {
+          "name": "Pro",
+          "price": 49.99,
+          "prices": {
+            "BRL": 249.90,
+            "EUR": 46.99
+          },
+          "url": "https://example.org/buy/pro"
+        }
+      ],
+      "sub_tiers": [
+        {
+          "name": "Standard",
+          "periods": [
+            {
+              "months": 1,
+              "price": 4.99,
+              "prices": {
+                "BRL": 24.90,
+                "EUR": 4.49
+              },
+              "url": "https://example.org/subscribe/standard/monthly"
+            },
+            {
+              "months": 12,
+              "price": 49.99,
+              "prices": {
+                "BRL": 249.90,
+                "EUR": 44.99
+              },
+              "url": "https://example.org/subscribe/standard/yearly"
+            }
+          ]
+        },
+        {
+          "name": "Pro",
+          "url": "https://example.org/subscribe/pro",
+          "periods": [
+            {
+              "months": 1,
+              "price": 9.99,
+              "prices": {
+                "BRL": 49.90,
+                "EUR": 8.99
+              }
+            },
+            {
+              "months": 12,
+              "price": 99.99,
+              "prices": {
+                "BRL": 499.90,
+                "EUR": 89.99
+              }
+            }
+          ]
+        }
+      ]
     },
     "donate": "https://example.org/donate"
   }
 ]
 ```
 
-Este exemplo oferece o aplicativo tanto por meio de uma **compra única** quanto de uma **assinatura**, com preços localizados para usuários que utilizam real brasileiro e euro, além de fornecer uma opção separada de doação.
+Essa configuração produz ações separadas de Comprar, Assinar e Doar, permitindo ao LinuxToys apresentar os preços localizados apropriados e direcionar os usuários ao destino escolhido pelo desenvolvedor para cada opção paga.
 
 Com a seguinte estrutura de diretórios:
 

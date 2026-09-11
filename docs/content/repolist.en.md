@@ -1987,9 +1987,25 @@ LinuxToys displays a **Donate** button on the application page which opens the s
 
 Only valid HTTP or HTTPS URLs are accepted.
 
-### Paid Applications
+### Paid Applications and Subscriptions
 
-Applications that are purchased rather than freely downloaded can provide a purchase link and price:
+Applications that require payment can provide one-time purchase options, subscription options, or both through the `purchase` field.
+
+LinuxToys supports:
+
+* one-time purchases;
+* subscriptions;
+* localized pricing;
+* multiple purchase tiers;
+* multiple subscription tiers;
+* multiple subscription billing periods;
+* different purchase URLs for individual tiers or billing periods.
+
+Purchase, subscription, and donation actions are displayed separately on the application page, so an application may offer any combination of them.
+
+#### One-Time Purchases
+
+For a simple one-time purchase, provide a `url` and base `price`:
 
 ```json
 "purchase": {
@@ -1998,19 +2014,27 @@ Applications that are purchased rather than freely downloaded can provide a purc
 }
 ```
 
-The `price` field defines the application's base price and is always specified as a numeric value in **US dollars (USD)**.
+The `price` is a numeric value specified in **US dollars (USD)** and acts as the fallback price.
 
-LinuxToys displays the price directly in the purchase button, for example:
+LinuxToys displays it directly in the purchase button:
 
 ```text
 Purchase · $19.99
 ```
 
-The purchase button is visually highlighted on the application page.
+A purchase URL can also be supplied without pricing information:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy"
+}
+```
+
+In this case, LinuxToys simply displays **Purchase**.
 
 #### Localized Prices
 
-In addition to the base price in US dollars, developers can provide prices for other currencies through the `prices` field:
+Localized prices can be provided using `prices`:
 
 ```json
 "purchase": {
@@ -2026,53 +2050,382 @@ In addition to the base price in US dollars, developers can provide prices for o
 
 The keys in `prices` correspond to the international currency codes reported by the system's `locale int_curr_symbol`, such as `BRL`, `EUR`, and `GBP`.
 
-When LinuxToys finds a currency matching the system's locale, it uses the corresponding localized price instead of the base price. The currency symbol displayed on the button is automatically obtained from `locale currency_symbol`.
+When a matching localized price is available, LinuxToys uses it instead of the base USD price. The displayed currency symbol is obtained from `locale currency_symbol`.
 
-For example, on a system whose locale reports `BRL`, the configuration above may be displayed as:
+For example, a system whose monetary locale reports `BRL` may display:
 
 ```text
 Purchase · R$59.90
 ```
 
-On a system configured for `EUR`:
+while a system configured for `EUR` may display:
 
 ```text
 Purchase · €17.99
 ```
 
-There is no need to add a `USD` entry to `prices`. The `price` field already represents the price in US dollars and serves as the **mandatory fallback**.
+There is no need to provide a `USD` entry in `prices`. The base `price` already represents the USD price and serves as the fallback.
 
-If the system's currency is not present in `prices`, if its monetary locale information cannot be determined, or if `locale` is unavailable, LinuxToys automatically uses the base USD price and the `$` symbol.
+If the user's currency is not present in `prices`, the monetary locale cannot be determined, or `locale` is unavailable, LinuxToys falls back to the base USD price and the `$` symbol.
 
-This allows an entry to provide localized pricing only for markets where it is desired:
+Localized prices are supplied directly by the developer. **LinuxToys does not perform currency conversion.**
+
+#### Tiered Purchases
+
+Applications with multiple editions or purchase tiers can use `tiers`:
 
 ```json
 "purchase": {
   "url": "https://example.org/buy",
-  "price": 19.99,
-  "prices": {
-    "BRL": 59.90
+  "tiers": [
+    {
+      "name": "Standard",
+      "price": 19.99,
+      "prices": {
+        "BRL": 59.90,
+        "EUR": 17.99
+      }
+    },
+    {
+      "name": "Pro",
+      "price": 39.99,
+      "prices": {
+        "BRL": 119.90,
+        "EUR": 35.99
+      }
+    }
+  ]
+}
+```
+
+When multiple purchase options are available, LinuxToys displays the lowest available price in the main button:
+
+```text
+Purchase · from $19.99
+```
+
+The button becomes a drop-down menu from which the user can select the desired tier.
+
+Each tier supports the same localized pricing mechanism through its own `prices` field.
+
+A tier may also provide its own `url`:
+
+```json
+"purchase": {
+  "url": "https://example.org/buy",
+  "tiers": [
+    {
+      "name": "Standard",
+      "price": 19.99,
+      "url": "https://example.org/buy/standard"
+    },
+    {
+      "name": "Pro",
+      "price": 39.99,
+      "url": "https://example.org/buy/pro"
+    }
+  ]
+}
+```
+
+Selecting a tier opens its respective URL. If a tier does not provide a `url`, the main `purchase.url` is used as the fallback.
+
+This allows developers to either direct every option to a common pricing page or send users directly to the checkout page for the option they selected.
+
+### Subscriptions
+
+For a simple subscription with a single price, use `sub_price`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99
+}
+```
+
+LinuxToys displays:
+
+```text
+Subscribe · $9.99
+```
+
+Localized subscription prices can be provided through `sub_prices`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_price": 9.99,
+  "sub_prices": {
+    "BRL": 29.90,
+    "EUR": 8.99
   }
 }
 ```
 
-In this example, users whose locale reports `BRL` receive the localized `R$59.90` price, while all other users receive the base `$19.99` price.
+`sub_price` is the base USD price and `sub_prices` follows the same localization and fallback rules as `price` and `prices`.
 
-A purchase URL can also be supplied without a price:
+#### Subscription Billing Periods
+
+When an application offers several billing periods, use `sub_periods`.
+
+Each period specifies its duration using `months`:
 
 ```json
 "purchase": {
-  "url": "https://example.org/buy"
+  "url": "https://example.org/subscribe",
+  "sub_periods": [
+    {
+      "months": 1,
+      "price": 9.99
+    },
+    {
+      "months": 6,
+      "price": 54.99
+    },
+    {
+      "months": 12,
+      "price": 99.99
+    }
+  ]
 }
 ```
 
-In this case, LinuxToys simply displays **Purchase**.
+The `months` value is a positive integer representing the duration of that subscription option in months.
 
-When both purchase and donation links are present, both buttons are displayed, with the purchase action receiving the primary emphasis.
+When multiple periods are available, LinuxToys displays the lowest supplied price in the subscription button:
+
+```text
+Subscribe · from $9.99
+```
+
+The user can then select the desired billing period from the drop-down menu.
+
+Each period can also provide localized prices:
+
+```json
+{
+  "months": 12,
+  "price": 99.99,
+  "prices": {
+    "BRL": 299.90,
+    "EUR": 89.99
+  }
+}
+```
+
+A billing period may optionally provide its own URL:
+
+```json
+{
+  "months": 12,
+  "price": 99.99,
+  "url": "https://example.org/subscribe/yearly"
+}
+```
+
+If no period-specific URL is supplied, LinuxToys falls back to the main `purchase.url`.
+
+#### Tiered Subscriptions
+
+Applications may combine subscription tiers with billing periods through `sub_tiers`:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_tiers": [
+    {
+      "name": "Standard",
+      "periods": [
+        {
+          "months": 1,
+          "price": 4.99
+        },
+        {
+          "months": 12,
+          "price": 49.99
+        }
+      ]
+    },
+    {
+      "name": "Pro",
+      "periods": [
+        {
+          "months": 1,
+          "price": 9.99
+        },
+        {
+          "months": 12,
+          "price": 99.99
+        }
+      ]
+    }
+  ]
+}
+```
+
+LinuxToys combines the tier and billing period information in the subscription drop-down while displaying the lowest supplied price upfront:
+
+```text
+Subscribe · from $4.99
+```
+
+For example, the menu can contain options corresponding to:
+
+```text
+Standard · 1 month · $4.99
+Standard · 12 months · $49.99
+Pro · 1 month · $9.99
+Pro · 12 months · $99.99
+```
+
+Localized pricing can be specified independently for every period using `prices`.
+
+#### Subscription URLs
+
+Subscription tiers and individual billing periods can optionally provide their own URLs.
+
+A tier-wide URL can be specified like this:
+
+```json
+{
+  "name": "Pro",
+  "url": "https://example.org/subscribe/pro",
+  "periods": [
+    {
+      "months": 1,
+      "price": 9.99
+    },
+    {
+      "months": 12,
+      "price": 99.99
+    }
+  ]
+}
+```
+
+Individual periods can override that URL:
+
+```json
+{
+  "name": "Pro",
+  "url": "https://example.org/subscribe/pro",
+  "periods": [
+    {
+      "months": 1,
+      "price": 9.99,
+      "url": "https://example.org/subscribe/pro/monthly"
+    },
+    {
+      "months": 12,
+      "price": 99.99,
+      "url": "https://example.org/subscribe/pro/yearly"
+    }
+  ]
+}
+```
+
+LinuxToys resolves subscription destinations in the following order:
+
+1. the billing period's `url`, when provided;
+2. the subscription tier's `url`, when provided;
+3. the main `purchase.url`.
+
+This makes it possible to link directly to individual checkout options without requiring separate LinuxToys entries.
+
+#### Subscription Tiers Without Multiple Periods
+
+A subscription tier does not need to define a `periods` list. A tier with a single billing option can provide its price directly:
+
+```json
+"purchase": {
+  "url": "https://example.org/subscribe",
+  "sub_tiers": [
+    {
+      "name": "Standard",
+      "months": 1,
+      "price": 4.99
+    },
+    {
+      "name": "Pro",
+      "months": 1,
+      "price": 9.99
+    }
+  ]
+}
+```
+
+If `months` is omitted from such a tier, LinuxToys treats it as a one-month option.
+
+### Offering Purchases and Subscriptions Together
+
+One-time purchases and subscriptions are independent and can be offered by the same application:
+
+```json
+"purchase": {
+  "url": "https://example.org/pricing",
+  "tiers": [
+    {
+      "name": "Standard",
+      "price": 29.99
+    },
+    {
+      "name": "Pro",
+      "price": 49.99
+    }
+  ],
+  "sub_tiers": [
+    {
+      "name": "Standard",
+      "periods": [
+        {
+          "months": 1,
+          "price": 4.99
+        },
+        {
+          "months": 12,
+          "price": 49.99
+        }
+      ]
+    },
+    {
+      "name": "Pro",
+      "periods": [
+        {
+          "months": 1,
+          "price": 9.99
+        },
+        {
+          "months": 12,
+          "price": 99.99
+        }
+      ]
+    }
+  ]
+}
+```
+
+LinuxToys keeps the two actions separate:
+
+```text
+Purchase · from $29.99
+Subscribe · from $4.99
+```
+
+Each button provides its own drop-down menu when multiple options are available.
+
+### Donations
+
+Donation links remain independent of paid purchase and subscription options:
+
+```json
+"donate": "https://example.org/donate"
+```
+
+An application can therefore offer Purchase, Subscribe, and Donate actions simultaneously.
 
 ### Complete Example
 
-A more complete repository entry can therefore look like:
+A repository entry using tiered purchases, tiered subscriptions, localized prices, option-specific URLs, and donations can look like:
 
 ```json
 [
@@ -2089,168 +2442,81 @@ A more complete repository entry can therefore look like:
     "descriptions": "descriptions.json",
     "screenshots": "screenshots/",
     "purchase": {
-      "url": "https://example.org/purchase",
-      "price": 14.99,
-      "prices": {
-        "BRL": 44.90,
-        "EUR": 12.99
-      }
-    },
-    "donate": "https://example.org/donate"
-  }
-]
-```
-### Paid Applications and Subscriptions
-
-Applications that require payment can provide a purchase link together with pricing information. LinuxToys distinguishes between a **one-time purchase price** and a **subscription price**, and applications may provide either or both.
-
-#### One-Time Purchase
-
-For applications sold through a one-time purchase, use `price`:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy",
-  "price": 19.99
-}
-```
-
-The price is specified as a numeric value in **US dollars**.
-
-LinuxToys displays the price directly in the purchase button, for example:
-
-```text
-Purchase · $19.99
-```
-
-Localized prices can be provided using `prices`:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy",
-  "price": 19.99,
-  "prices": {
-    "BRL": 59.90,
-    "EUR": 17.99
-  }
-}
-```
-
-Each key in `prices` is an ISO currency code. LinuxToys uses the system's monetary locale to select the appropriate localized price when one is available. If no matching localized price is provided, the base `price` in US dollars is used.
-
-Localized prices are specified directly by the developer; LinuxToys does not perform currency conversion.
-
-#### Subscriptions
-
-For applications offered through a subscription, use `sub_price` instead:
-
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_price": 9.99
-}
-```
-
-This is displayed as a subscription action:
-
-```text
-Subscribe · $9.99
-```
-
-Subscription prices support localization in exactly the same way as one-time purchase prices, using `sub_prices`:
-
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_price": 9.99,
-  "sub_prices": {
-    "BRL": 29.90,
-    "EUR": 8.99
-  }
-}
-```
-
-`sub_price` is the base subscription price in **US dollars**, while `sub_prices` provides developer-defined localized prices for other currencies.
-
-The subscription period itself is determined by the application's purchase page. LinuxToys only displays the supplied subscription price and does not assume whether it represents a monthly, yearly, or other billing interval.
-
-#### Offering Both Options
-
-An application may provide both a one-time purchase and a subscription option:
-
-```json
-"purchase": {
-  "url": "https://example.org/pricing",
-  "price": 49.99,
-  "prices": {
-    "BRL": 149.90,
-    "EUR": 44.99
-  },
-  "sub_price": 9.99,
-  "sub_prices": {
-    "BRL": 29.90,
-    "EUR": 8.99
-  }
-}
-```
-
-In this case, LinuxToys displays both actions:
-
-```text
-Purchase · $49.99
-Subscribe · $9.99
-```
-
-Each price is localized independently using its respective `prices` or `sub_prices` mapping.
-
-A purchase URL can also be supplied without pricing information:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy"
-}
-```
-
-In this case, LinuxToys simply displays **Purchase**.
-
-When purchase, subscription, and donation options are available, LinuxToys can display them alongside the application's normal installation action, allowing developers to direct users toward the appropriate way of supporting or obtaining the application.
-
-### Complete Example
-
-A more complete repository entry can therefore look like:
-
-```json
-[
-  {
-    "name": "Example App",
-    "repo": "https://example.org",
-    "category": "office",
-    "icon": "./example.svg",
-    "type": "url",
-    "urls": {
-      "appimage": "https://example.org/releases/example.AppImage"
-    },
-    "descriptions": "descriptions.json",
-    "screenshots": "screenshots/",
-    "purchase": {
       "url": "https://example.org/pricing",
-      "price": 14.99,
-      "prices": {
-        "BRL": 44.90,
-        "EUR": 12.99
-      },
-      "sub_price": 4.99,
-      "sub_prices": {
-        "BRL": 14.90,
-        "EUR": 4.49
-      }
+      "tiers": [
+        {
+          "name": "Standard",
+          "price": 29.99,
+          "prices": {
+            "BRL": 149.90,
+            "EUR": 27.99
+          },
+          "url": "https://example.org/buy/standard"
+        },
+        {
+          "name": "Pro",
+          "price": 49.99,
+          "prices": {
+            "BRL": 249.90,
+            "EUR": 46.99
+          },
+          "url": "https://example.org/buy/pro"
+        }
+      ],
+      "sub_tiers": [
+        {
+          "name": "Standard",
+          "periods": [
+            {
+              "months": 1,
+              "price": 4.99,
+              "prices": {
+                "BRL": 24.90,
+                "EUR": 4.49
+              },
+              "url": "https://example.org/subscribe/standard/monthly"
+            },
+            {
+              "months": 12,
+              "price": 49.99,
+              "prices": {
+                "BRL": 249.90,
+                "EUR": 44.99
+              },
+              "url": "https://example.org/subscribe/standard/yearly"
+            }
+          ]
+        },
+        {
+          "name": "Pro",
+          "url": "https://example.org/subscribe/pro",
+          "periods": [
+            {
+              "months": 1,
+              "price": 9.99,
+              "prices": {
+                "BRL": 49.90,
+                "EUR": 8.99
+              }
+            },
+            {
+              "months": 12,
+              "price": 99.99,
+              "prices": {
+                "BRL": 499.90,
+                "EUR": 89.99
+              }
+            }
+          ]
+        }
+      ]
     },
     "donate": "https://example.org/donate"
   }
 ]
 ```
 
-This example offers the application through both a **one-time purchase** and a **subscription**, with localized prices for Brazilian real and euro users, while also providing a separate donation option.
+This configuration produces separate Purchase, Subscribe, and Donate actions while allowing LinuxToys to present the appropriate localized prices and direct users to the developer's preferred destination for each paid option.
 
 With the following directory structure:
 
