@@ -518,6 +518,24 @@ A restrição automática de Flatpak/AppImage tem precedência sobre metadados e
 
 ---
 
+## Subsistema Windows para Linux (WSL)
+
+Para impedir que um script seja executado **fora** do WSL:
+
+```bash
+# wsl: yes
+```
+
+Para impedir que um script seja executado **dentro** do WSL:
+
+```bash
+# wsl: no
+```
+
+Se não configurado, o script estará disponível em ambos os ambientes.
+
+---
+
 ## Filtragem por Localização
 
 ### `localize`

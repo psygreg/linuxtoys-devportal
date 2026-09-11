@@ -518,6 +518,24 @@ The automatic Flatpak/AppImage restriction takes precedence over explicit contai
 
 ---
 
+## Windows Subsystem for Linux (WSL)
+
+To prevent a script from running **outside** WSL:
+
+```bash
+# wsl: yes
+```
+
+To prevent a script from running **within** WSL:
+
+```bash
+# wsl: no
+```
+
+If unset, the script will be available to both environments.
+
+---
+
 ## Localization Filtering
 
 ### `localize`

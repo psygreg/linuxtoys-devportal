@@ -1192,6 +1192,24 @@ This guardrail exists because Flatpak and AppImage installation should not be ne
 
 ---
 
+### Windows Subsystem for Linux (WSL)
+
+Windows Subsystem for Linux (WSL) compatibility is controlled with:
+
+```json
+"wsl": "yes"
+```
+
+for **WSL-only** compatibility, or:
+
+```json
+"wsl": "no"
+```
+
+for **WSL-incompatible**. The default is this option being unset, meaning compatible for both. Most entries do not need to specify this field.
+
+---
+
 ## Dependencies
 
 The optional `dependencies` field installs packages before the main application.

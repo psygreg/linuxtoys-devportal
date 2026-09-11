@@ -1192,6 +1192,24 @@ Essa proteção existe porque instalações Flatpak e AppImage não devem ser an
 
 ---
 
+### Subsistema Windows para Linux (WSL)
+
+A compatibilidade com o Subsistema Windows para Linux (WSL) é controlada por:
+
+```json
+"wsl": "yes"
+```
+
+para **somente** compatibilidade com WSL, ou:
+
+```json
+"wsl": "no"
+```
+
+para **não compatível** com WSL. O padrão é a opção estar indefinida, o que significa compatível para ambos. A maioria das entradas não precisa especificar este campo.
+
+---
+
 ## Dependências
 
 O campo opcional `dependencies` instala pacotes antes da aplicação principal.
