@@ -244,6 +244,8 @@ Como `git` é o padrão, isto é equivalente:
 }
 ```
 
+Este tipo de instalação também não requer uma configuração de metadados `os` explícita, a não ser que seu app, ou scripts de pré ou pós-instalação dele, tenham problemas de compatibilidade com certas variantes de alguma distribuição, o que raramente é o caso. Você pode usar `python3 dev/git_db.py` a partir da sua fork do repositório do LinuxToys quando terminar de adicionar os metadados do seu aplicativo para obter automaticamente quais pacotes estão disponíveis da release mais recente e configurar os dados de compatibilidade a partir destes.
+
 <a id="flathub-package"></a>
 
 ### `flathub`

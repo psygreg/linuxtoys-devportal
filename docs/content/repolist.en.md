@@ -244,6 +244,8 @@ Since `git` is the default, this is equivalent:
 }
 ```
 
+This type of package doesn't require you to set `os` explicitly unless your app, or pre or post-installation scripts for it, aren't compatible with specific variants of certain distros, which is rarely the case. You can use `python3 dev/git_db.py` from the LinuxToys repository when you finish adding your app's metadata to automatically fetch which packages are available from the latest release and set the compatibility data from those.
+
 <a id="flathub-package"></a>
 
 ### `flathub`
