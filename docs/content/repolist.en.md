@@ -677,7 +677,7 @@ and use the appropriate repository-list hardware or compatibility restrictions w
 
 LinuxToys may use architecture information present in release filenames while locating assets, but the developer should still identify the intended binary explicitly.
 
-### Application Menu Integration
+### Application Menu and System Integration
 
 Single-binary installations automatically receive an application-menu shortcut.
 
@@ -697,6 +697,8 @@ The binary is installed under:
 ```
 
 and the generated shortcut points to the installed copy rather than the temporary downloaded file.
+
+To add the application to the user's PATH, making it available as a CLI command, you can use [this function from LinuxToys' core libraries](corelibraries.html#path-integration) as a post-install override.
 
 ### Choosing Between `bin` and `url`
 
@@ -728,7 +730,7 @@ when:
 
 The `tar` type is intended for applications distributed as **prebuilt binary tarballs** through GitHub or Codeberg releases. It allows LinuxToys to install software that does not provide a native package, Flatpak, or AppImage, but ships a ready-to-run application as a `.tar.gz` or `.tar.xz` archive.
 
-> **Note:** `tar` is intended for binary application releases, not source archives, and **mandates** a post-install script to finish setting it up. Installations of this kind export a **`LINUXTOYS_TARBALL_DIR`** variable pointing towards the final directory name after the tarball is extracted for your convenience in the post-install script. If you are distributing an application in this format, you might also be interested in [creating a `.desktop` app menu shortcut automatically](corelibraries.html#app-shortcuts) and [adding the application to the user's PATH](corelibraries.pt-BR.html#path-integration).
+> **Note:** `tar` is intended for binary application releases, not source archives, and **mandates** a post-install script to finish setting it up. Installations of this kind export a **`LINUXTOYS_TARBALL_DIR`** variable pointing towards the final directory name after the tarball is extracted for your convenience in the post-install script. If you are distributing an application in this format, you might also be interested in [creating a `.desktop` app menu shortcut automatically](corelibraries.html#app-shortcuts) and [adding the application to the user's PATH](corelibraries.html#path-integration).
 
 ### GitHub, Codeberg and GitLab Releases
 

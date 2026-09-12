@@ -677,7 +677,7 @@ e utilizar as restrições apropriadas de hardware ou compatibilidade das listas
 
 O LinuxToys pode utilizar informações de arquitetura presentes nos nomes dos arquivos do lançamento ao localizar os arquivos, mas o desenvolvedor ainda deve identificar explicitamente o binário desejado.
 
-### Integração com o Menu de Aplicativos
+### Integração com o Menu de Aplicativos e Sistema
 
 Instalações de binário único recebem automaticamente um atalho no menu de aplicativos.
 
@@ -697,6 +697,8 @@ O binário é instalado em:
 ```
 
 e o atalho gerado aponta para a cópia instalada, e não para o arquivo temporário utilizado durante o download.
+
+Para adicionar o aplicativo ao PATH do usuário, permitindo que ele se torne um comando direto no terminal, você pode utilizar [esta função das bibliotecas do LinuxToys](corelibraries.pt-BR.html#path-integration) na pós-instalação.
 
 ### Escolhendo Entre `bin` e `url`
 
