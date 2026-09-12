@@ -1254,6 +1254,8 @@ Architecture filtering continues to apply in tarball mode, so architecture-speci
 
 `--tarball` is also accepted as an alias for `--tar`.
 
+> Tarball installations expose a `LINUXTOYS_TARBALL_DIR` variable that can be used to track the directory where the app was installed for post-installation procedures.
+
 ---
 
 ## Single-Binary Applications
@@ -1417,6 +1419,8 @@ pkg_fromrelease --bin \
 ```
 
 For single-binary applications, prefer these functions over manually copying executables into the user's home directory and constructing `.desktop` files.
+
+> Single binary installations expose a `LINUXTOYS_BIN_DIR` variable that can be used to track the directory where the app was installed for post-installation procedures.
 
 ---
 

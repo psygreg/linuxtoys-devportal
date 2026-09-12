@@ -1254,6 +1254,8 @@ A filtragem por arquitetura continua sendo aplicada no modo tarball, portanto ar
 
 `--tarball` também é aceito como um alias para `--tar`.
 
+> Instalações de tarball expõem a variável `LINUXTOYS_TARBALL_DIR`, que pode ser usada para rastrear o diretório onde o aplicativo foi instalado para procedimentos pós-instalação.
+
 ---
 
 ## Instalando Aplicativos de Binário Único
@@ -1417,6 +1419,8 @@ pkg_fromrelease --bin \
 ```
 
 Para aplicativos distribuídos como um único binário, prefira essas funções em vez de copiar manualmente executáveis para o diretório pessoal do usuário e construir arquivos `.desktop`.
+
+> Instalações de binário único expõem a variável `LINUXTOYS_BIN_DIR`, que pode ser usada para rastrear o diretório onde o aplicativo foi instalado para procedimentos pós-instalação.
 
 ---
 

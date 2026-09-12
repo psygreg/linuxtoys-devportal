@@ -700,6 +700,8 @@ e o atalho gerado aponta para a cópia instalada, e não para o arquivo temporá
 
 Para adicionar o aplicativo ao PATH do usuário, permitindo que ele se torne um comando direto no terminal, você pode utilizar [esta função das bibliotecas do LinuxToys](corelibraries.pt-BR.html#path-integration) na pós-instalação.
 
+> Instalações de binário único expõem a variável `LINUXTOYS_BIN_DIR`, que pode ser usada para rastrear o diretório onde o aplicativo foi instalado para procedimentos pós-instalação.
+
 ### Escolhendo Entre `bin` e `url`
 
 Use `"type": "bin"` quando:

@@ -700,6 +700,8 @@ and the generated shortcut points to the installed copy rather than the temporar
 
 To add the application to the user's PATH, making it available as a CLI command, you can use [this function from LinuxToys' core libraries](corelibraries.html#path-integration) as a post-install override.
 
+> Single binary installations expose a `LINUXTOYS_BIN_DIR` variable that can be used to track the directory where the app was installed for post-installation procedures.
+
 ### Choosing Between `bin` and `url`
 
 Use `"type": "bin"` when:
