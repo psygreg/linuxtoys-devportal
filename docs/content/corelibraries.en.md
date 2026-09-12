@@ -1897,6 +1897,94 @@ Manual use of `desktop_shortcut` remains useful for installations with custom la
 
 ---
 
+<a id="path-integration"></a>
+
+### PATH Integration
+
+Tarball and single-binary applications can expose their executable through the user's `PATH` with the `path_link` helper:
+
+```bash
+path_link "/path/to/executable"
+```
+
+`path_link` creates a symbolic link in:
+
+```text
+~/.local/bin/
+```
+
+using the executable's filename as the command name.
+
+For example:
+
+```bash
+path_link "$LINUXTOYS_TARBALL_DIR/bin/myapp"
+```
+
+creates:
+
+```text
+~/.local/bin/myapp -> $LINUXTOYS_TARBALL_DIR/bin/myapp
+```
+
+The helper also ensures that `~/.local/bin` is available in the user's `PATH`. If necessary, LinuxToys adds the required PATH configuration to the appropriate shell configuration file. Existing PATH configuration is preserved, and the entry is not added again when `~/.local/bin` is already configured.
+
+PATH configuration changes are tracked by LinuxToys and can therefore be reverted when the application is removed.
+
+#### Using the Application ID as the Command Name
+
+Some applications use executable filenames that are too generic to make good command names. For example, Android Studio provides an executable named `studio`.
+
+The optional `--useappid` flag tells `path_link` to derive the command name from the application's LinuxToys application ID instead:
+
+```bash
+path_link --useappid "$LINUXTOYS_TARBALL_DIR/bin/studio"
+```
+
+The flag can appear before or after the executable:
+
+```bash
+path_link "$LINUXTOYS_TARBALL_DIR/bin/studio" --useappid
+```
+
+When `--useappid` is used, `LINUXTOYS_APP_ID` is converted to lowercase and underscores are replaced with hyphens.
+
+For example:
+
+```text
+LINUXTOYS_APP_ID=ANDROID_STUDIO
+```
+
+produces:
+
+```text
+~/.local/bin/android-studio
+```
+
+This is useful when the upstream executable name is ambiguous or likely to conflict with another command.
+
+#### Repository List Example
+
+`path_link` can be called directly from a post-install override:
+
+```json
+"overrides": {
+    "post": "path_link --useappid \"$LINUXTOYS_TARBALL_DIR/bin/studio\""
+}
+```
+
+For applications whose executable already has an appropriate command name, the simpler form is preferred:
+
+```json
+"overrides": {
+    "post": "path_link \"$LINUXTOYS_TARBALL_DIR/bin/myapp\""
+}
+```
+
+Use `--useappid` only when using the LinuxToys application ID provides a clearer or less ambiguous command name.
+
+---
+
 ## Flatpak Overrides
 
 ### `flatpak_override`

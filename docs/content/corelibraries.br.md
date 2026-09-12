@@ -1897,6 +1897,94 @@ O uso manual de `desktop_shortcut` continuará sendo útil para instalações co
 
 ---
 
+<a id="path-integration"></a>
+
+### Integração com o PATH
+
+Aplicativos distribuídos como tarballs ou binários individuais podem disponibilizar seu executável através do `PATH` do usuário usando o auxiliar `path_link`:
+
+```bash
+path_link "/caminho/para/o/executavel"
+```
+
+O `path_link` cria um link simbólico em:
+
+```text
+~/.local/bin/
+```
+
+usando o nome do arquivo executável como nome do comando.
+
+Por exemplo:
+
+```bash
+path_link "$LINUXTOYS_TARBALL_DIR/bin/myapp"
+```
+
+cria:
+
+```text
+~/.local/bin/myapp -> $LINUXTOYS_TARBALL_DIR/bin/myapp
+```
+
+O auxiliar também garante que `~/.local/bin` esteja disponível no `PATH` do usuário. Se necessário, o LinuxToys adiciona a configuração de PATH necessária ao arquivo de configuração apropriado do shell. A configuração de PATH existente é preservada e a entrada não é adicionada novamente caso `~/.local/bin` já esteja configurado.
+
+As alterações na configuração do PATH são registradas pelo LinuxToys e, portanto, podem ser revertidas quando o aplicativo é removido.
+
+#### Usando o ID do Aplicativo como Nome do Comando
+
+Alguns aplicativos usam nomes de executáveis genéricos demais para serem bons nomes de comandos. Por exemplo, o Android Studio fornece um executável chamado `studio`.
+
+A opção `--useappid` faz com que o `path_link` derive o nome do comando a partir do ID do aplicativo no LinuxToys:
+
+```bash
+path_link --useappid "$LINUXTOYS_TARBALL_DIR/bin/studio"
+```
+
+A opção pode aparecer antes ou depois do executável:
+
+```bash
+path_link "$LINUXTOYS_TARBALL_DIR/bin/studio" --useappid
+```
+
+Quando `--useappid` é usada, `LINUXTOYS_APP_ID` é convertido para letras minúsculas e sublinhados (`_`) são substituídos por hífens (`-`).
+
+Por exemplo:
+
+```text
+LINUXTOYS_APP_ID=ANDROID_STUDIO
+```
+
+produz:
+
+```text
+~/.local/bin/android-studio
+```
+
+Isso é útil quando o nome do executável fornecido pelo projeto é ambíguo ou tem maior probabilidade de entrar em conflito com outro comando.
+
+#### Exemplo em uma Lista de Repositório
+
+O `path_link` pode ser chamado diretamente através de um override de pós-instalação:
+
+```json
+"overrides": {
+    "post": "path_link --useappid \"$LINUXTOYS_TARBALL_DIR/bin/studio\""
+}
+```
+
+Para aplicativos cujo executável já possui um nome de comando apropriado, a forma mais simples é recomendada:
+
+```json
+"overrides": {
+    "post": "path_link \"$LINUXTOYS_TARBALL_DIR/bin/myapp\""
+}
+```
+
+Use `--useappid` apenas quando usar o ID do aplicativo no LinuxToys resultar em um nome de comando mais claro ou menos ambíguo.
+
+---
+
 ## Substituições do Flatpak
 
 ### `flatpak_override`
