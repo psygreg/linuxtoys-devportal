@@ -1047,6 +1047,16 @@ Por exemplo:
 
 permite a entrada tanto em sistemas compatíveis com Fedora quanto com RHEL.
 
+Você também pode configurar uma exclusão em vez disso, escolhendo onde **não** exibir a entrada, usando um sinal de exclamação antes da tag correspondente:
+
+```json
+"os": [
+  "ubuntu",
+  "debian",
+  "!zorin"
+]
+```
+
 ### Ambiente de desktop
 
 O campo opcional `desktop` restringe uma aplicação a determinados ambientes de desktop.

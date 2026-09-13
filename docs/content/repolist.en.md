@@ -1047,6 +1047,16 @@ For example:
 
 allows the entry on either compatible Fedora or RHEL systems.
 
+You may also set an exclude tag instead, to choose where to **not** display the entry, using an exclamation mark before the corresponding tag:
+
+```json
+"os": [
+  "ubuntu",
+  "debian",
+  "!zorin"
+]
+```
+
 ### Desktop environment
 
 The optional `desktop` field restricts an application to particular desktop environments.
