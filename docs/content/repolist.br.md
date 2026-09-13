@@ -246,6 +246,18 @@ Como `git` é o padrão, isto é equivalente:
 
 Este tipo de instalação também não requer uma configuração de metadados `os` explícita, a não ser que seu app, ou scripts de pré ou pós-instalação dele, tenham problemas de compatibilidade com certas variantes de alguma distribuição, o que raramente é o caso. Você pode usar `python3 dev/git_db.py` a partir da sua fork do repositório do LinuxToys quando terminar de adicionar os metadados do seu aplicativo para obter automaticamente quais pacotes estão disponíveis da release mais recente e configurar os dados de compatibilidade a partir destes.
 
+Você pode prover um `"package-name"` opcional se houver mais de um pacote do mesmo tipo reconhecido como válido nas releases, para determinar qual será usado explicitamente. Eles podem ser baseados em `os` se necessário como pacotes nativos e o nome aceita globs.
+
+```json
+{
+  "name": "myapp",
+  "repo": "https://github.com/example/myapp",
+  "description": "Example application.",
+  "category": "utilities",
+  "package-name": "mypackagename.tar.gz",
+}
+```
+
 <a id="flathub-package"></a>
 
 ### `flathub`
@@ -765,6 +777,17 @@ myapp-2.4.0-source.tar.gz
 ```
 
 Em um sistema x86-64, o LinuxToys selecionará o arquivo `x86_64` do aplicativo, enquanto excluirá o arquivo destinado à arquitetura incompatível e o arquivo de código-fonte.
+
+Você pode prover um `"package-name"` opcional se houver mais de uma tarball reconhecida como válida nas releases, para determinar qual será usada explicitamente. Elas podem ser baseadas em `os` se necessário como pacotes nativos e o nome aceita globs.
+
+```json
+{
+  "name": "myapp",
+  "repo": "https://github.com/example/myapp",
+  "type": "tar",
+  "package-name": "mypackagename.tar.gz"
+}
+```
 
 ### URLs Diretas
 

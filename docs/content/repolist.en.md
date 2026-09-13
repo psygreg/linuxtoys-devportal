@@ -246,6 +246,18 @@ Since `git` is the default, this is equivalent:
 
 This type of package doesn't require you to set `os` explicitly unless your app, or pre or post-installation scripts for it, aren't compatible with specific variants of certain distros, which is rarely the case. You can use `python3 dev/git_db.py` from the LinuxToys repository when you finish adding your app's metadata to automatically fetch which packages are available from the latest release and set the compatibility data from those.
 
+You may optionally provide a `"package-name"` if there is more than one valid release asset passing automatic detection to determine which will be used explicitly. Those can be `os`-keyed if necessary like native packages and accept globs.
+
+```json
+{
+  "name": "myapp",
+  "repo": "https://github.com/example/myapp",
+  "description": "Example application.",
+  "category": "utilities",
+  "package-name": "mypackagename.tar.gz",
+}
+```
+
 <a id="flathub-package"></a>
 
 ### `flathub`
@@ -765,6 +777,17 @@ myapp-2.4.0-source.tar.gz
 ```
 
 On an x86-64 system, LinuxToys will select the `x86_64` application archive while excluding the incompatible architecture and source archive.
+
+You may optionally provide a `"package-name"` if there is more than one valid release asset passing automatic detection to determine which will be used explicitly. Those can be `os`-keyed if necessary like native packages and accept globs.
+
+```json
+{
+  "name": "myapp",
+  "repo": "https://github.com/example/myapp",
+  "type": "tar",
+  "package-name": "mypackagename.tar.gz"
+}
+```
 
 ### Direct URLs
 
