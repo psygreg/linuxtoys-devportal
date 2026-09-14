@@ -988,6 +988,124 @@ Dynamic URL declarations require a pre-installation hook. Environment-variable n
 
 ---
 
+## External Installation Scripts
+
+The `external` type allows a repository list entry to delegate its installation procedure to a custom Bash script while retaining the metadata, compatibility controls, application pages, and other conveniences provided by repository lists.
+
+It is intended primarily for two situations:
+
+* **Fully custom installation procedures** — when an application or feature requires an installation process that cannot reasonably be represented using the standard repository list types and helpers, but would still benefit from repository list features such as application pages, compatibility rules, dependencies, screenshots, descriptions, and other metadata.
+* **Proprietary installation procedures** — when proprietary software cannot publish its installation logic in the repository because the procedure itself contains confidential or otherwise non-public code. The installer may instead be retrieved from a URL at installation time.
+
+An external entry uses:
+
+```json
+{
+    "name": "Example Application",
+    "description": "An application using a custom installation procedure.",
+    "repo": "https://example.org",
+    "category": "utilities",
+    "type": "external",
+    "script": "./install.sh"
+}
+```
+
+The `script` field is required whenever the resolved type is `external`.
+
+#### Repository-Local Scripts
+
+The script may be stored alongside the repository list:
+
+```json
+"type": "external",
+"script": "./install.sh"
+```
+
+Relative paths are resolved from the directory containing the repository list entry. They must remain within the repository's `lists` directory tree.
+
+This approach is appropriate for custom installation procedures that can be distributed openly but do not fit the standard installation methods offered by repository lists.
+
+#### Remote Scripts
+
+The `script` field may instead contain an HTTPS URL:
+
+```json
+"type": "external",
+"script": "https://example.org/linux/install.sh"
+```
+
+LinuxToys downloads the script when the installation is started and executes the downloaded script through the normal LinuxToys script environment.
+
+This is particularly useful for proprietary applications whose installation procedure cannot be included in a public LinuxToys repository for code confidentiality reasons.
+
+#### LinuxToys Libraries
+
+External scripts are treated as LinuxToys installation scripts rather than arbitrary standalone shell commands.
+
+They are executed through the normal LinuxToys library loader, giving them access to the same core libraries and helpers available to regular LinuxToys scripts. The libraries required by the external script are detected and loaded for it automatically.
+
+For example, an external installer may directly use LinuxToys helpers:
+
+```bash
+#!/usr/bin/env bash
+
+pkg_install curl
+prep_tmp
+
+info "Preparing installation..."
+
+# Custom installation procedure...
+```
+
+The external script therefore does not need to manually locate or source the LinuxToys core libraries.
+
+#### Other Repository List Features
+
+Using `external` only replaces the actual installation procedure. The entry can continue to use the normal repository list functionality around it, including dependencies, compatibility rules, application-page metadata, descriptions, screenshots, icons, pre/post overrides, services, and other supported options.
+
+For example:
+
+```json
+{
+    "name": "Example Pro",
+    "description": "Professional software for example workflows.",
+    "repo": "https://example.org/example-pro",
+    "category": "utilities",
+    "icon": "example-pro.svg",
+    "license": "Proprietary",
+    "type": "external",
+    "script": "https://example.org/linux/install.sh",
+    "dependencies": {
+        "native": [
+            "curl"
+        ]
+    },
+    "os": [
+        "arch",
+        "cachy",
+        "fedora",
+        "ubuntu",
+        "debian"
+    ]
+}
+```
+
+The type can also participate in OS-specific type selection like other repository list types:
+
+```json
+"type": {
+    "ubuntu": "external",
+    "debian": "external",
+    "all": "flathub"
+}
+```
+
+In this case, the external script is used on Ubuntu and Debian while other supported systems use the Flathub installation method.
+
+> **Note:** Prefer the standard repository list installation types whenever they can adequately describe an application's installation process. `external` is intended for installation procedures that genuinely require custom logic or cannot be distributed as part of the repository.
+
+---
+
 ## Compatibility
 
 Repository-list entries can restrict themselves to particular operating systems, desktop environments, hardware, init systems, or container environments.

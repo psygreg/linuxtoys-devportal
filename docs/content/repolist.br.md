@@ -988,6 +988,124 @@ Declarações de URLs dinâmicas exigem um hook de pré-instalação. Os nomes d
 
 ---
 
+## Scripts de Instalação Externos
+
+O tipo `external` permite que uma entrada de lista de repositório delegue seu procedimento de instalação a um script Bash personalizado, mantendo os metadados, controles de compatibilidade, páginas de aplicativos e outras facilidades oferecidas pelas listas de repositórios.
+
+Ele é destinado principalmente a duas situações:
+
+* **Procedimentos de instalação totalmente personalizados** — quando um aplicativo ou recurso exige um processo de instalação que não pode ser representado adequadamente pelos tipos e auxiliares padrão das listas de repositórios, mas ainda se beneficiaria de recursos como páginas de aplicativos, regras de compatibilidade, dependências, capturas de tela, descrições e outros metadados.
+* **Procedimentos de instalação proprietários** — quando um software proprietário não pode publicar sua lógica de instalação no repositório porque o procedimento contém código confidencial ou que, por outros motivos, não pode ser disponibilizado publicamente. Nesse caso, o instalador pode ser obtido através de uma URL no momento da instalação.
+
+Uma entrada externa utiliza:
+
+```json id="4a8avc"
+{
+    "name": "Example Application",
+    "description": "An application using a custom installation procedure.",
+    "repo": "https://example.org",
+    "category": "utilities",
+    "type": "external",
+    "script": "./install.sh"
+}
+```
+
+O campo `script` é obrigatório sempre que o tipo resolvido for `external`.
+
+#### Scripts Locais do Repositório
+
+O script pode ser armazenado junto à lista de repositório:
+
+```json id="u77ogm"
+"type": "external",
+"script": "./install.sh"
+```
+
+Caminhos relativos são resolvidos a partir do diretório que contém a entrada da lista de repositório. Eles devem permanecer dentro da árvore do diretório `lists` do repositório.
+
+Essa abordagem é adequada para procedimentos de instalação personalizados que podem ser distribuídos publicamente, mas que não se encaixam nos métodos de instalação padrão oferecidos pelas listas de repositórios.
+
+#### Scripts Remotos
+
+O campo `script` também pode conter uma URL HTTPS:
+
+```json id="v61kty"
+"type": "external",
+"script": "https://example.org/linux/install.sh"
+```
+
+O LinuxToys baixa o script quando a instalação é iniciada e executa o script obtido através do ambiente normal de scripts do LinuxToys.
+
+Isso é particularmente útil para aplicativos proprietários cujo procedimento de instalação não pode ser incluído em um repositório público do LinuxToys por motivos de confidencialidade do código.
+
+#### Bibliotecas do LinuxToys
+
+Scripts externos são tratados como scripts de instalação do LinuxToys, e não simplesmente como comandos shell independentes.
+
+Eles são executados através do carregador de bibliotecas normal do LinuxToys, tendo acesso às mesmas bibliotecas principais e funções auxiliares disponíveis para scripts comuns do LinuxToys. As bibliotecas exigidas pelo script externo são detectadas e carregadas automaticamente.
+
+Por exemplo, um instalador externo pode utilizar diretamente funções auxiliares do LinuxToys:
+
+```bash id="8cpg1y"
+#!/usr/bin/env bash
+
+pkg_install curl
+prep_tmp
+
+info "Preparing installation..."
+
+# Custom installation procedure...
+```
+
+Portanto, o script externo não precisa localizar ou carregar manualmente as bibliotecas principais do LinuxToys.
+
+#### Outros Recursos das Listas de Repositórios
+
+O uso de `external` substitui apenas o procedimento de instalação propriamente dito. A entrada pode continuar utilizando normalmente os demais recursos das listas de repositórios, incluindo dependências, regras de compatibilidade, metadados da página do aplicativo, descrições, capturas de tela, ícones, sobrescritas pre/post, serviços e outras opções suportadas.
+
+Por exemplo:
+
+```json id="rvlbms"
+{
+    "name": "Example Pro",
+    "description": "Professional software for example workflows.",
+    "repo": "https://example.org/example-pro",
+    "category": "utilities",
+    "icon": "example-pro.svg",
+    "license": "Proprietary",
+    "type": "external",
+    "script": "https://example.org/linux/install.sh",
+    "dependencies": {
+        "native": [
+            "curl"
+        ]
+    },
+    "os": [
+        "arch",
+        "cachy",
+        "fedora",
+        "ubuntu",
+        "debian"
+    ]
+}
+```
+
+O tipo também pode participar da seleção de tipos específica por sistema operacional, assim como os demais tipos das listas de repositórios:
+
+```json id="qfth4v"
+"type": {
+    "ubuntu": "external",
+    "debian": "external",
+    "all": "flathub"
+}
+```
+
+Nesse caso, o script externo é utilizado no Ubuntu e Debian, enquanto os demais sistemas compatíveis utilizam o método de instalação pelo Flathub.
+
+> **Nota:** Prefira os tipos de instalação padrão das listas de repositórios sempre que eles forem suficientes para descrever adequadamente o processo de instalação de um aplicativo. O tipo `external` é destinado a procedimentos de instalação que realmente exigem lógica personalizada ou que não podem ser distribuídos como parte do repositório.
+
+---
+
 ## Compatibilidade
 
 Entradas de listas de repositórios podem ser limitadas a determinados sistemas operacionais, ambientes de desktop, hardware, sistemas de init ou ambientes containerizados.
