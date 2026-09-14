@@ -809,6 +809,8 @@ New code should generally use the newer names except where an existing LinuxToys
 
 ## Asking the User a Question
 
+LinuxToys provides helper functions for asking questions and presenting selections to the user. These functions automatically use Zenity when running in GUI mode and provide interactive terminal fallbacks when `DISABLE_ZENITY` is set.
+
 ### `question`
 
 ```bash
@@ -830,7 +832,7 @@ Default dimensions are:
 360 x 300
 ```
 
-In GUI mode the function uses Zenity. When an interactive terminal is available as a fallback, it asks for a `y/N` response.
+In GUI mode, the function uses Zenity. In terminal mode, it asks for a `y/N` response. Answering `y` or `Y` returns success; any other answer returns failure.
 
 Example:
 
@@ -839,6 +841,122 @@ if question "Example" "Install development tools?" 400 250; then
     pkg_install example-devel
 fi
 ```
+
+### `radioselect`
+
+Use `radioselect` when the user must select exactly one option.
+
+Pass each available option as an argument:
+
+```bash
+choice=$(radioselect \
+    "Stable" \
+    "Beta" \
+    "Nightly")
+```
+
+The signature is:
+
+```bash
+radioselect OPTION [OPTION ...]
+```
+
+The function prints the selected option to standard output, making it suitable for command substitution:
+
+```bash
+choice=$(radioselect "Option 1" "Option 2" "Option 3")
+
+case "$choice" in
+    "Option 1")
+        ...
+        ;;
+    "Option 2")
+        ...
+        ;;
+    "Option 3")
+        ...
+        ;;
+esac
+```
+
+In GUI mode, a Zenity radiolist is displayed. The first option is selected by default.
+
+In terminal mode, the available options are displayed as a numbered list and the user enters the number corresponding to their selection. Pressing Enter without entering a number selects the first option, matching the GUI default.
+
+For example:
+
+```text
+1) Stable
+2) Beta
+3) Nightly
+
+Selection [1]:
+```
+
+### `listselect`
+
+Use `listselect` when the user may select one or more options.
+
+Pass each available option as an argument:
+
+```bash
+mapfile -t choices < <(
+    listselect \
+        "Steam" \
+        "Lutris" \
+        "Heroic"
+)
+```
+
+The signature is:
+
+```bash
+listselect OPTION [OPTION ...]
+```
+
+The function prints each selected option on a separate line. `mapfile` is therefore a convenient way to collect the result into a Bash array:
+
+```bash
+mapfile -t choices < <(
+    listselect "Package A" "Package B" "Package C"
+)
+
+for choice in "${choices[@]}"; do
+    case "$choice" in
+        "Package A")
+            pkg_install package-a
+            ;;
+        "Package B")
+            pkg_install package-b
+            ;;
+        "Package C")
+            pkg_install package-c
+            ;;
+    esac
+done
+```
+
+In GUI mode, a Zenity list with multiple selection enabled is displayed.
+
+In terminal mode, the options are displayed as a numbered list. The user may enter multiple option numbers separated by spaces or commas:
+
+```text
+1) Package A
+2) Package B
+3) Package C
+
+Selections: 1 3
+```
+
+or:
+
+```text
+Selections: 1,3
+```
+
+Both select `Package A` and `Package C`.
+
+Because `radioselect` and `listselect` write their selected values to standard output, their results can be consumed directly by scripts without requiring temporary files or additional parsing.
 
 ---
 
@@ -2483,7 +2601,7 @@ When writing a LinuxToys script:
 
 | Area                       | Functions                                                                                                                                                        |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Messages                   | `info`, `warn`, `error`, `die`, `question`                                                                                                                       |
+| Messages                   | `info`, `warn`, `error`, `die`, `question`, `listselect`, `radioselect`                                                                                                                       |
 | Authentication             | `askpass`, `sudo_rq`                                                                                                                                             |
 | OS detection               | `is_arch`, `is_cachy`, `is_fedora`, `is_ostree`, `is_debian`, `is_ubuntu`, `is_suse`, `is_solus`, `is_zorin`, `is_rhel`, `is_deepin`, `is_manjaro`, `is_systemd` |
 | Hardware                   | `is_nvidia`, `is_intel`, `is_icr_capable`, `is_amd`, `amd_dgpu`, `rocm_apu`, `is_rocm_capable`, `has_rebar`, `is_hybridgpu`                                      |

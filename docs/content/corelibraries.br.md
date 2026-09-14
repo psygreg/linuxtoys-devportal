@@ -809,11 +809,13 @@ Código novo geralmente deve usar os nomes mais recentes, exceto quando uma conv
 
 ## Fazendo uma Pergunta ao Usuário
 
+O LinuxToys fornece funções auxiliares para fazer perguntas e apresentar opções de seleção ao usuário. Essas funções usam automaticamente o Zenity quando executadas em modo gráfico e oferecem alternativas interativas pelo terminal quando `DISABLE_ZENITY` está definido.
+
 ### `question`
 
 ```bash
-if question "Example Installer" \
-    "Would you like to enable the optional component?"; then
+if question "Instalador de Exemplo" \
+    "Gostaria de habilitar o componente opcional?"; then
     ...
 fi
 ```
@@ -821,7 +823,7 @@ fi
 A assinatura é:
 
 ```bash
-question TITLE TEXT [WIDTH] [HEIGHT]
+question TÍTULO TEXTO [LARGURA] [ALTURA]
 ```
 
 As dimensões padrão são:
@@ -830,15 +832,131 @@ As dimensões padrão são:
 360 x 300
 ```
 
-No modo gráfico, a função usa o Zenity. Quando um terminal interativo está disponível como alternativa, ela solicita uma resposta `y/N`.
+No modo gráfico, a função usa o Zenity. No modo de terminal, ela solicita uma resposta `s/N`. Responder `s` ou `S` retorna sucesso; qualquer outra resposta retorna falha.
 
 Exemplo:
 
 ```bash
-if question "Example" "Install development tools?" 400 250; then
+if question "Exemplo" "Instalar ferramentas de desenvolvimento?" 400 250; then
     pkg_install example-devel
 fi
 ```
+
+### `radioselect`
+
+Use `radioselect` quando o usuário precisar selecionar exatamente uma opção.
+
+Passe cada opção disponível como um argumento:
+
+```bash
+choice=$(radioselect \
+    "Estável" \
+    "Beta" \
+    "Nightly")
+```
+
+A assinatura é:
+
+```bash
+radioselect OPÇÃO [OPÇÃO ...]
+```
+
+A função imprime a opção selecionada na saída padrão, tornando-a adequada para substituição de comando:
+
+```bash
+choice=$(radioselect "Opção 1" "Opção 2" "Opção 3")
+
+case "$choice" in
+    "Opção 1")
+        ...
+        ;;
+    "Opção 2")
+        ...
+        ;;
+    "Opção 3")
+        ...
+        ;;
+esac
+```
+
+No modo gráfico, uma lista de seleção única do Zenity é exibida. A primeira opção é selecionada por padrão.
+
+No modo de terminal, as opções disponíveis são exibidas como uma lista numerada e o usuário insere o número correspondente à sua escolha. Pressionar Enter sem inserir um número seleciona a primeira opção, correspondendo ao comportamento padrão da interface gráfica.
+
+Por exemplo:
+
+```text
+1) Estável
+2) Beta
+3) Nightly
+
+Seleção [1]:
+```
+
+### `listselect`
+
+Use `listselect` quando o usuário puder selecionar uma ou mais opções.
+
+Passe cada opção disponível como um argumento:
+
+```bash
+mapfile -t choices < <(
+    listselect \
+        "Steam" \
+        "Lutris" \
+        "Heroic"
+)
+```
+
+A assinatura é:
+
+```bash
+listselect OPÇÃO [OPÇÃO ...]
+```
+
+A função imprime cada opção selecionada em uma linha separada. Portanto, `mapfile` é uma maneira conveniente de armazenar o resultado em um array do Bash:
+
+```bash
+mapfile -t choices < <(
+    listselect "Pacote A" "Pacote B" "Pacote C"
+)
+
+for choice in "${choices[@]}"; do
+    case "$choice" in
+        "Pacote A")
+            pkg_install package-a
+            ;;
+        "Pacote B")
+            pkg_install package-b
+            ;;
+        "Pacote C")
+            pkg_install package-c
+            ;;
+    esac
+done
+```
+
+No modo gráfico, uma lista do Zenity com seleção múltipla habilitada é exibida.
+
+No modo de terminal, as opções são exibidas como uma lista numerada. O usuário pode inserir vários números de opções separados por espaços ou vírgulas:
+
+```text
+1) Pacote A
+2) Pacote B
+3) Pacote C
+
+Seleções: 1 3
+```
+
+ou:
+
+```text
+Seleções: 1,3
+```
+
+Ambas as formas selecionam `Pacote A` e `Pacote C`.
+
+Como `radioselect` e `listselect` escrevem os valores selecionados na saída padrão, seus resultados podem ser consumidos diretamente pelos scripts sem a necessidade de arquivos temporários ou processamento adicional.
 
 ---
 
@@ -2483,7 +2601,7 @@ Ao escrever um script do LinuxToys:
 
 | Área                       | Funções                                                                                                                                                        |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mensagens                  | `info`, `warn`, `error`, `die`, `question`                                                                                                                       |
+| Mensagens                  | `info`, `warn`, `error`, `die`, `question`, `listselect`, `radioselect`                                                                                                                       |
 | Autenticação               | `askpass`, `sudo_rq`                                                                                                                                             |
 | Detecção de SO             | `is_arch`, `is_cachy`, `is_fedora`, `is_ostree`, `is_debian`, `is_ubuntu`, `is_suse`, `is_solus`, `is_zorin`, `is_rhel`, `is_deepin`, `is_manjaro`, `is_systemd` |
 | Hardware                   | `is_nvidia`, `is_intel`, `is_icr_capable`, `is_amd`, `amd_dgpu`, `rocm_apu`, `is_rocm_capable`, `has_rebar`, `is_hybridgpu`                                      |
