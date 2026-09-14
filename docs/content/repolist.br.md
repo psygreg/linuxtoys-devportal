@@ -2024,6 +2024,54 @@ O LinuxToys exibe um botão **Doar** na página do aplicativo, que abre a URL es
 
 Somente URLs HTTP ou HTTPS válidas são aceitas.
 
+### Licença
+
+Entradas de repositório podem, opcionalmente, declarar a licença do aplicativo usando o campo `license`:
+
+```json
+"license": "GPLv3"
+```
+
+Quando informado, o identificador da licença é exibido como um pequeno texto ao lado do nome do aplicativo em sua página.
+
+Por exemplo:
+
+```json
+{
+    "name": "Aplicativo de Exemplo",
+    "description": "Um aplicativo de exemplo.",
+    "repo": "https://example.org",
+    "category": "utilities",
+    "license": "GPLv3"
+}
+```
+
+O campo `license` é opcional e deve ser uma string contendo no máximo **20 caracteres**.
+
+Use o identificador curto ou abreviação comumente reconhecida para a licença:
+
+```json
+"license": "GPLv3"
+```
+
+```json
+"license": "MIT"
+```
+
+```json
+"license": "Apache-2.0"
+```
+
+Evite escrever o nome completo da licença:
+
+```json
+"license": "GNU General Public License v3"
+```
+
+Nomes extensos são intencionalmente rejeitados para manter a informação da licença compacta quando exibida ao lado do nome do aplicativo.
+
+Espaços em branco no início e no final são ignorados, mas um valor vazio não é válido.
+
 ### Aplicativos Pagos e Assinaturas
 
 Aplicativos que exigem pagamento podem oferecer opções de compra única, assinatura ou ambas através do campo `purchase`.

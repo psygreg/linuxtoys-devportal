@@ -2024,6 +2024,54 @@ LinuxToys displays a **Donate** button on the application page which opens the s
 
 Only valid HTTP or HTTPS URLs are accepted.
 
+### License
+
+Repository entries may optionally declare the application's license using the `license` field:
+
+```json
+"license": "GPLv3"
+```
+
+When provided, the license is displayed as small text beside the application name on the application page.
+
+For example:
+
+```json
+{
+    "name": "Example App",
+    "description": "An example application.",
+    "repo": "https://example.org",
+    "category": "utilities",
+    "license": "GPLv3"
+}
+```
+
+The `license` field is optional and must be a string containing no more than **20 characters**.
+
+Use the commonly recognized short identifier or abbreviation for the license:
+
+```json
+"license": "GPLv3"
+```
+
+```json
+"license": "MIT"
+```
+
+```json
+"license": "Apache-2.0"
+```
+
+Avoid writing the complete license name:
+
+```json
+"license": "GNU General Public License v3"
+```
+
+Long-form names are intentionally rejected so that license information remains compact when displayed beside the application name.
+
+Leading and trailing whitespace is ignored, but an empty value is not valid.
+
 ### Paid Applications and Subscriptions
 
 Applications that require payment can provide one-time purchase options, subscription options, or both through the `purchase` field.
