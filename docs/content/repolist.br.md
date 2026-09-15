@@ -1106,6 +1106,93 @@ Nesse caso, o script externo é utilizado no Ubuntu e Debian, enquanto os demais
 
 ---
 
+## Instalações Baseadas em Makefile
+
+O tipo `make` é destinado a aplicativos e ferramentas que fornecem um procedimento de instalação padrão baseado em Makefile usando `make install`.
+
+O LinuxToys pode obter o código-fonte da instalação clonando o repositório Git do aplicativo ou baixando um tarball de código-fonte da versão mais recente. Em seguida, a instalação é realizada localizando o Makefile e executando o equivalente a:
+
+```bash
+sudo make install
+```
+
+Diferentemente do tipo `tar`, que instala um aplicativo extraído no diretório de aplicativos do LinuxToys do usuário, `make` é destinado a projetos cujo próprio Makefile define onde e como o aplicativo deve ser instalado.
+
+### Instalando a Partir de um Repositório Git
+
+Por padrão, `make` clona o repositório especificado por `repo`:
+
+```json
+{
+    "name": "Example",
+    "description": "Aplicativo de exemplo",
+    "repo": "https://github.com/example/example",
+    "type": "make"
+}
+```
+
+O repositório de código-fonte é clonado para um diretório temporário do LinuxToys. Em seguida, o LinuxToys localiza seu Makefile e realiza a instalação.
+
+Git é a fonte padrão, portanto nenhuma opção adicional de fonte é necessária.
+
+### Instalando a Partir de um Tarball de Lançamento
+
+Uma entrada `make` pode, em vez disso, utilizar um tarball de código-fonte publicado com o lançamento mais recente do projeto:
+
+```json
+{
+    "name": "Example",
+    "description": "Aplicativo de exemplo",
+    "repo": "https://github.com/example/example",
+    "type": "make",
+    "make-source": "tar"
+}
+```
+
+A descoberta do tarball de lançamento segue as mesmas regras utilizadas por `pkg_fromrelease`. O LinuxToys seleciona um recurso `.tar.gz` ou `.tar.xz` compatível, baixa e extrai o arquivo em seu diretório temporário, localiza o Makefile e realiza a instalação.
+
+Quando um repositório publica múltiplos tarballs de código-fonte, `package-name` pode ser utilizado para selecionar o recurso desejado:
+
+```json
+{
+    "name": "Example",
+    "description": "Aplicativo de exemplo",
+    "repo": "https://github.com/example/example",
+    "type": "make",
+    "make-source": "tar",
+    "package-name": "example-*.tar.gz"
+}
+```
+
+O valor segue as mesmas regras de seleção de recursos de lançamento utilizadas pelos outros tipos baseados em `pkg_fromrelease`.
+
+### Desinstalação
+
+Instalações por Makefile são integradas ao Registro de Ações do LinuxToys.
+
+O LinuxToys registra a instalação como uma operação `pkg make`. Quando o aplicativo é removido através do LinuxToys, o código-fonte é obtido novamente utilizando o mesmo método usado durante a instalação e o LinuxToys executa o equivalente a:
+
+```bash
+sudo make uninstall
+```
+
+Portanto, o projeto upstream deve fornecer um alvo `uninstall` funcional no Makefile para que a remoção automática funcione corretamente.
+
+### Quando Usar `make`
+
+Use `make` quando um projeto upstream:
+
+* fornece um Makefile com alvos `install` e `uninstall`;
+* espera que a instalação seja realizada através de `make install`;
+* distribui seu código-fonte através de um repositório Git ou tarball de lançamento; e
+* não fornece um pacote nativo, Flatpak, AppImage ou outro formato de pacote compatível mais apropriado.
+
+Dependências de compilação necessárias para o projeto ainda devem ser declaradas através do campo `dependencies` da entrada do repositório quando necessário.
+
+Não use `make` simplesmente porque um projeto utiliza Make internamente. Este tipo representa especificamente projetos cujos procedimentos de instalação e remoção podem ser realizados através de `make install` e `make uninstall`.
+
+---
+
 ## Compatibilidade
 
 Entradas de listas de repositórios podem ser limitadas a determinados sistemas operacionais, ambientes de desktop, hardware, sistemas de init ou ambientes containerizados.

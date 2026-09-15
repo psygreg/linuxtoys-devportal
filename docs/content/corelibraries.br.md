@@ -1582,6 +1582,96 @@ Garante que o Bun esteja instalado ou o atualiza, configura o PATH relevante do 
 
 ---
 
+## `pkg_make`
+
+`pkg_make` instala software cujo procedimento de instalação upstream é baseado em um Makefile que fornece alvos `install` e `uninstall`.
+
+Ele cuida da obtenção do código-fonte, extração ou clonagem temporária, localização do Makefile, elevação de privilégios, instalação e integração com o Registro de Ações.
+
+### Repositório Git
+
+Para instalar diretamente a partir de um repositório Git:
+
+```bash
+pkg_make https://github.com/example/example
+```
+
+O LinuxToys clona o repositório para seu diretório temporário padrão, localiza o Makefile e executa seu alvo de instalação.
+
+Este é o modo de fonte padrão.
+
+### Tarball de Lançamento
+
+Para utilizar um tarball de código-fonte do lançamento mais recente do repositório:
+
+```bash
+pkg_make --tar https://github.com/example/example
+```
+
+O LinuxToys utiliza as mesmas regras de descoberta e seleção de lançamentos de `pkg_fromrelease --tar`, baixa o arquivo de código-fonte selecionado, extrai seu conteúdo no diretório temporário padrão do LinuxToys e localiza o Makefile antes de realizar a instalação.
+
+Um seletor opcional de recurso de lançamento pode ser fornecido quando o lançamento mais recente contém múltiplos tarballs adequados:
+
+```bash
+pkg_make --tar https://github.com/example/example 'example-*.tar.gz'
+```
+
+Dessa forma, a seleção de recursos de lançamento mantém o mesmo comportamento de `pkg_fromrelease`, incluindo suas regras de filtragem de arquitetura e recursos.
+
+### Integração com o Registro de Ações
+
+Após uma instalação bem-sucedida, `pkg_make` registra a operação no mapa de transações como:
+
+```text
+pkg make <fonte>
+```
+
+Isso é diferente de uma operação `pkg` normal, pois os arquivos instalados são gerenciados pelo Makefile upstream, e não pelo gerenciador de pacotes da distribuição.
+
+Durante a remoção, o LinuxToys reconhece a operação `pkg make`, obtém o código-fonte novamente utilizando o método apropriado, localiza seu Makefile e executa:
+
+```bash
+sudo make uninstall
+```
+
+Isso significa que um projeto utilizado com `pkg_make` deve fornecer um alvo `uninstall` funcional. Caso o upstream não forneça um, o LinuxToys não poderá determinar de forma confiável quais arquivos foram instalados por `make install`, e `pkg_make` não deve ser utilizado para esse projeto.
+
+### Arquivos Temporários
+
+As árvores de código-fonte são preparadas dentro do diretório temporário padrão do LinuxToys, em vez de serem instaladas ou compiladas diretamente no diretório pessoal do usuário:
+
+```text
+~/.cache/linuxtoys/tmp
+```
+
+### Privilégios e Controle do Runner
+
+Como as etapas de instalação e desinstalação requerem `sudo`, `pkg_make` obtém a autenticação antes de bloquear a entrada do terminal. Isso segue o mesmo princípio utilizado pelas outras operações privilegiadas de pacotes e evita que o bloqueio de entrada do visualizador de terminal interfira com a autenticação.
+
+A instalação privilegiada é então realizada enquanto a operação de pacote está protegida pelo bloqueio do runner.
+
+### Requisitos e Uso Apropriado
+
+`pkg_make` pressupõe que a árvore de código-fonte upstream forneça os alvos de Makefile necessários para realizar os dois lados da operação:
+
+```bash
+sudo make install
+sudo make uninstall
+```
+
+Compiladores, bibliotecas, sistemas de compilação ou outras dependências necessárias continuam sendo responsabilidade do script LinuxToys que chama a função. Normalmente, elas devem ser instaladas previamente com `pkg_install`.
+
+Por exemplo:
+
+```bash
+pkg_install gcc make example-devel
+pkg_make https://github.com/example/example
+```
+
+Use `pkg_make` somente quando o próprio Makefile for o mecanismo oficial de instalação. Se o upstream fornecer um pacote nativo ou outro formato de pacote já compatível com o LinuxToys, o helper correspondente deve ser utilizado.
+
+---
+
 ## Operações do Sistema de Arquivos e Reversão
 
 Para arquivos que o LinuxToys possa precisar restaurar posteriormente, use os auxiliares de preparação do sistema de arquivos em vez de editá-los diretamente sem registro.

@@ -1582,6 +1582,107 @@ Ensures Bun exists or updates it, configures the relevant user PATH, installs mi
 
 ---
 
+## `pkg_make`
+
+`pkg_make` installs software whose upstream installation procedure is based on a Makefile providing `install` and `uninstall` targets.
+
+It handles acquisition of the source code, temporary extraction or cloning, Makefile discovery, privilege escalation, installation, and Action Registry integration.
+
+The general installation procedure is equivalent to:
+
+```bash
+make
+sudo make install
+```
+
+with the source prepared automatically by LinuxToys.
+
+### Git Repository
+
+To install directly from a Git repository:
+
+```bash
+pkg_make https://github.com/example/example
+```
+
+LinuxToys clones the repository into its standard temporary directory, locates the Makefile, builds the project when required, and runs its installation target.
+
+This is the default source mode.
+
+### Release Tarball
+
+To use a source tarball from the latest repository release instead:
+
+```bash
+pkg_make --tar https://github.com/example/example
+```
+
+LinuxToys uses the same release discovery and selection rules as `pkg_fromrelease --tar`, downloads the selected source archive, extracts it into the standard LinuxToys temporary directory, and locates the Makefile before proceeding with the build and installation.
+
+An optional release asset selector can be supplied when the latest release contains multiple suitable tarballs:
+
+```bash
+pkg_make --tar https://github.com/example/example 'example-*.tar.gz'
+```
+
+Release asset selection therefore behaves consistently with `pkg_fromrelease`, including its architecture and asset filtering behavior. `pkg_fromrelease` already supports optional asset selectors and a dedicated tarball mode for this purpose.
+
+### Action Registry Integration
+
+After a successful installation, `pkg_make` registers the operation in the transaction map as:
+
+```text
+pkg make <source>
+```
+
+This is distinct from a normal `pkg` operation because the installed files are managed by the upstream Makefile rather than by the distribution's package manager.
+
+During removal, LinuxToys recognizes the `pkg make` operation, obtains the source again using the appropriate source method, locates its Makefile, and runs:
+
+```bash
+sudo make uninstall
+```
+
+This means that a project used with `pkg_make` must provide a functional `uninstall` target. If upstream does not provide one, LinuxToys cannot reliably determine which files were installed by `make install`, and `pkg_make` should not be used for that project.
+
+### Temporary Files
+
+Source trees are prepared inside the standard LinuxToys temporary directory rather than installed or built directly inside the user's home directory.
+
+The core filesystem library provides `prep_tmp_noram` for operations that need the standard persistent LinuxToys temporary area:
+
+```text
+~/.cache/linuxtoys/tmp
+```
+
+### Privilege and Runner Handling
+
+Because the installation and uninstallation stages require `sudo`, `pkg_make` obtains authentication before locking terminal input. This follows the same principle used by other privileged package operations and prevents the terminal runner's input lock from interfering with authentication.
+
+The actual privileged installation is then performed while the package operation is protected by the runner lock.
+
+### Requirements and Appropriate Usage
+
+`pkg_make` assumes that the upstream source tree provides the Makefile targets necessary to perform both sides of the operation:
+
+```bash
+sudo make install
+sudo make uninstall
+```
+
+Any compiler, library, build-system, or other build dependencies remain the responsibility of the calling LinuxToys script. They should normally be installed beforehand with `pkg_install`.
+
+For example:
+
+```bash
+pkg_install gcc make example-devel
+pkg_make https://github.com/example/example
+```
+
+Use `pkg_make` only when the Makefile itself is the authoritative installation mechanism. If upstream provides a native package or another package format already supported by LinuxToys, the corresponding package helper should generally be used instead.
+
+---
+
 ## Filesystem Operations and Reversion
 
 For files that LinuxToys may need to restore later, use the filesystem preparation helpers rather than editing them blindly.
