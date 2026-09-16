@@ -1108,88 +1108,203 @@ Nesse caso, o script externo é utilizado no Ubuntu e Debian, enquanto os demais
 
 ## Instalações Baseadas em Makefile
 
-O tipo `make` é destinado a aplicativos e ferramentas que fornecem um procedimento de instalação padrão baseado em Makefile usando `make install`.
+Entradas de listas de repositórios podem usar o tipo `make` para aplicativos cujo procedimento de instalação oficial é fornecido por meio de um Makefile.
 
-O LinuxToys pode obter o código-fonte da instalação clonando o repositório Git do aplicativo ou baixando um tarball de código-fonte da versão mais recente. Em seguida, a instalação é realizada localizando o Makefile e executando o equivalente a:
+Instalações `make` podem usar como fonte um repositório Git ou um tarball de lançamento. O LinuxToys obtém o código-fonte, localiza seu Makefile, compila o projeto e então executa seu alvo de instalação.
+
+### Repositório Git
+
+Git é o tipo de fonte padrão:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "category": "utilities"
+}
+```
+
+O LinuxToys clona o repositório e localiza seu Makefile.
+
+### Tarball de Lançamento
+
+Para compilar a partir de um tarball de lançamento, defina:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "make-source": "tar",
+  "category": "utilities"
+}
+```
+
+O LinuxToys seleciona o lançamento estável mais recente usando o mesmo mecanismo de lançamentos utilizado por `pkg_fromrelease`.
+
+Quando necessário, `package-name` pode selecionar um arquivo específico do lançamento:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "make-source": "tar",
+  "package-name": "example-*.tar.gz",
+  "category": "utilities"
+}
+```
+
+### Compilação
+
+Depois de obter o código-fonte e localizar seu Makefile, o LinuxToys primeiro compila o projeto com:
+
+```bash
+make
+```
+
+A compilação é realizada como o usuário atual e não solicita privilégios elevados.
+
+Se a compilação falhar, a instalação não será tentada.
+
+### Instalação
+
+O comando de instalação padrão é:
 
 ```bash
 sudo make install
 ```
 
-Diferentemente do tipo `tar`, que instala um aplicativo extraído no diretório de aplicativos do LinuxToys do usuário, `make` é destinado a projetos cujo próprio Makefile define onde e como o aplicativo deve ser instalado.
-
-### Instalando a Partir de um Repositório Git
-
-Por padrão, `make` clona o repositório especificado por `repo`:
+Portanto, uma entrada `make` normal não requer nenhuma propriedade adicional para a instalação:
 
 ```json
 {
-    "name": "Example",
-    "description": "Aplicativo de exemplo",
-    "repo": "https://github.com/example/example",
-    "type": "make"
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "category": "utilities"
 }
 ```
 
-O repositório de código-fonte é clonado para um diretório temporário do LinuxToys. Em seguida, o LinuxToys localiza seu Makefile e realiza a instalação.
+Quando o comando de instalação contém `sudo`, o LinuxToys solicita autenticação por meio do seu fluxo gráfico normal de `askpass` antes de bloquear a entrada do terminal.
 
-Git é a fonte padrão, portanto nenhuma opção adicional de fonte é necessária.
+### Comando de Instalação Make Personalizado
 
-### Instalando a Partir de um Tarball de Lançamento
-
-Uma entrada `make` pode, em vez disso, utilizar um tarball de código-fonte publicado com o lançamento mais recente do projeto:
+Projetos que fornecem um alvo de instalação diferente podem substituir o comando padrão usando `make-command`:
 
 ```json
 {
-    "name": "Example",
-    "description": "Aplicativo de exemplo",
-    "repo": "https://github.com/example/example",
-    "type": "make",
-    "make-source": "tar"
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "make-command": "make install-user",
+  "category": "utilities"
 }
 ```
 
-A descoberta do tarball de lançamento segue as mesmas regras utilizadas por `pkg_fromrelease`. O LinuxToys seleciona um recurso `.tar.gz` ou `.tar.xz` compatível, baixa e extrai o arquivo em seu diretório temporário, localiza o Makefile e realiza a instalação.
+O comando especificado é executado a partir do diretório que contém o Makefile.
 
-Quando um repositório publica múltiplos tarballs de código-fonte, `package-name` pode ser utilizado para selecionar o recurso desejado:
+Isso é particularmente útil para projetos que fornecem um método de instalação local para o usuário:
 
-```json
-{
-    "name": "Example",
-    "description": "Aplicativo de exemplo",
-    "repo": "https://github.com/example/example",
-    "type": "make",
-    "make-source": "tar",
-    "package-name": "example-*.tar.gz"
-}
+```bash
+make install-user
 ```
 
-O valor segue as mesmas regras de seleção de recursos de lançamento utilizadas pelos outros tipos baseados em `pkg_fromrelease`.
+Como esse comando não usa `sudo`, o LinuxToys não solicita privilégios elevados.
 
-### Desinstalação
+Isso também permite que entradas `make` sejam compatíveis com o SteamOS quando fornecem explicitamente um comando personalizado de instalação em nível de usuário. Entradas `make` que usam o padrão `sudo make install`, ou um comando personalizado que exige `sudo`, continuam incompatíveis com o SteamOS, pois modificariam seu sistema-base imutável.
 
-Instalações por Makefile são integradas ao Registro de Ações do LinuxToys.
+### Remoção
 
-O LinuxToys registra a instalação como uma operação `pkg make`. Quando o aplicativo é removido através do LinuxToys, o código-fonte é obtido novamente utilizando o mesmo método usado durante a instalação e o LinuxToys executa o equivalente a:
+Instalações Make concluídas com sucesso são registradas no Registro de Ações. O LinuxToys registra tanto a fonte quanto o comando de instalação para que o mesmo fluxo de instalação possa ser revertido posteriormente.
+
+O padrão:
+
+```bash
+sudo make install
+```
+
+é revertido como:
 
 ```bash
 sudo make uninstall
 ```
 
-Portanto, o projeto upstream deve fornecer um alvo `uninstall` funcional no Makefile para que a remoção automática funcione corretamente.
+Alvos de instalação personalizados são convertidos para seus respectivos alvos de desinstalação, preservando o restante do comando:
 
-### Quando Usar `make`
+```text
+make install-user             → make uninstall-user
+make install_user             → make uninstall_user
+sudo make PREFIX=/opt install → sudo make PREFIX=/opt uninstall
+```
 
-Use `make` quando um projeto upstream:
+Portanto, o Makefile do projeto precisa fornecer o alvo de desinstalação correspondente.
 
-* fornece um Makefile com alvos `install` e `uninstall`;
-* espera que a instalação seja realizada através de `make install`;
-* distribui seu código-fonte através de um repositório Git ou tarball de lançamento; e
-* não fornece um pacote nativo, Flatpak, AppImage ou outro formato de pacote compatível mais apropriado.
+O LinuxToys obtém novamente o código-fonte para a remoção, mas não recompila o projeto antes de executar o comando de desinstalação.
 
-Dependências de compilação necessárias para o projeto ainda devem ser declaradas através do campo `dependencies` da entrada do repositório quando necessário.
+Assim como na instalação, a autenticação é solicitada somente quando o comando de desinstalação resultante contém `sudo`.
 
-Não use `make` simplesmente porque um projeto utiliza Make internamente. Este tipo representa especificamente projetos cujos procedimentos de instalação e remoção podem ser realizados através de `make install` e `make uninstall`.
+### Hooks Pós-Instalação
+
+Depois de localizar o Makefile, o LinuxToys exporta seu diretório como:
+
+```bash
+LINUXTOYS_MAKE_DIR
+```
+
+A variável permanece disponível para hooks pós-instalação das listas de repositórios, permitindo que eles acessem arquivos gerados pela compilação ou outros arquivos presentes na árvore de código-fonte obtida.
+
+Por exemplo:
+
+```json
+{
+  "overrides": {
+    "post": "./example-post.sh"
+  }
+}
+```
+
+O hook pode então usar:
+
+```bash
+cd "$LINUXTOYS_MAKE_DIR" || die "failed to enter make directory"
+```
+
+Isso é útil quando alvos Make adicionais do projeto ou artefatos gerados precisam ser tratados depois da instalação principal.
+
+O código-fonte permanece na área temporária de trabalho do LinuxToys durante o restante da operação e é tratado pela limpeza normal de arquivos temporários do aplicativo.
+
+### Dependências
+
+Entradas `make` não determinam automaticamente as dependências de compilação ou execução. Elas devem ser declaradas normalmente por meio de `dependencies`.
+
+Por exemplo:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "dependencies": [
+    {
+      "type": "native",
+      "package-name": "example-devel"
+    }
+  ],
+  "category": "utilities"
+}
+```
+
+Dependências nativas também tornam uma entrada incompatível com o SteamOS, mesmo quando a própria instalação Make é realizada inteiramente em nível de usuário.
+
+Use o tipo `make` quando o projeto oficialmente oferecer suporte à compilação e instalação por meio de seu Makefile e fornecer um alvo de desinstalação correspondente.
 
 ---
 

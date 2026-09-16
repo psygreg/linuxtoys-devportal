@@ -1584,91 +1584,208 @@ Garante que o Bun esteja instalado ou o atualiza, configura o PATH relevante do 
 
 ## `pkg_make`
 
-`pkg_make` instala software cujo procedimento de instalação upstream é baseado em um Makefile que fornece alvos `install` e `uninstall`.
+`pkg_make` trata aplicativos cujo mecanismo oficial de compilação e instalação é fornecido por meio de um Makefile.
 
-Ele cuida da obtenção do código-fonte, extração ou clonagem temporária, localização do Makefile, elevação de privilégios, instalação e integração com o Registro de Ações.
+Ele trata a obtenção do código-fonte, clonagem Git ou extração de tarballs, localização do Makefile, compilação, instalação, elevação de privilégios quando necessária e registro no Registro de Ações.
 
-### Repositório Git
+### Fontes Git
 
-Para instalar diretamente a partir de um repositório Git:
+A fonte padrão é um repositório Git:
 
 ```bash
 pkg_make https://github.com/example/example
 ```
 
-O LinuxToys clona o repositório para seu diretório temporário padrão, localiza o Makefile e executa seu alvo de instalação.
+O LinuxToys clona o repositório para sua área temporária de trabalho e localiza o Makefile.
 
-Este é o modo de fonte padrão.
+### Tarballs de Lançamento
 
-### Tarball de Lançamento
-
-Para utilizar um tarball de código-fonte do lançamento mais recente do repositório:
+Um tarball de lançamento pode ser selecionado com:
 
 ```bash
 pkg_make --tar https://github.com/example/example
 ```
 
-O LinuxToys utiliza as mesmas regras de descoberta e seleção de lançamentos de `pkg_fromrelease --tar`, baixa o arquivo de código-fonte selecionado, extrai seu conteúdo no diretório temporário padrão do LinuxToys e localiza o Makefile antes de realizar a instalação.
-
-Um seletor opcional de recurso de lançamento pode ser fornecido quando o lançamento mais recente contém múltiplos tarballs adequados:
+Um nome ou glob opcional para o arquivo do lançamento também pode ser fornecido:
 
 ```bash
 pkg_make --tar https://github.com/example/example 'example-*.tar.gz'
 ```
 
-Dessa forma, a seleção de recursos de lançamento mantém o mesmo comportamento de `pkg_fromrelease`, incluindo suas regras de filtragem de arquitetura e recursos.
+A seleção de lançamentos usa o mesmo mecanismo para lançamentos estáveis de `pkg_fromrelease`.
 
-### Integração com o Registro de Ações
-
-Após uma instalação bem-sucedida, `pkg_make` registra a operação no mapa de transações como:
-
-```text
-pkg make <fonte>
-```
-
-Isso é diferente de uma operação `pkg` normal, pois os arquivos instalados são gerenciados pelo Makefile upstream, e não pelo gerenciador de pacotes da distribuição.
-
-Durante a remoção, o LinuxToys reconhece a operação `pkg make`, obtém o código-fonte novamente utilizando o método apropriado, localiza seu Makefile e executa:
+Uma URL direta para um tarball também pode ser tratada internamente com:
 
 ```bash
-sudo make uninstall
+pkg_make --url https://example.com/example.tar.gz
 ```
 
-Isso significa que um projeto utilizado com `pkg_make` deve fornecer um alvo `uninstall` funcional. Caso o upstream não forneça um, o LinuxToys não poderá determinar de forma confiável quais arquivos foram instalados por `make install`, e `pkg_make` não deve ser utilizado para esse projeto.
+### Localização do Makefile
 
-### Arquivos Temporários
+Depois de obter o código-fonte, `pkg_make` localiza o Makefile que controlará a operação.
 
-As árvores de código-fonte são preparadas dentro do diretório temporário padrão do LinuxToys, em vez de serem instaladas ou compiladas diretamente no diretório pessoal do usuário:
+Quando o código-fonte obtido contém um Makefile na raiz esperada do projeto, esse Makefile é priorizado. Caso contrário, o LinuxToys pesquisa a árvore obtida e aceita um único Makefile não ambíguo em vez de tentar escolher entre subprojetos não relacionados.
 
-```text
-~/.cache/linuxtoys/tmp
+O diretório que contém o Makefile selecionado se torna o diretório de trabalho para as operações Make seguintes.
+
+### Compilação
+
+Para uma instalação normal, `pkg_make` primeiro compila o projeto com:
+
+```bash
+make
 ```
 
-### Privilégios e Controle do Runner
+A compilação é executada como o usuário atual antes da autenticação ou do bloqueio de transação de pacotes pelo runner.
 
-Como as etapas de instalação e desinstalação requerem `sudo`, `pkg_make` obtém a autenticação antes de bloquear a entrada do terminal. Isso segue o mesmo princípio utilizado pelas outras operações privilegiadas de pacotes e evita que o bloqueio de entrada do visualizador de terminal interfira com a autenticação.
+Se a compilação falhar, o comando de instalação não é executado.
 
-A instalação privilegiada é então realizada enquanto a operação de pacote está protegida pelo bloqueio do runner.
+Uma fonte obtida novamente para uma operação de desinstalação não é recompilada.
 
-### Requisitos e Uso Apropriado
+### Instalação Padrão
 
-`pkg_make` pressupõe que a árvore de código-fonte upstream forneça os alvos de Makefile necessários para realizar os dois lados da operação:
+Depois de uma compilação bem-sucedida, o comando de instalação padrão é:
 
 ```bash
 sudo make install
-sudo make uninstall
 ```
-
-Compiladores, bibliotecas, sistemas de compilação ou outras dependências necessárias continuam sendo responsabilidade do script LinuxToys que chama a função. Normalmente, elas devem ser instaladas previamente com `pkg_install`.
 
 Por exemplo:
 
 ```bash
-pkg_install gcc make example-devel
 pkg_make https://github.com/example/example
 ```
 
-Use `pkg_make` somente quando o próprio Makefile for o mecanismo oficial de instalação. Se o upstream fornecer um pacote nativo ou outro formato de pacote já compatível com o LinuxToys, o helper correspondente deve ser utilizado.
+efetivamente realiza o seguinte fluxo depois de obter e localizar o projeto:
+
+```bash
+make
+sudo make install
+```
+
+### Comandos de Instalação Personalizados
+
+Um comando de instalação personalizado pode ser fornecido com `--command`:
+
+```bash
+pkg_make --command "make install-user" https://github.com/example/example
+```
+
+Ele também pode ser combinado com tarballs de lançamentos:
+
+```bash
+pkg_make --command "make install-user" --tar https://github.com/example/example
+```
+
+ou fontes de tarball diretas:
+
+```bash
+pkg_make --command "make install-user" --url https://example.com/example.tar.gz
+```
+
+Entradas de listas de repositórios disponibilizam a mesma funcionalidade por meio de:
+
+```json
+"make-command": "make install-user"
+```
+
+O comando personalizado é executado a partir do diretório que contém o Makefile selecionado.
+
+Isso permite que projetos com alvos de instalação locais para o usuário evitem modificar o sistema:
+
+```bash
+make install-user
+```
+
+Quando nenhum comando personalizado é fornecido, `pkg_make` sempre utiliza:
+
+```bash
+sudo make install
+```
+
+### Autenticação e Bloqueio do Runner
+
+`pkg_make` examina o comando real de instalação ou desinstalação antes de executá-lo.
+
+Se o comando invocar `sudo`, o LinuxToys chama `askpass` antes de ativar o bloqueio de transação de pacotes do runner:
+
+```text
+sudo make install    → askpass necessário
+sudo make uninstall  → askpass necessário
+make install-user    → sem askpass
+make uninstall-user  → sem askpass
+```
+
+A compilação inicial com `make` é sempre realizada antes dessa etapa de autenticação e é executada sem elevação de privilégios.
+
+Essa ordem impede que o bloqueio de entrada do terminal interfira com a autenticação gráfica e, ao mesmo tempo, evita solicitações desnecessárias de privilégios para instalações em nível de usuário.
+
+### SteamOS
+
+O fluxo de instalação padrão de `pkg_make` usa:
+
+```bash
+sudo make install
+```
+
+e, portanto, não é adequado para o sistema-base imutável do SteamOS.
+
+Uma instalação Make pode ser considerada compatível com o SteamOS quando fornece explicitamente um comando personalizado de instalação em nível de usuário, como:
+
+```bash
+make install-user
+```
+
+O comando não deve exigir `sudo` ou outras modificações em nível de sistema.
+
+As demais restrições de compatibilidade com o SteamOS continuam válidas. Por exemplo, uma entrada que exige dependências de pacotes nativos não se torna compatível com o SteamOS simplesmente por utilizar um alvo Make de instalação em nível de usuário.
+
+### Registro de Ações e Reversão
+
+Instalações concluídas com sucesso são registradas como operações `pkg make`.
+
+O LinuxToys armazena a fonte junto ao comando de instalação realmente utilizado na operação. Isso permite reconstruir fielmente um fluxo de instalação personalizado quando o usuário posteriormente o reverte.
+
+Durante a reversão, `pkg_make` obtém novamente o código-fonte e deriva o comando de desinstalação substituindo o alvo de instalação por seu equivalente de desinstalação.
+
+Por exemplo:
+
+```text
+sudo make install             → sudo make uninstall
+make install-user             → make uninstall-user
+make install_user             → make uninstall_user
+sudo make PREFIX=/opt install → sudo make PREFIX=/opt uninstall
+```
+
+Somente o alvo de instalação é alterado; o restante do comando é preservado.
+
+O código-fonte não é recompilado durante a reversão.
+
+O Makefile do projeto precisa fornecer o alvo de desinstalação correspondente para que a operação possa ser revertida.
+
+### Diretório do Makefile
+
+Depois que o Makefile é localizado, `pkg_make` exporta seu diretório como:
+
+```bash
+LINUXTOYS_MAKE_DIR
+```
+
+Essa variável permanece disponível depois da instalação principal e, portanto, pode ser utilizada por hooks pós-instalação:
+
+```bash
+cd "$LINUXTOYS_MAKE_DIR" || die "failed to enter make directory"
+```
+
+Isso permite que um hook invoque alvos Make adicionais ou acesse artefatos gerados pela compilação sem precisar obter ou localizar novamente a árvore de código-fonte.
+
+O código-fonte obtido permanece na área temporária de trabalho do LinuxToys durante o restante da operação. A limpeza de arquivos temporários em nível do aplicativo cuida dele posteriormente.
+
+### Dependências
+
+`pkg_make` requer `make` e, para fontes Git, `git`, mas não tenta determinar as dependências de compilação ou execução específicas do projeto.
+
+Essas dependências continuam sendo responsabilidade do script que chama a função ou da entrada da lista de repositórios e devem ser instaladas antes que `pkg_make` seja executado.
 
 ---
 

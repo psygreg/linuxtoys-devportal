@@ -1584,102 +1584,208 @@ Ensures Bun exists or updates it, configures the relevant user PATH, installs mi
 
 ## `pkg_make`
 
-`pkg_make` installs software whose upstream installation procedure is based on a Makefile providing `install` and `uninstall` targets.
+`pkg_make` handles applications whose upstream build and installation mechanism is provided through a Makefile.
 
-It handles acquisition of the source code, temporary extraction or cloning, Makefile discovery, privilege escalation, installation, and Action Registry integration.
+It handles source acquisition, Git cloning or tarball extraction, Makefile discovery, building, installation, privilege elevation when required, and registration with the Action Registry.
 
-The general installation procedure is equivalent to:
+### Git Sources
+
+The default source is a Git repository:
+
+```bash
+pkg_make https://github.com/example/example
+```
+
+LinuxToys clones the repository into its temporary working area and locates the Makefile.
+
+### Release Tarballs
+
+A release tarball can be selected with:
+
+```bash
+pkg_make --tar https://github.com/example/example
+```
+
+An optional release asset name or glob can also be supplied:
+
+```bash
+pkg_make --tar https://github.com/example/example 'example-*.tar.gz'
+```
+
+Release selection uses the same stable-release handling as `pkg_fromrelease`.
+
+A direct tarball URL can also be handled internally with:
+
+```bash
+pkg_make --url https://example.com/example.tar.gz
+```
+
+### Makefile Discovery
+
+After acquiring the source, `pkg_make` locates the Makefile that will control the operation.
+
+When the fetched source contains a Makefile at its expected project root, that Makefile is preferred. Otherwise, LinuxToys searches the fetched tree and accepts a single unambiguous Makefile rather than guessing between unrelated subprojects.
+
+The directory containing the selected Makefile becomes the working directory for subsequent Make operations.
+
+### Building
+
+For a normal installation, `pkg_make` first builds the project with:
+
+```bash
+make
+```
+
+The build runs as the current user before authentication or the package-transaction runner lock is engaged.
+
+If the build fails, the installation command is not executed.
+
+A source reacquired for an uninstall operation is not rebuilt.
+
+### Default Installation
+
+After a successful build, the default installation command is:
+
+```bash
+sudo make install
+```
+
+For example:
+
+```bash
+pkg_make https://github.com/example/example
+```
+
+effectively performs the following flow after fetching and locating the project:
 
 ```bash
 make
 sudo make install
 ```
 
-with the source prepared automatically by LinuxToys.
+### Custom Installation Commands
 
-### Git Repository
-
-To install directly from a Git repository:
+A custom installation command can be supplied with `--command`:
 
 ```bash
-pkg_make https://github.com/example/example
+pkg_make --command "make install-user" https://github.com/example/example
 ```
 
-LinuxToys clones the repository into its standard temporary directory, locates the Makefile, builds the project when required, and runs its installation target.
-
-This is the default source mode.
-
-### Release Tarball
-
-To use a source tarball from the latest repository release instead:
+It can also be combined with release tarballs:
 
 ```bash
-pkg_make --tar https://github.com/example/example
+pkg_make --command "make install-user" --tar https://github.com/example/example
 ```
 
-LinuxToys uses the same release discovery and selection rules as `pkg_fromrelease --tar`, downloads the selected source archive, extracts it into the standard LinuxToys temporary directory, and locates the Makefile before proceeding with the build and installation.
-
-An optional release asset selector can be supplied when the latest release contains multiple suitable tarballs:
+or direct tarball sources:
 
 ```bash
-pkg_make --tar https://github.com/example/example 'example-*.tar.gz'
+pkg_make --command "make install-user" --url https://example.com/example.tar.gz
 ```
 
-Release asset selection therefore behaves consistently with `pkg_fromrelease`, including its architecture and asset filtering behavior. `pkg_fromrelease` already supports optional asset selectors and a dedicated tarball mode for this purpose.
+Repository-list entries expose the same functionality through:
 
-### Action Registry Integration
-
-After a successful installation, `pkg_make` registers the operation in the transaction map as:
-
-```text
-pkg make <source>
+```json
+"make-command": "make install-user"
 ```
 
-This is distinct from a normal `pkg` operation because the installed files are managed by the upstream Makefile rather than by the distribution's package manager.
+The custom command is executed from the directory containing the selected Makefile.
 
-During removal, LinuxToys recognizes the `pkg make` operation, obtains the source again using the appropriate source method, locates its Makefile, and runs:
+This allows projects with user-local installation targets to avoid modifying the system:
 
 ```bash
-sudo make uninstall
+make install-user
 ```
 
-This means that a project used with `pkg_make` must provide a functional `uninstall` target. If upstream does not provide one, LinuxToys cannot reliably determine which files were installed by `make install`, and `pkg_make` should not be used for that project.
-
-### Temporary Files
-
-Source trees are prepared inside the standard LinuxToys temporary directory rather than installed or built directly inside the user's home directory.
-
-The core filesystem library provides `prep_tmp_noram` for operations that need the standard persistent LinuxToys temporary area:
-
-```text
-~/.cache/linuxtoys/tmp
-```
-
-### Privilege and Runner Handling
-
-Because the installation and uninstallation stages require `sudo`, `pkg_make` obtains authentication before locking terminal input. This follows the same principle used by other privileged package operations and prevents the terminal runner's input lock from interfering with authentication.
-
-The actual privileged installation is then performed while the package operation is protected by the runner lock.
-
-### Requirements and Appropriate Usage
-
-`pkg_make` assumes that the upstream source tree provides the Makefile targets necessary to perform both sides of the operation:
+When no custom command is supplied, `pkg_make` always falls back to:
 
 ```bash
 sudo make install
-sudo make uninstall
 ```
 
-Any compiler, library, build-system, or other build dependencies remain the responsibility of the calling LinuxToys script. They should normally be installed beforehand with `pkg_install`.
+### Authentication and Runner Locking
+
+`pkg_make` examines the actual installation or uninstallation command before execution.
+
+If the command invokes `sudo`, LinuxToys calls `askpass` before engaging the package-transaction runner lock:
+
+```text
+sudo make install    → askpass required
+sudo make uninstall  → askpass required
+make install-user    → no askpass
+make uninstall-user  → no askpass
+```
+
+The initial `make` build is always performed before this authentication stage and runs without elevation.
+
+This ordering prevents terminal input locking from interfering with graphical authentication while avoiding unnecessary privilege prompts for user-level installations.
+
+### SteamOS
+
+The default `pkg_make` installation flow uses:
+
+```bash
+sudo make install
+```
+
+and is therefore not suitable for SteamOS' immutable base system.
+
+A Make installation can be considered SteamOS-compatible when it explicitly supplies a custom user-level installation command, such as:
+
+```bash
+make install-user
+```
+
+The command must not require `sudo` or other system-level modification.
+
+Other SteamOS compatibility restrictions still apply. For example, an entry that requires native package dependencies cannot become SteamOS-compatible merely by using a user-level Make installation target.
+
+### Action Registry and Reversion
+
+Successful installations are registered as `pkg make` operations.
+
+LinuxToys stores the source together with the actual installation command used for the operation. This allows a custom installation flow to be faithfully reconstructed when the user later reverses it.
+
+During reversal, `pkg_make` reacquires the source and derives the uninstall command by replacing the installation target with its uninstall counterpart.
 
 For example:
 
-```bash
-pkg_install gcc make example-devel
-pkg_make https://github.com/example/example
+```text
+sudo make install             → sudo make uninstall
+make install-user             → make uninstall-user
+make install_user             → make uninstall_user
+sudo make PREFIX=/opt install → sudo make PREFIX=/opt uninstall
 ```
 
-Use `pkg_make` only when the Makefile itself is the authoritative installation mechanism. If upstream provides a native package or another package format already supported by LinuxToys, the corresponding package helper should generally be used instead.
+Only the install target is changed; the rest of the command is preserved.
+
+The source is not rebuilt during reversal.
+
+The upstream Makefile must provide the corresponding uninstall target for the operation to be reversible.
+
+### Makefile Directory
+
+Once the Makefile has been located, `pkg_make` exports its directory as:
+
+```bash
+LINUXTOYS_MAKE_DIR
+```
+
+This variable remains available after the main installation and can therefore be used by post-install hooks:
+
+```bash
+cd "$LINUXTOYS_MAKE_DIR" || die "failed to enter make directory"
+```
+
+This allows a hook to invoke additional Make targets or access artifacts generated by the build without reacquiring or independently locating the source tree.
+
+The fetched source remains in LinuxToys' temporary working area for the remainder of the operation. Application-level temporary-file cleanup handles it afterward.
+
+### Dependencies
+
+`pkg_make` requires `make` and, for Git sources, `git`, but it does not attempt to determine the project's own build or runtime dependencies.
+
+Those dependencies remain the responsibility of the calling script or repository-list entry and should be installed before `pkg_make` is invoked.
 
 ---
 

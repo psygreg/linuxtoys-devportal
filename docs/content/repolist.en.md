@@ -1108,88 +1108,203 @@ In this case, the external script is used on Ubuntu and Debian while other suppo
 
 ## Makefile-Based Installations
 
-The `make` type is intended for applications and tools that provide a standard Makefile-based installation procedure using `make install`.
+Repository list entries can use the `make` type for applications whose upstream installation procedure is provided through a Makefile.
 
-LinuxToys can build the installation source either by cloning the application's Git repository or by downloading a source tarball from its latest release. The installation is then performed by locating the Makefile and running the equivalent of:
+Make installations support either a Git repository or a release tarball as their source. LinuxToys fetches the source, locates its Makefile, builds the project, and then runs its installation target.
+
+### Git Repository
+
+Git is the default source type:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "category": "utilities"
+}
+```
+
+LinuxToys clones the repository and locates its Makefile.
+
+### Release Tarball
+
+To build from a release tarball instead, set:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "make-source": "tar",
+  "category": "utilities"
+}
+```
+
+LinuxToys selects the latest stable release using the same release handling used by `pkg_fromrelease`.
+
+When necessary, `package-name` can select a particular release asset:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "make-source": "tar",
+  "package-name": "example-*.tar.gz",
+  "category": "utilities"
+}
+```
+
+### Building
+
+After fetching the source and locating its Makefile, LinuxToys first builds the project with:
+
+```bash
+make
+```
+
+The build is performed as the current user and does not request elevated privileges.
+
+If the build fails, the installation is not attempted.
+
+### Installation
+
+The default installation command is:
 
 ```bash
 sudo make install
 ```
 
-Unlike the `tar` type, which installs an extracted application into the user's LinuxToys applications directory, `make` is intended for projects whose own Makefile defines where and how the application should be installed.
-
-### Installing from a Git Repository
-
-By default, `make` clones the repository specified by `repo`:
+Therefore, a normal `make` entry requires no additional installation property:
 
 ```json
 {
-    "name": "Example",
-    "description": "Example application",
-    "repo": "https://github.com/example/example",
-    "type": "make"
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "category": "utilities"
 }
 ```
 
-The source repository is cloned into a LinuxToys temporary directory. LinuxToys then locates its Makefile and performs the installation.
+When the installation command contains `sudo`, LinuxToys requests authentication through its normal graphical `askpass` flow before locking terminal input.
 
-The Git source is the default, so no additional source option is required.
+### Custom Make Install Command
 
-### Installing from a Release Tarball
-
-A `make` entry can instead use a source tarball published with the project's latest release:
+Projects that provide a different installation target can override the default command with `make-command`:
 
 ```json
 {
-    "name": "Example",
-    "description": "Example application",
-    "repo": "https://github.com/example/example",
-    "type": "make",
-    "make-source": "tar"
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "make-command": "make install-user",
+  "category": "utilities"
 }
 ```
 
-Release tarball discovery follows the same rules used by `pkg_fromrelease`. LinuxToys selects a compatible `.tar.gz` or `.tar.xz` release asset, downloads it, extracts it into its temporary directory, locates the Makefile, and runs the installation.
+The specified command is executed from the directory containing the Makefile.
 
-When a repository publishes multiple source tarballs, `package-name` may be used to select the desired asset:
+This is particularly useful for projects that provide a user-local installation method:
 
-```json
-{
-    "name": "Example",
-    "description": "Example application",
-    "repo": "https://github.com/example/example",
-    "type": "make",
-    "make-source": "tar",
-    "package-name": "example-*.tar.gz"
-}
+```bash
+make install-user
 ```
 
-The value follows the same release asset selection rules as other `pkg_fromrelease`-based types.
+Because this command does not use `sudo`, LinuxToys does not request elevated privileges.
 
-### Uninstallation
+This also allows `make` entries to be compatible with SteamOS when they explicitly provide a custom user-level installation command. Make entries using the default `sudo make install`, or a custom command that requires `sudo`, remain incompatible with SteamOS because they would modify its immutable base system.
 
-Makefile installations are integrated with the LinuxToys Action Registry.
+### Removal
 
-LinuxToys records the installation as a `pkg make` operation. When the application is removed through LinuxToys, the source is obtained again using the same method used during installation and LinuxToys runs the equivalent of:
+Successful Make installations are registered in the Action Registry. LinuxToys records both the source and the installation command so that the same installation flow can later be reversed.
+
+The default:
+
+```bash
+sudo make install
+```
+
+is reversed as:
 
 ```bash
 sudo make uninstall
 ```
 
-The upstream project must therefore provide a working `uninstall` Makefile target for automatic removal to work correctly.
+Custom installation targets are converted to their corresponding uninstall targets while preserving the rest of the command:
 
-### When to Use `make`
+```text
+make install-user             → make uninstall-user
+make install_user             → make uninstall_user
+sudo make PREFIX=/opt install → sudo make PREFIX=/opt uninstall
+```
 
-Use `make` when an upstream project:
+The upstream Makefile must therefore provide the corresponding uninstall target.
 
-* provides a Makefile with `install` and `uninstall` targets;
-* expects installation through `make install`;
-* distributes its source through a Git repository or release tarball; and
-* does not provide a more appropriate native package, Flatpak, AppImage, or other supported package format.
+LinuxToys reacquires the source for removal but does not rebuild the project before executing the uninstall command.
 
-Build-time dependencies required by the project should still be declared through the repository entry's `dependencies` field when necessary.
+As with installation, authentication is requested only when the resulting uninstall command contains `sudo`.
 
-Do not use `make` merely because a project uses Make internally. This type specifically represents projects whose supported installation and removal procedures can be handled through `make install` and `make uninstall`.
+### Post-Install Hooks
+
+After locating the Makefile, LinuxToys exports its directory as:
+
+```bash
+LINUXTOYS_MAKE_DIR
+```
+
+The variable remains available to repository-list post-install hooks, allowing them to access files generated by the build or other files from the fetched source tree.
+
+For example:
+
+```json
+{
+  "overrides": {
+    "post": "./example-post.sh"
+  }
+}
+```
+
+The hook can then use:
+
+```bash
+cd "$LINUXTOYS_MAKE_DIR" || die "failed to enter make directory"
+```
+
+This is useful when additional upstream Make targets or generated artifacts must be handled after the main installation.
+
+The source remains in LinuxToys' temporary working area for the remainder of the operation and is handled by the application's normal temporary-file cleanup.
+
+### Dependencies
+
+`make` entries do not automatically determine build or runtime dependencies. These should be declared through `dependencies` as usual.
+
+For example:
+
+```json
+{
+  "name": "Example",
+  "description": "Example application",
+  "repo": "https://github.com/example/example",
+  "type": "make",
+  "dependencies": [
+    {
+      "type": "native",
+      "package-name": "example-devel"
+    }
+  ],
+  "category": "utilities"
+}
+```
+
+Native dependencies also make an entry incompatible with SteamOS, even when its Make installation itself runs entirely at user level.
+
+Use the `make` type when the upstream project officially supports building and installation through its Makefile and provides a corresponding uninstall target.
 
 ---
 
