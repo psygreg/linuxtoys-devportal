@@ -197,6 +197,9 @@ Os tipos atualmente utilizáveis são:
 | `flathub` | Aplicação Flatpak através de `pkg_flat`             |
 | `native`  | Pacote da distribuição através de `pkg_install`     |
 | `url`     | URL direta de pacote através de `pkg_fromurl`       |
+| `tar`     | Tarball obtida através de `pkg_fromrelease`         |
+| `make`    | Pacote instalado através de makefile                |
+| `external`| Fluxos de instalação customizados ou proprietários  |
 
 `repository` é reservado pelo parser, mas a instalação através de repositórios de terceiros ainda não foi implementada. Entradas que utilizem esse tipo são atualmente rejeitadas e não são exibidas.
 
