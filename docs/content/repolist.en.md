@@ -201,8 +201,6 @@ Currently usable types are:
 | `make`    | Package installed through a makefile              |
 | `external`| Custom or proprietary installation workflows      |
 
-`repository` is reserved by the parser but third-party repository installation is not implemented yet. Entries using it are currently rejected and are not shown.
-
 It is also possible to key types to certain `os` values. For example, if you want to use a `native` package for *Arch Linux* and derivatives and fallback to `git`:
 
 ```json
