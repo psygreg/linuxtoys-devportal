@@ -561,3 +561,30 @@
   color: var(--text);
   background: var(--bg-soft);
 }
+
+/* Light/dark theme fixes — mobile documentation navigation + inline Markdown code */
+
+/*
+ * The earlier :not(pre) > code selector is more specific than the generic
+ * .markdown-body code rule in the visual refresh, so override it explicitly.
+ */
+.markdown-body :not(pre) > code {
+  color: var(--text);
+  background: var(--bg-soft);
+  border-color: var(--border);
+}
+
+/*
+ * These mobile surfaces previously used hard-coded dark backgrounds.
+ * Use the shared theme surfaces so they follow both automatic and manual themes.
+ */
+@media (max-width: 980px) {
+  .mobile-toc-toggle {
+    background: var(--bg-soft);
+  }
+
+  .docs-sidebar {
+    background: var(--bg);
+  }
+}
+
