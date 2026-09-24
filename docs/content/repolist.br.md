@@ -1,1692 +1,625 @@
-# Listas de Repositórios
+# Listagens de Repositório
 
-As listas de repositórios permitem que desenvolvedores distribuam aplicações através do LinuxToys sem precisar criar um script shell completo para o LinuxToys.
+As listagens de repositório são o formato declarativo do LinuxToys para
+softwares que não podem ser tratados inteiramente pelo catálogo
+AppStream normal.
 
-Uma entrada de lista de repositório descreve a aplicação, de onde o LinuxToys deve obtê-la, quais sistemas são suportados, quais dependências são necessárias e qualquer configuração opcional que deva ser realizada após a instalação.
+Se um aplicativo já estiver disponível pelo Flathub ou pelos
+repositórios nativos de uma distribuição, normalmente ele deve ser
+descoberto e instalado pelo AppStream. As listagens de repositório são
+destinadas a softwares distribuídos por fontes como lançamentos Git,
+AppImages, URLs de download direto, tarballs, binários independentes ou
+repositórios de código-fonte que exigem uma etapa de compilação.
 
-O LinuxToys converte uma entrada válida em um script temporário de instalação e o executa através do fluxo normal de execução e transações do LinuxToys.
+Overlays do AppStream são documentados separadamente. Eles estendem um
+aplicativo AppStream existente e não devem ser tratados como listagens
+de repositório normais.
 
-## Localização dos arquivos
+## Início rápido
 
-As entradas de repositório podem ser armazenadas em:
+Uma listagem de repositório é um objeto JSON. No mínimo, uma entrada
+normal precisa de um nome, URL do repositório/fonte, categoria e
+descrição curta.
 
-```text
-scripts/repos.json
-```
+Para um aplicativo publicado por lançamentos do GitHub, uma entrada
+mínima pode ser assim:
 
-ou em qualquer arquivo `.json` localizado recursivamente dentro de:
-
-```text
-scripts/lists/
-```
-
-Por exemplo:
-
-```text
-scripts/
-├── repos.json
-└── lists/
-    ├── openlogi.json
-    ├── amethyst/
-    │   ├── app.json
-    │   ├── icon.svg
-    │   └── setup.sh
-    └── utilities/
-        └── example.json
-```
-
-O `repos.json` é carregado primeiro por compatibilidade retroativa. Em seguida, os arquivos dentro de `scripts/lists/` são carregados recursivamente em ordem alfabética determinística.
-
-Um arquivo JSON pode conter uma única entrada:
-
-```json
+``` json
 {
-  "name": "example",
-  "repo": "developer/example",
-  "description": "An example application.",
-  "category": "utilities"
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
+  "category": "utilities",
+  "description": "Uma descrição curta do Meu App."
 }
 ```
 
-ou uma lista contendo várias entradas:
+`git` é o tipo de instalação padrão, portanto `"type": "git"` pode ser
+omitido.
 
-```json
-[
-  {
-    "name": "example-one",
-    "repo": "developer/example-one",
-    "description": "First example.",
-    "category": "utilities"
-  },
-  {
-    "name": "example-two",
-    "repo": "developer/example-two",
-    "description": "Second example.",
-    "category": "utilities"
-  }
-]
+O LinuxToys usa as informações de lançamento do repositório para
+localizar um asset compatível com a arquitetura e o sistema atuais.
+Quando a escolha automática não for específica o suficiente,
+`package-name` pode selecionar o asset de lançamento desejado.
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
+  "category": "utilities",
+  "description": "Uma descrição curta do Meu App.",
+  "package-name": "MyApp-*.AppImage"
+}
 ```
 
-Arquivos JSON inválidos e entradas inválidas são ignorados individualmente, sem impedir o carregamento das demais listas de repositórios.
+Comece com a menor listagem que descreva corretamente o aplicativo.
+Regras de compatibilidade, dependências, hooks, serviços e metadados
+avançados da página do aplicativo podem ser adicionados apenas quando
+forem necessários.
+
+## Escolhendo uma fonte de instalação
+
+A decisão mais importante em uma listagem de repositório é de onde o
+LinuxToys deve obter o aplicativo.
+
+### Lançamentos Git
+
+Use o tipo `git` padrão para aplicativos distribuídos como assets de
+lançamento de um repositório Git compatível.
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo portátil para desktop."
+}
+```
+
+O campo `repo` identifica o projeto, e não um arquivo de lançamento
+específico. O LinuxToys resolve o lançamento adequado mais recente e
+escolhe um asset compatível.
+
+As URLs de projeto compatíveis são repositórios HTTPS hospedados no
+GitHub, Codeberg ou GitLab.
+
+Quando vários assets de lançamento puderem corresponder, use
+`package-name` como seletor de asset:
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo portátil para desktop.",
+  "package-name": "MyApp-*.AppImage"
+}
+```
+
+Para entradas `git`, `package-name` é opcional e pode ser um nome de
+asset ou glob. Ele também pode variar de acordo com o sistema
+operacional:
+
+``` json
+{
+  "package-name": {
+    "arch": "MyApp-*-arch.AppImage",
+    "all": "MyApp-*.AppImage"
+  }
+}
+```
+
+O valor `all` é usado como fallback quando nenhuma chave de sistema
+operacional mais específica corresponde.
+
+### AppImages
+
+Um AppImage publicado como lançamento Git normalmente não precisa de um
+tipo de instalação especial. Use uma listagem `git` e, quando
+necessário, selecione o asset AppImage com `package-name`.
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo AppImage portátil.",
+  "package-name": "MyApp-*.AppImage"
+}
+```
+
+Se o AppImage for distribuído por uma URL direta estável em vez de um
+lançamento Git, use `url`:
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://example.com/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo AppImage portátil.",
+  "type": "url",
+  "urls": {
+    "appimage": "https://example.com/download/MyApp.AppImage"
+  }
+}
+```
+
+O campo `repo` ainda identifica o projeto ou a fonte upstream do
+aplicativo. O arquivo que será baixado pertence a `urls`.
+
+### URLs diretas
+
+Use `type: "url"` quando o LinuxToys deve baixar um pacote de uma URL
+explícita em vez de descobri-lo por um lançamento Git.
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://example.com/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo distribuído por download direto.",
+  "type": "url",
+  "urls": {
+    "appimage": "https://example.com/download/MyApp.AppImage"
+  }
+}
+```
+
+O objeto `urls` descreve os formatos de pacote disponíveis. O LinuxToys
+entende estas chaves:
+
+``` text
+deb
+rpm
+pacman
+pkg.tar.zst
+flatpak
+appimage
+tar
+bin
+```
+
+Quando mais de uma URL compatível é fornecida, o LinuxToys prefere um
+pacote nativo apropriado para a distribuição atual e depois usa formatos
+portáteis como fallback nesta ordem:
+
+``` text
+appimage → flatpak → tar → bin
+```
+
+Isso permite descrever vários downloads upstream em uma única entrada:
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://example.com/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo com vários pacotes upstream.",
+  "type": "url",
+  "urls": {
+    "deb": "https://example.com/download/my-app.deb",
+    "rpm": "https://example.com/download/my-app.rpm",
+    "appimage": "https://example.com/download/MyApp.AppImage"
+  }
+}
+```
+
+Para aplicativos já distribuídos por repositórios nativos normais ou
+pelo Flathub, prefira o AppStream em vez de recriar esse caminho de
+distribuição como uma listagem de repositório.
+
+#### URLs de download dinâmicas
+
+Alguns projetos geram uma URL de download dinamicamente. Um valor de URL
+pode referenciar uma variável de ambiente exportada por um hook de
+pré-instalação:
+
+``` json
+{
+  "type": "url",
+  "urls": {
+    "appimage": {
+      "env": "DOWNLOAD_URL"
+    }
+  },
+  "overrides": {
+    "pre": "export DOWNLOAD_URL=\"https://example.com/generated/MyApp.AppImage\""
+  }
+}
+```
+
+A forma com variável de ambiente só é aceita quando existe um hook de
+pré-instalação válido. Use-a apenas quando uma URL estável normal não
+puder descrever o download.
+
+### Tarballs
+
+Use `type: "tar"` para um tarball publicado como lançamento Git:
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo distribuído como arquivo de lançamento.",
+  "type": "tar",
+  "package-name": "my-app-*.tar.gz",
+  "overrides": {
+    "post": {
+      "script": "my-app/post-install.sh"
+    }
+  }
+}
+```
+
+Para um tarball hospedado em uma URL direta, use `type: "url"`:
+
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://example.com/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo distribuído como arquivo para download.",
+  "type": "url",
+  "urls": {
+    "tar": "https://example.com/download/my-app.tar.gz"
+  },
+  "overrides": {
+    "post": {
+      "script": "my-app/post-install.sh"
+    }
+  }
+}
+```
+
+Uma instalação por tarball apenas extrai os arquivos do aplicativo. Por
+isso, o LinuxToys exige um hook de pós-instalação válido para entradas
+tarball. Use esse hook para a integração de que o aplicativo extraído
+precisa, como criar um lançador, entrada de desktop ou link simbólico.
+
+### Binários independentes
+
+Use `type: "bin"` para um executável independente publicado como
+lançamento Git.
+
+``` json
+{
+  "name": "Minha Ferramenta",
+  "repo": "https://github.com/example/my-tool",
+  "category": "utilities",
+  "description": "Um utilitário de linha de comando independente.",
+  "type": "bin",
+  "package-name": "my-tool"
+}
+```
+
+Ao contrário do seletor usado por `git` e `tar`, uma entrada `bin` exige
+o nome exato do arquivo do asset. Globs e caminhos não são aceitos.
+
+Para um binário hospedado diretamente, use `url`:
+
+``` json
+{
+  "name": "Minha Ferramenta",
+  "repo": "https://example.com/my-tool",
+  "category": "utilities",
+  "description": "Um utilitário de linha de comando independente.",
+  "type": "url",
+  "urls": {
+    "bin": "https://example.com/download/my-tool"
+  }
+}
+```
+
+### Compilando com Make
+
+Use `type: "make"` quando o aplicativo precisar ser compilado do
+código-fonte com `make`.
+
+Por padrão, o LinuxToys clona o repositório Git, compila o projeto e usa
+`sudo make install` como comando de instalação.
+
+``` json
+{
+  "name": "Minha Ferramenta",
+  "repo": "https://github.com/example/my-tool",
+  "category": "utilities",
+  "description": "Uma ferramenta compilada do código-fonte.",
+  "type": "make"
+}
+```
+
+Um alvo de instalação personalizado pode ser declarado com
+`make-command`:
+
+``` json
+{
+  "type": "make",
+  "make-command": "make install-user"
+}
+```
+
+O comando deve conter um alvo de instalação que o LinuxToys possa mapear
+para o alvo de desinstalação correspondente durante a reversão.
+
+Uma compilação Make também pode usar um tarball de lançamento em vez de
+um clone Git:
+
+``` json
+{
+  "name": "Minha Ferramenta",
+  "repo": "https://github.com/example/my-tool",
+  "category": "utilities",
+  "description": "Uma ferramenta compilada de um tarball de lançamento.",
+  "type": "make",
+  "make-source": "tar",
+  "package-name": "my-tool-*.tar.gz"
+}
+```
+
+`make-source` aceita `git` ou `tar`.
 
 ## Campos obrigatórios
 
-Toda entrada deve conter estes quatro campos de texto não vazios:
+Entradas normais de repositório exigem estes campos:
 
-| Campo         | Finalidade                                              |
-| ------------- | ------------------------------------------------------- |
-| `name`        | Identidade interna da aplicação no LinuxToys.           |
-| `repo`        | Repositório upstream ou identificador do projeto.       |
-| `description` | Descrição padrão apresentada ao usuário.                |
-| `category`    | Categoria do LinuxToys em que a aplicação será exibida. |
+### `name`
 
-Exemplo:
+O nome de exibição mostrado pelo LinuxToys.
 
-```json
-{
-  "name": "example-app",
-  "repo": "developer/example-app",
-  "description": "A useful example application.",
-  "category": "utilities"
-}
+``` json
+"name": "Meu App"
 ```
 
-O `name` deve ser único entre todas as listas de repositórios. Os nomes são comparados sem diferenciar maiúsculas e minúsculas. Se duas entradas usarem o mesmo nome, apenas a primeira carregada será utilizada.
+Os nomes devem ser únicos entre as listagens de repositório. O LinuxToys
+também deriva um ID interno estável da entrada a partir do nome de
+exibição.
 
-O `category` corresponde ao nome do diretório de categoria do LinuxToys. Por exemplo:
+### `repo`
 
-```json
-"category": "gaming"
+A URL do projeto ou fonte upstream do aplicativo.
+
+``` json
+"repo": "https://github.com/example/my-app"
 ```
 
-faz com que a entrada apareça na categoria `gaming` quando essa categoria for exibida.
+Para tipos de instalação baseados em Git, esse também é o repositório
+que o LinuxToys usa para descobrir lançamentos ou obter o código-fonte.
 
-## Campos opcionais básicos
+Para entradas `url`, as URLs dos pacotes para download pertencem a
+`urls`; `repo` continua representando a identidade upstream do
+aplicativo.
 
-Metadados opcionais comuns podem ser adicionados junto aos campos obrigatórios:
+### `category`
 
-```json
-{
-  "name": "example-app",
-  "repo": "developer/example-app",
-  "description": "A useful example application.",
-  "description_tag": "example_app_desc",
-  "category": "utilities",
-  "icon": "example.svg"
-}
+A categoria do LinuxToys em que o aplicativo deve aparecer.
+
+``` json
+"category": "utilities"
 ```
 
-### `description_tag`
+Use um identificador de categoria existente no LinuxToys.
 
-```json
-"description_tag": "example_app_desc"
+### `description`
+
+Uma descrição curta exibida nas listas de aplicativos e nos resultados
+de busca.
+
+``` json
+"description": "Um utilitário de desktop rápido e leve."
 ```
 
-Se a tabela de traduções fornecida contiver essa chave, o LinuxToys usará o valor traduzido no lugar de `description`.
+Um catálogo de descrições localizadas pode ser usado em vez de manter
+todas as traduções diretamente na listagem. Consulte
+[Localização](#localização).
 
-O campo `description` normal continua sendo obrigatório e funciona como fallback.
+## Compatibilidade
 
-### `icon`
+As listagens de repositório são filtradas antes de serem exibidas ao
+usuário. Adicione restrições de compatibilidade apenas quando o
+aplicativo ou método de instalação realmente precisar delas.
 
-Se omitido, o LinuxToys utiliza:
+### Sistemas operacionais
 
-```text
-application-x-executable
+Use `os` para restringir uma entrada a famílias de compatibilidade
+específicas do LinuxToys:
+
+``` json
+"os": ["debian", "ubuntu", "fedora"]
 ```
 
-Existem duas formas de fornecer um ícone.
+As chaves compatíveis são:
 
-Um nome de ícone comum ou nome de arquivo pode continuar usando a resolução padrão de ícones do LinuxToys:
-
-```json
-"icon": "example.svg"
+``` text
+debian
+ubuntu
+cachy
+arch
+steamos
+fedora
+rhel
+suse
+ostree
+ublue
+zorin
+solus
+pika
+deepin
+manjaro
 ```
 
-ou:
+Valores positivos formam uma lista de permissões.
 
-```json
-"icon": "application-x-executable"
+Exclusões começam com `!`:
+
+``` json
+"os": ["!steamos"]
 ```
 
-Aplicações cujo JSON esteja dentro de `scripts/lists/` também podem incluir seu ícone junto ao arquivo da lista:
+Uma lista contendo apenas exclusões significa "todos os sistemas
+compatíveis, exceto estes". Se valores positivos e negativos forem
+misturados, as exclusões sempre têm precedência.
 
-```text
-scripts/lists/example/
-├── app.json
-└── icon.svg
-```
+Não inclua e exclua a mesma chave em uma única declaração.
 
-usando:
+### Tipos de instalação por sistema operacional
 
-```json
-"icon": "./icon.svg"
-```
+O campo `type` pode ser um mapeamento quando um aplicativo realmente
+precisa de métodos de instalação diferentes em sistemas diferentes:
 
-Subdiretórios também são suportados:
-
-```json
-"icon": "assets/icon.png"
-```
-
-Ícones locais de listas de repositórios devem:
-
-* usar um caminho relativo;
-* permanecer dentro de `scripts/lists/`;
-* existir no sistema de arquivos;
-* ser SVG ou PNG.
-
-Caso essas condições não sejam atendidas, o LinuxToys volta para `application-x-executable`.
-
----
-
-## Tipos de instalação
-
-O campo `type` informa ao LinuxToys como a aplicação deve ser instalada.
-
-Se `type` for omitido, o valor padrão é:
-
-```json
-"type": "git"
-```
-
-Os tipos atualmente utilizáveis são:
-
-| Tipo      | Mecanismo de instalação                             |
-| --------- | --------------------------------------------------- |
-| `git`     | Última versão upstream através de `pkg_fromrelease` |
-| `flathub` | Aplicação Flatpak através de `pkg_flat`             |
-| `native`  | Pacote da distribuição através de `pkg_install`     |
-| `url`     | URL direta de pacote através de `pkg_fromurl`       |
-| `tar`     | Tarball obtida através de `pkg_fromrelease`         |
-| `make`    | Pacote instalado através de makefile                |
-| `external`| Fluxos de instalação customizados ou proprietários  |
-
-Também é possível associar tipos a determinados valores de `os`. Por exemplo, se você quiser usar um pacote `native` para o **Arch Linux** e seus derivados, com `git` para outros sistemas:
-
-```json
+``` json
 "type": {
-  "arch": "native",
+  "arch": "make",
   "all": "git"
 }
 ```
 
-<a id="git-package"></a>
+`all` é o fallback. Prefira um único tipo de instalação sempre que
+possível.
 
-### `git`
+### Nomes de pacote ou asset por sistema operacional
 
-Essa é a opção padrão e mais simples.
+Campos que resolvem nomes de pacotes ou seletores de lançamento também
+podem usar mapeamentos por sistema operacional quando compatível:
 
-```json
-{
-  "name": "example",
-  "repo": "developer/example",
-  "description": "Example application.",
-  "category": "utilities",
-  "type": "git"
-}
-```
-
-O LinuxToys gera:
-
-```bash
-pkg_fromrelease developer/example
-```
-
-Portanto, o valor de `repo` é o valor esperado pelo helper `pkg_fromrelease` do LinuxToys.
-
-Como `git` é o padrão, isto é equivalente:
-
-```json
-{
-  "name": "example",
-  "repo": "developer/example",
-  "description": "Example application.",
-  "category": "utilities"
-}
-```
-
-Este tipo de instalação também não requer uma configuração de metadados `os` explícita, a não ser que seu app, ou scripts de pré ou pós-instalação dele, tenham problemas de compatibilidade com certas variantes de alguma distribuição, o que raramente é o caso. Você pode usar `python3 dev/git_db.py` a partir da sua fork do repositório do LinuxToys quando terminar de adicionar os metadados do seu aplicativo para obter automaticamente quais pacotes estão disponíveis da release mais recente e configurar os dados de compatibilidade a partir destes.
-
-Você pode prover um `"package-name"` opcional se houver mais de um pacote do mesmo tipo reconhecido como válido nas releases, para determinar qual será usado explicitamente. Eles podem ser baseados em `os` se necessário como pacotes nativos e o nome aceita globs.
-
-```json
-{
-  "name": "myapp",
-  "repo": "https://github.com/example/myapp",
-  "description": "Example application.",
-  "category": "utilities",
-  "package-name": "mypackagename.tar.gz",
-}
-```
-
-<a id="flathub-package"></a>
-
-### `flathub`
-
-Use `flathub` quando a aplicação deve ser instalada como Flatpak:
-
-```json
-{
-  "name": "example",
-  "repo": "https://github.com/developer/example",
-  "description": "Example application.",
-  "category": "utilities",
-  "type": "flathub",
-  "package-name": "com.example.Application"
-}
-```
-
-O LinuxToys executa:
-
-```bash
-pkg_flat com.example.Application
-```
-
-### Vários Flatpaks
-
-`package-name` também pode ser uma lista:
-
-```json
-"package-name": [
-  "com.example.Application",
-  "com.example.Extension"
-]
-```
-
-O LinuxToys instala todos os pacotes listados.
-
-Instalações Flatpak exigem implicitamente um sistema compatível com systemd e não podem ser realizadas dentro de um container.
-
-<a id="native-package"></a>
-
-### `native`
-
-Use `native` quando a aplicação já estiver disponível através do gerenciador de pacotes da distribuição:
-
-```json
-{
-  "name": "example",
-  "repo": "https://example.org",
-  "description": "Example application.",
-  "category": "utilities",
-  "type": "native",
-  "package-name": "example"
-}
-```
-
-O LinuxToys executa:
-
-```bash
-pkg_install example
-```
-
-### Vários pacotes nativos
-
-Uma aplicação pode exigir vários pacotes:
-
-```json
-"package-name": [
-  "example",
-  "example-data",
-  "example-plugins"
-]
-```
-
-Cada pacote é instalado através de `pkg_install`.
-
-### Nomes de pacote diferentes entre distribuições
-
-`package-name` também pode ser um objeto:
-
-```json
+``` json
 "package-name": {
-  "debian": "example",
-  "fedora": "example-app",
-  "arch": "example-git"
+  "arch": "MyApp-*-arch.AppImage",
+  "all": "MyApp-*.AppImage"
 }
 ```
 
-Listas também podem ser utilizadas dentro do mapeamento:
+### Ambientes de desktop
 
-```json
-"package-name": {
-  "debian": [
-    "example",
-    "example-data"
-  ],
-  "fedora": [
-    "example-app",
-    "example-assets"
-  ]
-}
-```
-
-Um fallback genérico pode ser fornecido através de `all`:
-
-```json
-"package-name": {
-  "all": "example",
-  "fedora": "example-app"
-}
-```
-
-Quando o sistema atual corresponde a uma entrada específica de distribuição, essa entrada tem precedência sobre `all`.
-
-Isso significa que uma instalação no Fedora utiliza:
-
-```text
-example-app
-```
-
-enquanto outra distribuição suportada sem um mapeamento mais específico utiliza como fallback:
-
-```text
-example
-```
-
-### Prioridade de mapeamento de pacotes nativos
-
-Alguns sistemas expõem mais de uma chave de compatibilidade. O LinuxToys resolve os mapeamentos de pacotes usando a seguinte prioridade:
-
-```text
-ublue
-deepin
-zorin
-pika
-manjaro
-cachy
-ostree
-ubuntu
-debian
-fedora
-rhel
-suse
-solus
-arch
-all
-```
-
-Isso permite que distribuições derivadas sobrescrevam o comportamento da distribuição-base.
-
-Por exemplo:
-
-```json
-"package-name": {
-  "all": "example",
-  "arch": "example",
-  "cachy": "example-cachyos"
-}
-```
-
-utiliza `example-cachyos` no CachyOS em vez do pacote genérico do Arch. 
-
-Lembre-se que **não é possível instalar pacotes nativos no SteamOS devido ao seu modelo de imutabilidade**, que só permite alterações em modo de desenvolvedor e todas as alterações são desfeitas na próxima atualização. Por isso, quaisquer entradas em listas de repositório que usem pacotes nativos sem opção por Flatpak ou AppImage automaticamente desqualificam o SteamOS.
-
-<a id="url-fetching"></a>
-
-### `url`
-
-O tipo `url` é destinado a desenvolvedores ou empresas que distribuem pacotes diretamente, como através de seu próprio CDN ou servidor de downloads.
-
-Exemplo:
-
-```json
-{
-  "name": "example",
-  "repo": "https://example.org",
-  "description": "Example application.",
-  "category": "utilities",
-  "type": "url",
-  "urls": {
-    "deb": "https://downloads.example.org/example-amd64.deb",
-    "rpm": "https://downloads.example.org/example-x86_64.rpm",
-    "pkg.tar.zst": "https://downloads.example.org/example-x86_64.pkg.tar.zst",
-    "appimage": "https://downloads.example.org/Example.AppImage"
-  }
-}
-```
-
-As chaves de URL suportadas são:
-
-```text
-deb
-rpm
-pacman
-pkg.tar.zst
-flatpak
-appimage
-```
-
-As URLs devem utilizar HTTP ou HTTPS.
-
-O LinuxToys seleciona um pacote apropriado para a distribuição atual e passa sua URL para:
-
-```bash
-pkg_fromurl URL
-```
-
-### Seleção de pacotes
-
-O LinuxToys dá preferência a um pacote nativo sempre que houver um disponível.
-
-Sistemas da família Debian verificam:
-
-```text
-deb
-```
-
-Isso inclui Debian, Ubuntu, Deepin, Zorin OS e PikaOS.
-
-Sistemas da família RPM verificam:
-
-```text
-rpm
-```
-
-Isso inclui Fedora, RHEL, openSUSE, sistemas rpm-ostree e Universal Blue.
-
-Sistemas da família Arch verificam:
-
-```text
-pkg.tar.zst
-pacman
-```
-
-nessa ordem.
-
-Isso inclui Arch Linux, CachyOS e Manjaro.
-
-Se nenhum pacote nativo utilizável estiver disponível, o LinuxToys verifica formatos portáveis nesta ordem:
-
-```text
-appimage
-flatpak
-```
-
-Por exemplo:
-
-```json
-"urls": {
-  "deb": "https://example.org/app.deb",
-  "rpm": "https://example.org/app.rpm",
-  "appimage": "https://example.org/App.AppImage"
-}
-```
-
-instalará o DEB em sistemas da família Debian, o RPM em sistemas da família RPM e poderá usar o AppImage como fallback nos demais.
-
-Uma entrada do tipo URL só é exibida quando o LinuxToys consegue resolver uma das URLs fornecidas para o sistema atual.
-
----
-
-<a id="single-binary"></a>
-
-## Aplicativos de Binário Único
-
-O LinuxToys pode instalar aplicativos distribuídos como um **único binário executável**, sem exigir um pacote nativo, AppImage, Flatpak ou tarball.
-
-Isso é útil para aplicativos cujos lançamentos upstream fornecem executáveis independentes, como:
-
-```text
-myapp
-myapp-linux-x86_64
-myapp-v1.4.2-linux-amd64
-```
-
-Quando o LinuxToys instala um aplicativo de binário único, ele automaticamente:
-
-* cria um diretório para o aplicativo em:
-
-  ```text
-  ~/.local/linuxtoys/apps/<nome do aplicativo>/
-  ```
-
-* copia o binário baixado para esse diretório;
-
-* marca o binário como executável;
-
-* cria um atalho no menu de aplicativos usando o nome, a descrição e o ícone da lista de repositório;
-
-* registra a instalação no sistema de transações do LinuxToys para que ela possa ser revertida normalmente.
-
-Em listas de repositório, binários únicos podem ser instalados a partir de um lançamento do GitHub, Codeberg ou GitLab ou diretamente de uma URL.
-
-### Instalando um Binário a Partir de um Lançamento do GitHub, Codeberg ou GitLab
-
-Use:
-
-```json
-"type": "bin"
-```
-
-O campo `repo` deve apontar para o repositório do aplicativo, enquanto `package-name` deve conter o **nome exato do arquivo do lançamento** que contém o executável.
-
-Por exemplo:
-
-```json
-{
-  "name": "Example App",
-  "description": "A standalone example application.",
-  "category": "utilities",
-  "repo": "https://github.com/example/example",
-  "type": "bin",
-  "package-name": "example-linux-x86_64",
-  "icon": "example.svg"
-}
-```
-
-O LinuxToys obterá o lançamento estável mais recente, localizará o arquivo solicitado, fará seu download e o instalará como um aplicativo independente.
-
-### O Nome do Arquivo Binário Deve Ser Informado Explicitamente
-
-Ao contrário de formatos de pacote como `.deb`, `.rpm` ou `.AppImage`, binários independentes frequentemente **não possuem uma extensão que permita identificá-los**.
-
-Por isso, o LinuxToys não pode determinar com segurança qual arquivo do lançamento corresponde ao binário do aplicativo de forma automática.
-
-Desenvolvedores utilizando `"type": "bin"` devem, portanto, fornecer o nome exato do arquivo do lançamento através de `package-name`.
-
-Por exemplo, se um lançamento contém:
-
-```text
-example-linux-x86_64
-example-linux-aarch64
-example.sha256
-source.tar.gz
-```
-
-a entrada da lista de repositório deve selecionar explicitamente:
-
-```json
-"package-name": "example-linux-x86_64"
-```
-
-Curingas não devem ser utilizados para arquivos binários de lançamentos.
-
-### Versões de Lançamento no Nome do Binário
-
-Alguns projetos incluem a versão do lançamento diretamente no nome do arquivo binário.
-
-Por exemplo, um lançamento upstream com a tag:
-
-```text
-v2.4.1
-```
-
-pode conter:
-
-```text
-example-v2.4.1-linux-x86_64
-```
-
-Para esses casos, o LinuxToys disponibiliza:
-
-```text
-$APP_GIT_VERSION
-```
-
-dentro do nome do arquivo binário.
-
-Portanto, é possível escrever:
-
-```json
-{
-  "name": "Example App",
-  "description": "A standalone example application.",
-  "category": "utilities",
-  "repo": "https://github.com/example/example",
-  "type": "bin",
-  "package-name": "example-$APP_GIT_VERSION-linux-x86_64"
-}
-```
-
-O LinuxToys determinará primeiro a versão do lançamento estável mais recente e substituirá `$APP_GIT_VERSION` antes de localizar o arquivo.
-
-Isso evita a necessidade de atualizar a entrada da lista de repositório sempre que o upstream publicar uma nova versão.
-
-> `APP_GIT_VERSION` corresponde à tag do lançamento no GitHub, Codeberg ou GitLab. Portanto, se o upstream utilizar tags como `v2.4.1`, o `v` fará parte do valor.
-
-### Instalando um Binário Diretamente de uma URL
-
-Um binário independente também pode ser instalado através do tipo regular `"url"` das listas de repositório.
-
-Use a chave `bin` dentro de `urls`:
-
-```json
-{
-  "name": "Example App",
-  "description": "A standalone example application.",
-  "category": "utilities",
-  "repo": "https://example.org",
-  "type": "url",
-  "urls": {
-    "bin": "https://example.org/releases/example-linux-x86_64"
-  },
-  "icon": "example.svg"
-}
-```
-
-O LinuxToys fará o download do arquivo através do seu mecanismo normal de downloads por URL e, em seguida, o instalará utilizando o mesmo procedimento para aplicativos de binário único.
-
-Isso é especialmente útil para projetos que publicam executáveis independentes fora dos Lançamentos do GitHub.
-
-### Entradas Específicas por Arquitetura
-
-Caso o upstream publique binários separados para diferentes arquiteturas de CPU, a entrada do repositório deve selecionar o arquivo correto para os sistemas suportados pela entrada.
-
-Por exemplo:
-
-```text
-example-linux-x86_64
-example-linux-aarch64
-```
-
-Uma entrada de repositório destinada somente a sistemas x86-64 deve referenciar:
-
-```json
-"package-name": "example-linux-x86_64"
-```
-
-e utilizar as restrições apropriadas de hardware ou compatibilidade das listas de repositório quando necessário.
-
-O LinuxToys pode utilizar informações de arquitetura presentes nos nomes dos arquivos do lançamento ao localizar os arquivos, mas o desenvolvedor ainda deve identificar explicitamente o binário desejado.
-
-### Integração com o Menu de Aplicativos e Sistema
-
-Instalações de binário único recebem automaticamente um atalho no menu de aplicativos.
-
-O atalho utiliza os mesmos metadados já fornecidos pela entrada do repositório:
-
-* `name` se torna o nome de exibição do aplicativo;
-* a `description` traduzida, quando disponível, se torna a descrição do aplicativo;
-* `icon` se torna o ícone do aplicativo;
-* o executável instalado se torna o comando utilizado pelo atalho.
-
-Consequentemente, desenvolvedores de listas de repositório normalmente **não precisam** fornecer um script de pós-instalação apenas para criar um arquivo `.desktop` para um aplicativo independente.
-
-O binário é instalado em:
-
-```text
-~/.local/linuxtoys/apps/<nome do aplicativo>/
-```
-
-e o atalho gerado aponta para a cópia instalada, e não para o arquivo temporário utilizado durante o download.
-
-Para adicionar o aplicativo ao PATH do usuário, permitindo que ele se torne um comando direto no terminal, você pode utilizar [esta função das bibliotecas do LinuxToys](corelibraries.pt-BR.html#path-integration) na pós-instalação.
-
-> Instalações de binário único expõem a variável `LINUXTOYS_BIN_DIR`, que pode ser usada para rastrear o diretório onde o aplicativo foi instalado para procedimentos pós-instalação.
-
-### Escolhendo Entre `bin` e `url`
-
-Use `"type": "bin"` quando:
-
-* o aplicativo estiver hospedado nos Lançamentos do GitHub;
-* o upstream distribuir o aplicativo como um único arquivo executável;
-* for possível identificar o arquivo do lançamento pelo seu nome exato.
-
-Use `"type": "url"` com:
-
-```json
-"urls": {
-  "bin": "..."
-}
-```
-
-quando:
-
-* o executável independente estiver disponível através de uma URL direta e estável;
-* o projeto não utilizar os Lançamentos do GitHub para distribuição;
-* ou você quiser explicitamente que o LinuxToys faça o download a partir de outra fonte.
-
----
-
-<a id="tarball-package"></a>
-
-## Aplicativos em Tarball
-
-O tipo `tar` é destinado a aplicativos distribuídos como **tarballs binários pré-compilados** por meio de releases do GitHub, Codeberg ou GitLab. Ele permite que o LinuxToys instale softwares que não fornecem um pacote nativo, Flatpak ou AppImage, mas distribuem o aplicativo pronto para execução em um arquivo `.tar.gz` ou `.tar.xz`.
-
-> **Observação:** `tar` é destinado a releases binários de aplicativos, não a arquivos de código-fonte, e requer, **obrigatoriamente**, um script pós-instalação para finalizar a configuração. Instalações deste tipo exportam a variável **`LINUXTOYS_TARBALL_DIR`** que aponta para o nome de diretório final da tarball extraída para uso no script pós-instalação. Se estiver distribuindo um aplicativo neste formato, pode ter interesse também em [criar um atalho `.desktop` para o menu de aplicativos automaticamente](corelibraries.pt-BR.html#app-shortcuts) e [adicionar o aplicativo ao PATH do usuário](corelibraries.pt-BR.html#path-integration).
-
-### Releases do GitHub, Codeberg e GitLab
-
-Para um aplicativo distribuído como um tarball anexado a um release do GitHub, Codeberg ou GitLab, use:
-
-```json
-{
-  "name": "myapp",
-  "type": "tar",
-  "repo": "https://github.com/example/myapp"
-}
-```
-
-Internamente, isso faz com que o LinuxToys utilize o instalador de releases no modo tarball:
-
-```bash
-pkg_fromrelease --tar "https://github.com/example/myapp"
-```
-
-O release mais recente é consultado e o LinuxToys procura especificamente por um arquivo `.tar.gz` ou `.tar.xz` compatível entre seus assets.
-
-Os arquivos de código-fonte gerados automaticamente pelo GitHub não são considerados, pois não fazem parte da lista de assets enviados ao release. Assets de release identificados como arquivos de código-fonte também são filtrados. Portanto, os desenvolvedores devem fornecer o **tarball do aplicativo compilado como um asset propriamente dito do release**.
-
-As informações de arquitetura presentes nos nomes dos assets são respeitadas. Por exemplo:
-
-```text
-myapp-2.4.0-x86_64.tar.xz
-myapp-2.4.0-aarch64.tar.xz
-myapp-2.4.0-source.tar.gz
-```
-
-Em um sistema x86-64, o LinuxToys selecionará o arquivo `x86_64` do aplicativo, enquanto excluirá o arquivo destinado à arquitetura incompatível e o arquivo de código-fonte.
-
-Você pode prover um `"package-name"` opcional se houver mais de uma tarball reconhecida como válida nas releases, para determinar qual será usada explicitamente. Elas podem ser baseadas em `os` se necessário como pacotes nativos e o nome aceita globs.
-
-```json
-{
-  "name": "myapp",
-  "repo": "https://github.com/example/myapp",
-  "type": "tar",
-  "package-name": "mypackagename.tar.gz"
-}
-```
-
-### URLs Diretas
-
-Tarballs hospedados diretamente pelo desenvolvedor ou pela infraestrutura do projeto podem utilizar o tipo `url`:
-
-```json
-{
-  "name": "myapp",
-  "type": "url",
-  "urls": {
-    "tar": "https://example.com/releases/myapp.tar.xz"
-  }
-}
-```
-
-Isso chama o instalador por URL no modo tarball:
-
-```bash
-pkg_fromurl --tar "https://example.com/releases/myapp.tar.xz"
-```
-
-A URL pode apontar diretamente para o arquivo ou utilizar um redirecionamento HTTP. O LinuxToys resolve o nome do arquivo baixado antes de determinar o formato do pacote.
-
-O arquivo resolvido deve estar em um formato de tarball compatível.
-
-### Formatos Compatíveis
-
-Atualmente, o manipulador de tarballs aceita:
-
-```text
-.tar.gz
-.tar.xz
-```
-
-Outros formatos de arquivo não devem ser declarados utilizando `tar`.
-
-### Estrutura do Arquivo
-
-Os desenvolvedores podem empacotar o aplicativo dentro de um único diretório de nível superior ou colocar os arquivos do aplicativo diretamente na raiz do tarball.
-
-Um tarball que já contém seu próprio diretório:
-
-```text
-MyApp/
-├── bin/
-│   └── myapp
-├── lib/
-└── resources/
-```
-
-é instalado diretamente como:
-
-```text
-~/.local/linuxtoys/apps/MyApp/
-```
-
-O LinuxToys detecta o diretório comum de nível superior existente e **não** cria um diretório adicional desnecessário, como `MyApp/MyApp/`.
-
-Um tarball que contém arquivos soltos no nível raiz também é compatível:
+Use `desktop` quando um aplicativo ou integração fizer sentido apenas
+para determinadas famílias de desktop:
 
-```text
-myapp
-lib/
-resources/
-README.md
+``` json
+"desktop": ["gnome", "plasma"]
 ```
-
-Nesse caso, o LinuxToys cria um diretório para o aplicativo utilizando o nome do arquivo, excluindo a extensão `.tar.gz` ou `.tar.xz`.
-
-Por exemplo:
-
-```text
-myapp-2.4.0.tar.xz
-```
-
-resultaria em:
-
-```text
-~/.local/linuxtoys/apps/myapp-2.4.0/
-```
-
-Por esse motivo, recomenda-se que os desenvolvedores distribuam o conteúdo dentro de um diretório de nível superior com um nome adequado quando for necessário manter um nome de diretório de instalação estável entre diferentes releases.
-
-### Atualizações
-
-Executar novamente a mesma instalação por tarball é tratado como uma atualização.
-
-O LinuxToys substitui o diretório de destino existente pelo aplicativo recém-extraído, em vez de mesclar o novo arquivo com a instalação anterior. Isso garante que arquivos removidos pelo upstream em versões mais recentes não permaneçam no sistema após uma atualização.
-
-Portanto, desenvolvedores que distribuem releases sucessivos devem, preferencialmente, manter consistente o diretório de nível superior do tarball entre as versões:
-
-```text
-myapp/
-```
-
-em vez de:
-
-```text
-myapp-2.4.0/
-myapp-2.5.0/
-```
-
-Um nome de diretório estável permite que releases posteriores substituam corretamente a instalação anterior.
-
-### Tipos Específicos por Sistema Operacional
-
-O tipo `tar` também pode ser selecionado através do mapeamento normal de `type` específico por sistema operacional. Por exemplo, um projeto pode utilizar um pacote nativo no Arch Linux enquanto distribui um tarball binário para os demais sistemas compatíveis:
-
-```json
-{
-  "name": "myapp",
-  "type": {
-    "arch": "native",
-    "all": "tar"
-  },
-  "package-name": {
-    "arch": "myapp"
-  },
-  "repo": "https://github.com/example/myapp"
-}
-```
-
-No Arch Linux e derivados, o LinuxToys utilizará o pacote nativo. Nos demais sistemas compatíveis, obterá o tarball binário a partir dos releases do projeto.
-
-### Escolhendo entre `tar` e `url`
-
-Use:
-
-```json
-"type": "tar"
-```
-
-quando o tarball binário for publicado como um asset dos releases do projeto no GitHub ou Codeberg e o LinuxToys deva acompanhar automaticamente novos releases.
-
-Use:
-
-```json
-"type": "url"
-```
-
-com:
-
-```json
-"urls": {
-  "tar": "https://example.com/application.tar.gz"
-}
-```
-
-quando o arquivo estiver hospedado em uma URL fornecida diretamente pelo desenvolvedor.
-
-Em ambos os casos, o arquivo deve conter um aplicativo já compilado e pronto para uso. A compilação de tarballs contendo código-fonte está fora do escopo do tipo `tar`.
-
----
-
-## Utilizando URLs de Download Dinâmicas
-
-As páginas de aplicativos não alteram a forma como um aplicativo é instalado. Portanto, elas podem ser combinadas com outras funcionalidades das listas de repositórios, incluindo URLs de download descobertas dinamicamente.
-
-Por exemplo:
-
-```json
-{
-  "name": "Example App",
-  "repo": "https://example.org",
-  "category": "office",
-  "icon": "./example.svg",
-  "type": "url",
-
-  "urls": {
-    "appimage": {
-      "env": "URL"
-    }
-  },
-
-  "overrides": {
-    "pre": {
-      "script": "./example-pre.sh"
-    }
-  },
-
-  "descriptions": "descriptions.json",
-  "screenshots": "screenshots/"
-}
-```
-
-O script de pré-instalação pode descobrir a URL atual de download e exportá-la:
-
-```bash
-#!/usr/bin/env bash
-
-# Determinar a URL apropriada da versão...
-export URL="https://example.org/releases/latest/example.AppImage"
-```
-
-O LinuxToys então expande essa variável de ambiente quando `pkg_fromurl` é chamado.
-
-Declarações de URLs dinâmicas exigem um hook de pré-instalação. Os nomes das variáveis de ambiente são declarados explicitamente utilizando a forma `{"env": "VARIABLE"}`, em vez de inserir variáveis do shell diretamente nas strings de URLs.
-
----
-
-## Scripts de Instalação Externos
-
-O tipo `external` permite que uma entrada de lista de repositório delegue seu procedimento de instalação a um script Bash personalizado, mantendo os metadados, controles de compatibilidade, páginas de aplicativos e outras facilidades oferecidas pelas listas de repositórios.
-
-Ele é destinado principalmente a duas situações:
-
-* **Procedimentos de instalação totalmente personalizados** — quando um aplicativo ou recurso exige um processo de instalação que não pode ser representado adequadamente pelos tipos e auxiliares padrão das listas de repositórios, mas ainda se beneficiaria de recursos como páginas de aplicativos, regras de compatibilidade, dependências, capturas de tela, descrições e outros metadados.
-* **Procedimentos de instalação proprietários** — quando um software proprietário não pode publicar sua lógica de instalação no repositório porque o procedimento contém código confidencial ou que, por outros motivos, não pode ser disponibilizado publicamente. Nesse caso, o instalador pode ser obtido através de uma URL no momento da instalação.
-
-Uma entrada externa utiliza:
-
-```json id="4a8avc"
-{
-    "name": "Example Application",
-    "description": "An application using a custom installation procedure.",
-    "repo": "https://example.org",
-    "category": "utilities",
-    "type": "external",
-    "script": "./install.sh"
-}
-```
-
-O campo `script` é obrigatório sempre que o tipo resolvido for `external`.
-
-#### Scripts Locais do Repositório
-
-O script pode ser armazenado junto à lista de repositório:
-
-```json id="u77ogm"
-"type": "external",
-"script": "./install.sh"
-```
-
-Caminhos relativos são resolvidos a partir do diretório que contém a entrada da lista de repositório. Eles devem permanecer dentro da árvore do diretório `lists` do repositório.
-
-Essa abordagem é adequada para procedimentos de instalação personalizados que podem ser distribuídos publicamente, mas que não se encaixam nos métodos de instalação padrão oferecidos pelas listas de repositórios.
-
-#### Scripts Remotos
-
-O campo `script` também pode conter uma URL HTTPS:
-
-```json id="v61kty"
-"type": "external",
-"script": "https://example.org/linux/install.sh"
-```
-
-O LinuxToys baixa o script quando a instalação é iniciada e executa o script obtido através do ambiente normal de scripts do LinuxToys.
-
-Isso é particularmente útil para aplicativos proprietários cujo procedimento de instalação não pode ser incluído em um repositório público do LinuxToys por motivos de confidencialidade do código.
-
-#### Bibliotecas do LinuxToys
-
-Scripts externos são tratados como scripts de instalação do LinuxToys, e não simplesmente como comandos shell independentes.
-
-Eles são executados através do carregador de bibliotecas normal do LinuxToys, tendo acesso às mesmas bibliotecas principais e funções auxiliares disponíveis para scripts comuns do LinuxToys. As bibliotecas exigidas pelo script externo são detectadas e carregadas automaticamente.
-
-Por exemplo, um instalador externo pode utilizar diretamente funções auxiliares do LinuxToys:
-
-```bash id="8cpg1y"
-#!/usr/bin/env bash
-
-pkg_install curl
-prep_tmp
-
-info "Preparing installation..."
-
-# Custom installation procedure...
-```
-
-Portanto, o script externo não precisa localizar ou carregar manualmente as bibliotecas principais do LinuxToys.
-
-#### Outros Recursos das Listas de Repositórios
-
-O uso de `external` substitui apenas o procedimento de instalação propriamente dito. A entrada pode continuar utilizando normalmente os demais recursos das listas de repositórios, incluindo dependências, regras de compatibilidade, metadados da página do aplicativo, descrições, capturas de tela, ícones, sobrescritas pre/post, serviços e outras opções suportadas.
-
-Por exemplo:
-
-```json id="rvlbms"
-{
-    "name": "Example Pro",
-    "description": "Professional software for example workflows.",
-    "repo": "https://example.org/example-pro",
-    "category": "utilities",
-    "icon": "example-pro.svg",
-    "license": "Proprietary",
-    "type": "external",
-    "script": "https://example.org/linux/install.sh",
-    "dependencies": {
-        "native": [
-            "curl"
-        ]
-    },
-    "os": [
-        "arch",
-        "cachy",
-        "fedora",
-        "ubuntu",
-        "debian"
-    ]
-}
-```
-
-O tipo também pode participar da seleção de tipos específica por sistema operacional, assim como os demais tipos das listas de repositórios:
-
-```json id="qfth4v"
-"type": {
-    "ubuntu": "external",
-    "debian": "external",
-    "all": "flathub"
-}
-```
-
-Nesse caso, o script externo é utilizado no Ubuntu e Debian, enquanto os demais sistemas compatíveis utilizam o método de instalação pelo Flathub.
-
-> **Nota:** Prefira os tipos de instalação padrão das listas de repositórios sempre que eles forem suficientes para descrever adequadamente o processo de instalação de um aplicativo. O tipo `external` é destinado a procedimentos de instalação que realmente exigem lógica personalizada ou que não podem ser distribuídos como parte do repositório.
-
----
-
-## Instalações Baseadas em Makefile
-
-Entradas de listas de repositórios podem usar o tipo `make` para aplicativos cujo procedimento de instalação oficial é fornecido por meio de um Makefile.
-
-Instalações `make` podem usar como fonte um repositório Git ou um tarball de lançamento. O LinuxToys obtém o código-fonte, localiza seu Makefile, compila o projeto e então executa seu alvo de instalação.
-
-### Repositório Git
-
-Git é o tipo de fonte padrão:
-
-```json
-{
-  "name": "Example",
-  "description": "Example application",
-  "repo": "https://github.com/example/example",
-  "type": "make",
-  "category": "utilities"
-}
-```
-
-O LinuxToys clona o repositório e localiza seu Makefile.
-
-### Tarball de Lançamento
-
-Para compilar a partir de um tarball de lançamento, defina:
-
-```json
-{
-  "name": "Example",
-  "description": "Example application",
-  "repo": "https://github.com/example/example",
-  "type": "make",
-  "make-source": "tar",
-  "category": "utilities"
-}
-```
-
-O LinuxToys seleciona o lançamento estável mais recente usando o mesmo mecanismo de lançamentos utilizado por `pkg_fromrelease`.
-
-Quando necessário, `package-name` pode selecionar um arquivo específico do lançamento:
-
-```json
-{
-  "name": "Example",
-  "description": "Example application",
-  "repo": "https://github.com/example/example",
-  "type": "make",
-  "make-source": "tar",
-  "package-name": "example-*.tar.gz",
-  "category": "utilities"
-}
-```
-
-### Compilação
-
-Depois de obter o código-fonte e localizar seu Makefile, o LinuxToys primeiro compila o projeto com:
-
-```bash
-make
-```
-
-A compilação é realizada como o usuário atual e não solicita privilégios elevados.
-
-Se a compilação falhar, a instalação não será tentada.
-
-### Instalação
-
-O comando de instalação padrão é:
-
-```bash
-sudo make install
-```
-
-Portanto, uma entrada `make` normal não requer nenhuma propriedade adicional para a instalação:
-
-```json
-{
-  "name": "Example",
-  "description": "Example application",
-  "repo": "https://github.com/example/example",
-  "type": "make",
-  "category": "utilities"
-}
-```
-
-Quando o comando de instalação contém `sudo`, o LinuxToys solicita autenticação por meio do seu fluxo gráfico normal de `askpass` antes de bloquear a entrada do terminal.
-
-### Comando de Instalação Make Personalizado
-
-Projetos que fornecem um alvo de instalação diferente podem substituir o comando padrão usando `make-command`:
-
-```json
-{
-  "name": "Example",
-  "description": "Example application",
-  "repo": "https://github.com/example/example",
-  "type": "make",
-  "make-command": "make install-user",
-  "category": "utilities"
-}
-```
-
-O comando especificado é executado a partir do diretório que contém o Makefile.
-
-Isso é particularmente útil para projetos que fornecem um método de instalação local para o usuário:
-
-```bash
-make install-user
-```
-
-Como esse comando não usa `sudo`, o LinuxToys não solicita privilégios elevados.
-
-Isso também permite que entradas `make` sejam compatíveis com o SteamOS quando fornecem explicitamente um comando personalizado de instalação em nível de usuário. Entradas `make` que usam o padrão `sudo make install`, ou um comando personalizado que exige `sudo`, continuam incompatíveis com o SteamOS, pois modificariam seu sistema-base imutável.
-
-### Remoção
-
-Instalações Make concluídas com sucesso são registradas no Registro de Ações. O LinuxToys registra tanto a fonte quanto o comando de instalação para que o mesmo fluxo de instalação possa ser revertido posteriormente.
-
-O padrão:
-
-```bash
-sudo make install
-```
-
-é revertido como:
-
-```bash
-sudo make uninstall
-```
-
-Alvos de instalação personalizados são convertidos para seus respectivos alvos de desinstalação, preservando o restante do comando:
-
-```text
-make install-user             → make uninstall-user
-make install_user             → make uninstall_user
-sudo make PREFIX=/opt install → sudo make PREFIX=/opt uninstall
-```
-
-Portanto, o Makefile do projeto precisa fornecer o alvo de desinstalação correspondente.
-
-O LinuxToys obtém novamente o código-fonte para a remoção, mas não recompila o projeto antes de executar o comando de desinstalação.
-
-Assim como na instalação, a autenticação é solicitada somente quando o comando de desinstalação resultante contém `sudo`.
-
-### Hooks Pós-Instalação
-
-Depois de localizar o Makefile, o LinuxToys exporta seu diretório como:
-
-```bash
-LINUXTOYS_MAKE_DIR
-```
-
-A variável permanece disponível para hooks pós-instalação das listas de repositórios, permitindo que eles acessem arquivos gerados pela compilação ou outros arquivos presentes na árvore de código-fonte obtida.
-
-Por exemplo:
-
-```json
-{
-  "overrides": {
-    "post": "./example-post.sh"
-  }
-}
-```
-
-O hook pode então usar:
-
-```bash
-cd "$LINUXTOYS_MAKE_DIR" || die "failed to enter make directory"
-```
-
-Isso é útil quando alvos Make adicionais do projeto ou artefatos gerados precisam ser tratados depois da instalação principal.
-
-O código-fonte permanece na área temporária de trabalho do LinuxToys durante o restante da operação e é tratado pela limpeza normal de arquivos temporários do aplicativo.
-
-### Dependências
-
-Entradas `make` não determinam automaticamente as dependências de compilação ou execução. Elas devem ser declaradas normalmente por meio de `dependencies`.
-
-Por exemplo:
-
-```json
-{
-  "name": "Example",
-  "description": "Example application",
-  "repo": "https://github.com/example/example",
-  "type": "make",
-  "dependencies": [
-    {
-      "type": "native",
-      "package-name": "example-devel"
-    }
-  ],
-  "category": "utilities"
-}
-```
-
-Dependências nativas também tornam uma entrada incompatível com o SteamOS, mesmo quando a própria instalação Make é realizada inteiramente em nível de usuário.
-
-Use o tipo `make` quando o projeto oficialmente oferecer suporte à compilação e instalação por meio de seu Makefile e fornecer um alvo de desinstalação correspondente.
-
----
-
-## Compatibilidade
-
-Entradas de listas de repositórios podem ser limitadas a determinados sistemas operacionais, ambientes de desktop, hardware, sistemas de init ou ambientes containerizados.
-
-Campos omitidos geralmente são tratados como irrestritos.
-
-### Sistemas operacionais
-
-Use `os` para restringir uma aplicação a um ou mais sistemas operacionais suportados.
-
-Um sistema:
-
-```json
-"os": "fedora"
-```
-
-Vários:
-
-```json
-"os": [
-  "fedora",
-  "arch",
-  "debian"
-]
-```
-
-Valores suportados:
-
-```text
-debian
-ubuntu
-cachy
-arch
-fedora
-rhel
-suse
-ostree
-ublue
-zorin
-solus
-pika
-deepin
-manjaro
-steamos
-```
-
-A entrada fica disponível quando pelo menos uma das chaves de compatibilidade de sistema solicitadas corresponde ao host.
-
-Por exemplo:
-
-```json
-"os": [
-  "fedora",
-  "rhel"
-]
-```
-
-permite a entrada tanto em sistemas compatíveis com Fedora quanto com RHEL.
-
-Você também pode configurar uma exclusão em vez disso, escolhendo onde **não** exibir a entrada, usando um sinal de exclamação antes da tag correspondente:
-
-```json
-"os": [
-  "ubuntu",
-  "debian",
-  "!zorin"
-]
-```
-
-### Ambiente de desktop
-
-O campo opcional `desktop` restringe uma aplicação a determinados ambientes de desktop.
 
-Valores suportados:
+Os valores compatíveis são:
 
-```text
+``` text
 gnome
 plasma
 other
 ```
 
-Um desktop:
-
-```json
-"desktop": "gnome"
-```
-
-Vários:
-
-```json
-"desktop": [
-  "gnome",
-  "plasma"
-]
-```
-
-Uma entrada é aceita quando pelo menos um dos desktops especificados corresponde ao ambiente atual.
-
-Use esse campo apenas quando a aplicação ou integração realmente depender de um ambiente de desktop específico.
-
-### Hardware
-
-A compatibilidade de hardware é declarada em `hardware`.
-
-Por exemplo:
-
-```json
-"hardware": {
-  "gpu": "nvidia"
-}
-```
-
-ou:
-
-```json
-"hardware": {
-  "gpu": [
-    "amd",
-    "intel"
-  ],
-  "cpu": "amd"
-}
-```
-
-O LinuxToys converte esses valores para suas chaves normais de compatibilidade.
-
-Por exemplo:
-
-```text
-gpu: "amd"    -> gpu-amd
-cpu: "intel"  -> cpu-intel
-```
-
-Valores que já possuam prefixo também podem ser utilizados:
-
-```json
-"hardware": {
-  "gpu": "gpu-xe"
-}
-```
-
-Os valores podem ser strings ou listas.
-
-Dentro de cada classe de hardware, vários valores funcionam como alternativas. Por exemplo:
-
-```json
-"hardware": {
-  "gpu": [
-    "amd",
-    "nvidia"
-  ]
-}
-```
-
-significa AMD **ou** NVIDIA, e não que ambas sejam obrigatórias.
-
-O valor especial:
-
-```text
-all
-```
-
-não adiciona nenhum requisito de hardware.
-
-Os nomes de hardware correspondem, em última instância, às chaves de compatibilidade expostas pelo LinuxToys. Portanto, utilize chaves suportadas pelo subsistema de compatibilidade do LinuxToys.
-
 ### systemd
 
-O campo opcional `systemd` pode restringir explicitamente uma entrada com base no sistema de init.
+Use `systemd` apenas quando a instalação exigir ou excluir
+explicitamente o systemd:
 
-Requer systemd:
-
-```json
+``` json
 "systemd": "yes"
 ```
 
-Requer um sistema sem systemd:
+ou:
 
-```json
+``` json
 "systemd": "no"
 ```
 
-Omita o campo, use `null` ou uma string vazia quando ambos forem aceitáveis.
+Omitir o campo é neutro.
 
-Instalações Flatpak exigem implicitamente systemd, independentemente de esse campo ser fornecido.
+Declarar serviços também exige implicitamente um ambiente compatível com
+systemd.
 
-Declarar `services` também exige implicitamente systemd.
+### WSL
 
-### Containers
+Use `wsl` para tornar uma entrada exclusiva para WSL ou exclusiva para
+ambientes que não sejam WSL:
 
-A compatibilidade com containers é controlada por:
-
-```json
-"container": "allow"
+``` json
+"wsl": "yes"
 ```
 
 ou:
 
-```json
-"container": "deny"
-```
-
-O padrão é:
-
-```json
-"container": "allow"
-```
-
-portanto, a maioria das entradas não precisa especificar esse campo.
-
-Use:
-
-```json
-"container": "deny"
-```
-
-quando uma aplicação não puder ser instalada corretamente a partir de dentro de um container.
-
-### Restrições automáticas para containers
-
-O LinuxToys rejeita automaticamente entradas dentro de containers quando a instalação selecionada instalaria:
-
-```text
-Flatpak
-AppImage
-```
-
-Isso se aplica mesmo que:
-
-```json
-"container": "allow"
-```
-
-tenha sido especificado explicitamente.
-
-A mesma restrição se aplica quando uma entrada declara uma dependência do Flathub.
-
-Essa proteção existe porque instalações Flatpak e AppImage não devem ser aninhadas dentro do fluxo de containers suportado.
-
----
-
-### Subsistema Windows para Linux (WSL)
-
-A compatibilidade com o Subsistema Windows para Linux (WSL) é controlada por:
-
-```json
-"wsl": "yes"
-```
-
-para **somente** compatibilidade com WSL, ou:
-
-```json
+``` json
 "wsl": "no"
 ```
 
-para **não compatível** com WSL. O padrão é a opção estar indefinida, o que significa compatível para ambos. A maioria das entradas não precisa especificar este campo.
+### Contêineres
 
----
+Entradas de repositório são permitidas em contêineres compatíveis por
+padrão.
+
+Para impedir explicitamente que uma entrada apareça em contêineres:
+
+``` json
+"container": "deny"
+```
+
+Os valores aceitos são `allow` e `deny`.
+
+Fluxos de instalação Flatpak e AppImage não são compatíveis dentro de
+contêineres independentemente dessa configuração.
+
+### Hardware
+
+Requisitos de hardware podem ser expressos com valores de
+compatibilidade `gpu` e `cpu`:
+
+``` json
+"hardware": {
+  "gpu": ["amd"],
+  "cpu": ["x86_64"]
+}
+```
+
+Use restrições de hardware apenas quando o aplicativo ou método de
+instalação realmente depender delas.
 
 ## Dependências
 
-O campo opcional `dependencies` instala pacotes antes da aplicação principal.
+As dependências são instaladas antes do aplicativo principal.
 
-As dependências são uma lista de objetos.
+Uma dependência pode ser `native` ou `flathub`.
 
-Os tipos de dependência atualmente suportados são:
+### Dependências nativas
 
-```text
-native
-flathub
-```
-
-### Dependência nativa
-
-```json
+``` json
 "dependencies": [
   {
     "type": "native",
-    "package-name": "git"
+    "package-name": "ffmpeg"
   }
 ]
 ```
 
-Dependências nativas suportam exatamente as mesmas formas de `package-name` que uma aplicação nativa.
+Os nomes dos pacotes nativos podem variar de acordo com o sistema
+operacional:
 
-Um único pacote:
-
-```json
-{
-  "type": "native",
-  "package-name": "git"
-}
-```
-
-Vários pacotes:
-
-```json
-{
-  "type": "native",
-  "package-name": [
-    "git",
-    "curl"
-  ]
-}
-```
-
-Pacotes específicos por distribuição:
-
-```json
-{
-  "type": "native",
-  "package-name": {
-    "debian": "libexample-dev",
-    "fedora": "example-devel",
-    "arch": "example"
-  }
-}
-```
-
-E os próprios mapeamentos podem conter listas de pacotes:
-
-```json
-{
-  "type": "native",
-  "package-name": {
-    "debian": [
-      "libexample1",
-      "libexample2"
-    ],
-    "fedora": [
-      "example-libs",
-      "example-data"
-    ]
-  }
-}
-```
-
-Se nenhum mapeamento de dependência nativa puder ser resolvido para o host, a própria aplicação é considerada incompatível e não é exibida.
-
-### Dependência do Flathub
-
-```json
-"dependencies": [
-  {
-    "type": "flathub",
-    "package-name": "org.example.Runtime"
-  }
-]
-```
-
-Vários Flatpaks são permitidos:
-
-```json
-{
-  "type": "flathub",
-  "package-name": [
-    "org.example.Runtime",
-    "org.example.Extension"
-  ]
-}
-```
-
-Uma dependência do Flathub exige implicitamente systemd e torna a entrada incompatível com instalação dentro de containers.
-
-### Várias dependências
-
-Diferentes dependências podem ser combinadas:
-
-```json
+``` json
 "dependencies": [
   {
     "type": "native",
     "package-name": {
-      "debian": "example-helper",
-      "fedora": "example-helper",
-      "arch": "example-helper"
+      "debian": "libexample-dev",
+      "fedora": "example-devel",
+      "arch": "example"
     }
-  },
+  }
+]
+```
+
+Um nome de pacote também pode ser uma lista quando vários pacotes forem
+necessários:
+
+``` json
+"dependencies": [
+  {
+    "type": "native",
+    "package-name": ["git", "curl", "make"]
+  }
+]
+```
+
+### Dependências do Flathub
+
+``` json
+"dependencies": [
   {
     "type": "flathub",
     "package-name": "org.example.Runtime"
@@ -1694,149 +627,93 @@ Diferentes dependências podem ser combinadas:
 ]
 ```
 
-As dependências são instaladas antes da aplicação principal.
+Dependências do Flathub exigem um ambiente systemd compatível.
 
----
+As dependências são pré-requisitos do aplicativo definido pela listagem
+de repositório. Elas não transformam aplicativos nativos ou do Flathub
+comuns em listagens de repositório.
 
-## Overrides
+## Hooks e overrides de instalação
 
-Comportamentos adicionais de instalação podem ser declarados utilizando:
+O objeto opcional `overrides` personaliza o fluxo de instalação gerado.
 
-```json
-"overrides": {}
-```
+As chaves compatíveis para listagens de repositório normais são:
 
-As chaves de override atualmente suportadas são:
-
-```text
-flatpak
+``` text
 pre
 post
+flatpak
+skip-user
 ```
 
-Outras chaves fazem com que a entrada seja rejeitada.
+### Hooks de pré-instalação
 
-### Hook de pré-instalação
+Um hook de pré-instalação é executado antes dos comandos de instalação
+gerados.
 
-`pre` é executado antes das dependências e dos comandos de instalação da aplicação.
+Para uma operação pequena, shell inline pode ser usado:
 
-Para operações curtas, ele pode conter shell inline:
-
-```json
+``` json
 "overrides": {
-  "pre": "mkdir -p \"$HOME/.config/example\""
+  "pre": "export EXAMPLE_MODE=1"
 }
 ```
 
-Como esse conteúdo é inserido diretamente no script Bash de instalação gerado, ele deve ser mantido pequeno e previsível.
+Para uma lógica mais substancial, referencie um script armazenado junto
+à listagem de repositório:
 
-### Hook de pós-instalação
-
-`post` é executado depois das dependências, da instalação da aplicação, dos overrides de Flatpak e da configuração de serviços.
-
-Exemplo:
-
-```json
-"overrides": {
-  "post": "touch \"$HOME/.config/example/installed\""
-}
-```
-
-### Scripts externos de pre/post
-
-Configurações mais complexas podem ser distribuídas como um script separado dentro de `scripts/lists/`.
-
-Exemplo de estrutura:
-
-```text
-scripts/lists/example/
-├── app.json
-├── pre-install.sh
-└── post-install.sh
-```
-
-O JSON pode referenciá-los através de:
-
-```json
+``` json
 "overrides": {
   "pre": {
-    "script": "example/pre-install.sh"
-  },
-  "post": {
-    "script": "example/post-install.sh"
+    "script": "my-app/pre-install.sh"
   }
 }
 ```
 
-Esses hooks são executados através do helper `run_list_hook` do LinuxToys.
+Os caminhos dos scripts são resolvidos relativamente ao arquivo JSON e
+devem permanecer dentro da árvore de listagens de repositório.
 
-Os caminhos dos hooks devem ser relativos. Caminhos absolutos e caminhos que tentem sair de `scripts/lists/` são rejeitados.
+### Hooks de pós-instalação
 
-Por exemplo, isto é inválido:
+Hooks de pós-instalação usam a mesma sintaxe:
 
-```json
-"pre": {
-  "script": "../outside.sh"
+``` json
+"overrides": {
+  "post": {
+    "script": "my-app/post-install.sh"
+  }
 }
 ```
 
-Scripts externos são mais apropriados quando a configuração é complexa demais para ser expressa razoavelmente como um pequeno comando inline.
+Eles são executados depois dos comandos de instalação gerados.
 
-## Ordem de execução
+Instalações por tarball exigem um hook de pós-instalação porque extrair
+um arquivo, por si só, não define como o aplicativo deve ser integrado
+ao sistema do usuário.
 
-O procedimento de instalação gerado é executado nesta ordem:
+### Overrides de permissões Flatpak
 
-```text
-hook pre
+Uma listagem de repositório pode declarar overrides de permissões
+Flatpak quando seu fluxo de instalação inclui conteúdo Flatpak.
 
-dependências
-
-instalação da aplicação principal
-
-overrides de Flatpak
-
-serviços systemd
-
-hook post
-
-mensagem de sucesso
-```
-
-Essa ordem é importante ao escrever hooks. Um hook `pre` não pode assumir que a aplicação já foi instalada, enquanto um hook `post` pode.
-
----
-
-## Overrides de Flatpak
-
-O LinuxToys pode aplicar permissões de Flatpak após a instalação utilizando seu helper `flatpak_override`.
-
-Exemplo:
-
-```json
+``` json
 "overrides": {
   "flatpak": [
     {
       "scope": "user",
       "type": "filesystem",
-      "setting": "xdg-config/example",
-      "target": "com.example.Application"
+      "setting": "xdg-download",
+      "target": "org.example.App"
     }
   ]
 }
 ```
 
-Todo override de Flatpak exige quatro campos:
+Os escopos compatíveis são `user` e `system`.
 
-| Campo     | Descrição                                      |
-| --------- | ---------------------------------------------- |
-| `scope`   | `user` ou `system`                             |
-| `type`    | Tipo de override do Flatpak                    |
-| `setting` | Permissão ou configuração passada ao LinuxToys |
-| `target`  | Aplicação Flatpak de destino                   |
+Os tipos de override compatíveis incluem:
 
-Tipos de override suportados:
-
-```text
+``` text
 fs
 name
 dbus
@@ -1850,1348 +727,358 @@ talk-name
 talk-dbus
 ```
 
-Vários overrides podem ser aplicados:
+### Forçando o escopo de sistema do Flatpak
 
-```json
+Quando as operações Flatpak de uma listagem não puderem usar o escopo de
+usuário:
+
+``` json
 "overrides": {
-  "flatpak": [
-    {
-      "scope": "user",
-      "type": "filesystem",
-      "setting": "xdg-config/example",
-      "target": "com.example.Application"
-    },
-    {
-      "scope": "user",
-      "type": "device",
-      "setting": "dri",
-      "target": "com.example.Application"
-    }
-  ]
+  "skip-user": true
 }
 ```
 
-O LinuxToys traduz cada entrada em uma chamada equivalente a:
+Use isso apenas quando o escopo de sistema for realmente necessário.
 
-```bash
-flatpak_override SCOPE TYPE SETTING TARGET
+## Serviços
+
+Listagens de repositório podem pedir ao LinuxToys para habilitar e
+iniciar serviços systemd depois da instalação.
+
+Uma string ou lista usa o escopo de sistema por padrão:
+
+``` json
+"services": "my-app.service"
 ```
 
-#### Forçar Flatpaks em nível de sistema
-
-Alguns aplicativos Flatpak podem apresentar problemas ao serem executados no nível do usuário. Para esses casos, há uma opção de override disponível:
-
-```json
-"overrides": {
-    "skip-user": true
-}
-```
-
----
-
-## Serviços systemd
-
-O campo `services` pode instruir o LinuxToys a habilitar e iniciar imediatamente unidades systemd após a instalação.
-
-Qualquer entrada que declare `services` é automaticamente restrita a hosts com systemd.
-
-### Um serviço de sistema
-
-A forma mais curta é:
-
-```json
-"services": "example"
-```
-
-Por padrão, isso é tratado como um serviço de sistema e se torna:
-
-```text
-example.service
-```
-
-O LinuxToys efetivamente executa:
-
-```bash
-sudo systemctl enable --now example.service
-```
-
-### Vários serviços de sistema
-
-```json
+``` json
 "services": [
-  "example",
-  "example-helper"
+  "my-app.service",
+  "my-app-helper.service"
 ]
 ```
 
-Ambos usam escopo de sistema por padrão.
+Para serviços de sistema e usuário explícitos:
 
-### Serviços de sistema e de usuário
-
-Para controle explícito:
-
-```json
+``` json
 "services": {
-  "system": [
-    "example.service"
-  ],
-  "user": [
-    "example-tray.service"
-  ]
+  "system": ["my-app.service"],
+  "user": ["my-app-session.service"]
 }
 ```
 
-Serviços de sistema são habilitados com:
+Se o sufixo da unidade for omitido, `.service` é adicionado
+automaticamente.
 
-```bash
-sudo systemctl enable --now UNIT
+Serviços de sistema exigem elevação de privilégios. Serviços de usuário
+são habilitados pela instância systemd do usuário.
+
+## Metadados da página do aplicativo
+
+Aplicativos definidos por listagens de repositório podem ter o mesmo
+tipo de apresentação rica que os usuários esperam do restante do
+LinuxToys.
+
+Esses campos afetam a apresentação e não substituem a fonte de
+instalação.
+
+### Desenvolvedor
+
+``` json
+"developer": "Example Software"
 ```
 
-Serviços de usuário são habilitados com:
-
-```bash
-systemctl --user enable --now UNIT
-```
-
-O LinuxToys registra essas operações em seu mapa de transações para que possam participar do fluxo normal de reversão.
-
-### Sufixos de unidades
-
-Se nenhum sufixo reconhecido de unidade systemd for fornecido, o LinuxToys adiciona automaticamente:
-
-```text
-.service
-```
-
-Portanto:
-
-```json
-"services": "example"
-```
-
-e:
-
-```json
-"services": "example.service"
-```
-
-são equivalentes.
-
-Os sufixos de unidade reconhecidos incluem:
-
-```text
-.service
-.socket
-.timer
-.path
-.mount
-.automount
-.target
-.slice
-.scope
-.device
-.swap
-```
-
-Isso também permite unidades que não sejam serviços:
-
-```json
-"services": {
-  "system": [
-    "example.socket",
-    "example.timer"
-  ]
-}
-```
-
----
-
-<a id="app-pages"></a>
-
-## Páginas de Aplicativos
-
-Entradas de listas de repositórios podem, opcionalmente, fornecer uma **página de aplicativo**. Isso permite apresentar mais informações sobre um aplicativo antes da instalação, incluindo uma descrição mais longa, capturas de tela e links opcionais para compra ou doação.
-
-![Página de Aplicativo - exemplo](/assets/app-page-screenshot-br.webp)
-
-As páginas de aplicativos são destinadas a aplicativos que se beneficiam de uma apresentação mais completa do que a caixa de diálogo padrão de confirmação de instalação.
-
-Se nenhum dos campos relacionados à página de aplicativo for fornecido, o LinuxToys ignora completamente essa página e segue o fluxo normal de instalação.
-
-#### Exemplo Básico
-
-Uma entrada com uma página de aplicativo pode ser semelhante a esta:
-
-```json
-{
-  "name": "Example App",
-  "repo": "https://example.org",
-  "category": "office",
-  "icon": "./example.svg",
-  "type": "url",
-
-  "urls": {
-    "appimage": "https://example.org/releases/example.AppImage"
-  },
-
-  "description": "Uma descrição curta do aplicativo.",
-
-  "long-description": "Uma descrição mais longa contendo informações adicionais sobre o aplicativo e seus recursos.",
-
-  "screenshots": "screenshots/",
-
-  "donate": "https://example.org/donate"
-}
-```
-
-Quando o usuário seleciona essa entrada, o LinuxToys abre sua página de aplicativo em vez de exibir imediatamente a confirmação de instalação.
-
-A página mantém o cabeçalho padrão do LinuxToys contendo o nome do aplicativo, sua descrição curta, informações do repositório e ícone. A área principal exibe a descrição mais longa e o visualizador de capturas de tela.
-
-Selecionar **Instalar** continua pelo fluxo normal de instalação do LinuxToys.
-
-### Descrições Longas
-
-A `description` curta continua sendo o texto exibido em toda a interface normal do LinuxToys. A página do aplicativo pode fornecer adicionalmente uma descrição mais longa:
-
-```json
-"long-description": "Uma descrição detalhada do aplicativo, sua finalidade e seus principais recursos."
-```
-
-A forma com sublinhado também é aceita:
-
-```json
-"long_description": "Uma descrição detalhada."
-```
-
-Descrições longas também podem usar o sistema normal de traduções do LinuxToys:
-
-```json
-"description": "Descrição curta de fallback.",
-"description_tag": "example_desc",
-"long-description": "Descrição longa de fallback.",
-"long-description_tag": "example_long_desc"
-```
-
-No entanto, para entradas de repositório com descrições mais substanciais, recomenda-se usar um catálogo de descrições local do repositório.
-
-#### Descrições Longas em Markdown
-
-Desenvolvedores podem usar um arquivo Markdown em vez de fornecer a descrição longa diretamente. Para optar pela formatação Markdown, defina a descrição longa como um caminho relativo terminado em `.md`:
-
-```json
-"long-description": "description.md"
-```
-
-O LinuxToys detecta a extensão `.md`, carrega o arquivo referenciado e renderiza seu conteúdo como Markdown na página do aplicativo.
-
-Descrições em Markdown oferecem suporte a formatações padrão, como:
-
-```markdown
-# Aplicativo de Exemplo
-
-Um aplicativo **poderoso** com suporte a:
-
-- Recurso um
-- Recurso dois
-- Recurso três
-
-## Informações Adicionais
-
-Visite o [site do projeto](https://example.org) para mais informações.
-```
-
-Para manter a consistência visual das páginas de aplicativos, cabeçalhos Markdown de todos os níveis são exibidos usando um tamanho mais contido, equivalente a `####`. Isso permite que desenvolvedores utilizem a estrutura normal de documentos Markdown sem produzir textos excessivamente grandes na interface do LinuxToys.
-
-O uso de Markdown é inteiramente opcional. Um valor de texto normal continua sendo exibido como texto simples:
-
-```json
-"long-description": "Isto continua sendo uma descrição longa comum em texto simples."
-```
-
-Descrições em Markdown também podem ser usadas com tags de tradução para descrições longas. Isso permite que cada idioma forneça seu próprio documento `.md`, conforme descrito abaixo.
-
-### Traduções de Descrições Locais do Repositório
-
-Listas de repositórios podem manter as descrições de seus aplicativos separadas dos arquivos principais de tradução do LinuxToys colocando um catálogo de descrições JSON junto ao arquivo da lista de repositório.
-
-Faça referência a ele com:
-
-```json
-"descriptions": "descriptions.json"
-```
-
-`description-file` também é aceito como um alias.
-
-O arquivo de descrições deve estar localizado no **mesmo diretório que o JSON da lista de repositório**.
-
-Por exemplo:
-
-```text
-scripts/lists/example/
-├── repository.json
-├── descriptions.json
-├── description.en.md
-├── description.pt-BR.md
-├── example.svg
-└── screenshots/
-    ├── main.webp
-    ├── editor.webp
-    └── settings.webp
-```
-
-Um arquivo `descriptions.json` pode usar descrições longas em texto simples:
-
-```json
-{
-  "description_tag": "example_desc",
-  "description_long_tag": "example_long",
-  "en": {
-    "example_desc": "A short description of the application.",
-    "example_long": "A longer description explaining the application and its main features."
-  },
-  "pt": {
-    "example_desc": "Uma descrição curta do aplicativo.",
-    "example_long": "Uma descrição mais longa explicando o aplicativo e seus principais recursos."
-  }
-}
-```
-
-`description_tag` identifica a descrição curta, enquanto `description_long_tag` identifica a descrição longa exibida na página do aplicativo.
-
-A mesma tag de descrição longa pode, em vez disso, apontar para um arquivo Markdown diferente para cada idioma:
-
-```json
-{
-  "description_tag": "example_desc",
-  "description_long_tag": "example_long",
-  "en": {
-    "example_desc": "A short description of the application.",
-    "example_long": "description.en.md"
-  },
-  "pt-BR": {
-    "example_desc": "Uma descrição curta do aplicativo.",
-    "example_long": "description.pt-BR.md"
-  }
-}
-```
-
-Nesse caso, o LinuxToys primeiro resolve `example_long` de acordo com o idioma selecionado e, em seguida, carrega o arquivo `.md` referenciado por essa tradução. Isso permite que cada tradução forneça uma descrição completa em Markdown com formatação independente.
-
-Os caminhos dos arquivos Markdown são resolvidos relativamente ao arquivo da lista de repositório. Eles também podem apontar para arquivos dentro de subdiretórios pertencentes à entrada do repositório, permitindo uma estrutura como:
-
-```text
-scripts/lists/example/
-├── repository.json
-├── descriptions.json
-└── descriptions/
-    ├── description.en.md
-    └── description.pt-BR.md
-```
-
-com:
-
-```json
-{
-  "description_long_tag": "example_long",
-  "en": {
-    "example_long": "descriptions/description.en.md"
-  },
-  "pt-BR": {
-    "example_long": "descriptions/description.pt-BR.md"
-  }
-}
-```
-
-O LinuxToys primeiro procura pelo idioma atualmente selecionado e recorre ao inglês quando uma tradução apropriada não está disponível. Isso se aplica igualmente a descrições longas em texto simples e em Markdown.
-
-Descrições inline e tags de tradução existentes continuam sendo suportadas, o que é útil ao migrar um script existente do LinuxToys para uma entrada de lista de repositório.
-
-### Capturas de Tela
-
-Use `screenshots` para fornecer imagens para a página do aplicativo.
-
-Há duas maneiras de fazer isso.
-
-#### Diretório de Capturas de Tela
-
-O método mais simples é apontar para um diretório:
-
-```json
-"screenshots": "screenshots/"
-```
-
-O LinuxToys carrega automaticamente os arquivos de imagem suportados diretamente dentro desse diretório.
-
-Os formatos suportados são:
-
-* `.png`
-* `.jpg`
-* `.jpeg`
-* `.webp`
-* `.svg`
-
-Os arquivos são ordenados pelo nome, portanto os nomes dos arquivos também podem ser utilizados para controlar sua ordem:
-
-```text
-screenshots/
-├── 01-main.webp
-├── 02-editor.webp
-└── 03-settings.webp
-```
-
-#### Capturas de Tela Individuais
-
-Também é possível listar arquivos específicos:
-
-```json
-"screenshots": [
-  "screenshots/main.webp",
-  "screenshots/editor.webp",
-  "screenshots/settings.webp"
-]
-```
-
-Os caminhos das capturas de tela são relativos ao JSON da lista de repositório.
-
-Por segurança, os caminhos das capturas de tela devem permanecer dentro da hierarquia `scripts/lists`. Caminhos que resolvam para locais externos a ela são rejeitados.
-
-#### Visualizador de Capturas de Tela
-
-Quando várias capturas de tela estão disponíveis, o LinuxToys as apresenta em um visualizador circular.
-
-Os usuários podem navegar tanto para frente quanto para trás entre as imagens. Ao chegar a qualquer uma das extremidades, a navegação retorna para a outra extremidade:
-
-```text
-1 → 2 → 3 → 1
-```
-
-e:
-
-```text
-1 ← 2 ← 3 ← 1
-```
-
-As teclas de seta Esquerda e Direita do teclado também podem ser utilizadas enquanto a página do aplicativo estiver aberta.
-
-### Identificação do Desenvolvedor
-
-Uma entrada pode especificar o nome do desenvolvedor, equipe ou empresa responsável pelo aplicativo usando `developer`:
-
-```json
-"developer": "Example Company"
-```
-
-Quando disponível, o nome do desenvolvedor é exibido na página do aplicativo, permitindo que os usuários identifiquem facilmente quem desenvolve ou mantém o software.
-
-Para aplicativos hospedados no GitHub, esse campo é opcional. Se `developer` não for especificado, o LinuxToys utiliza automaticamente o nome do usuário ou organização proprietária do repositório no GitHub.
-
-Por exemplo:
-
-```json
-{
-  "name": "Example App",
-  "repo": "https://github.com/example-company/example-app"
-}
-```
-
-resultará em:
-
-```text
-example-company
-```
-
-como nome do desenvolvedor.
-
-O campo `developer` pode ser usado para substituir esse valor automático por um nome mais apropriado para apresentação:
-
-```json
-{
-  "name": "Example App",
-  "repo": "https://github.com/example-company/example-app",
-  "developer": "Example Company"
-}
-```
-
-Isso é particularmente útil quando o nome público de uma pessoa, projeto ou empresa é diferente do nome de sua conta ou organização no GitHub.
-
-A detecção automática se aplica apenas a repositórios hospedados no GitHub. Para outras fontes, defina `developer` explicitamente caso queira que um nome de desenvolvedor seja exibido.
-
-#### Indicador de Suporte Oficial
-
-Quando um aplicativo faz parte do índice oficial do LinuxToys, um indicador de verificação é exibido ao lado do nome do desenvolvedor em sua página de aplicativo.
-
-Esse indicador identifica aplicativos com suporte oficial no LinuxToys. Ele é determinado pelo próprio índice oficial e **não pode ser habilitado por meio da entrada da lista de repositório**.
-
-Portanto, definir `developer` controla apenas o nome apresentado e não concede ou implica status de suporte oficial. [Consulte como adquirir status de suporte oficial aqui, se desejar](documentation.pt-BR.html#official-support).
-
-### Links para Doação
-
-Um link para doação pode ser adicionado com:
-
-```json
-"donate": "https://example.org/donate"
-```
-
-A forma de objeto também é aceita:
-
-```json
-"donate": {
-  "url": "https://example.org/donate"
-}
-```
-
-O LinuxToys exibe um botão **Doar** na página do aplicativo, que abre a URL especificada.
-
-Somente URLs HTTP ou HTTPS válidas são aceitas.
+Quando possível, o LinuxToys pode derivar o namespace do
+desenvolvedor/projeto a partir da URL do repositório se esse campo for
+omitido.
 
 ### Licença
 
-Entradas de repositório podem, opcionalmente, declarar a licença do aplicativo usando o campo `license`:
-
-```json
-"license": "GPLv3"
+``` json
+"license": "GPL-3.0"
 ```
 
-Quando informado, o identificador da licença é exibido como um pequeno texto ao lado do nome do aplicativo em sua página.
+Mantenha o identificador de licença exibido conciso.
 
-Por exemplo:
+### Descrições longas
 
-```json
-{
-    "name": "Aplicativo de Exemplo",
-    "description": "Um aplicativo de exemplo.",
-    "repo": "https://example.org",
-    "category": "utilities",
-    "license": "GPLv3"
+Uma descrição longa pode ser escrita diretamente:
+
+``` json
+"long-description": "Meu App oferece um fluxo de trabalho completo para..."
+```
+
+Para conteúdo mais extenso, aponte para um arquivo Markdown armazenado
+junto à listagem de repositório:
+
+``` json
+"long-description": "my-app/description.md"
+```
+
+Os caminhos Markdown são resolvidos relativamente ao arquivo JSON e
+podem usar subdiretórios, mas não podem sair da árvore de diretórios da
+listagem.
+
+### Capturas de tela
+
+`screenshots` pode apontar para uma imagem:
+
+``` json
+"screenshots": "my-app/screenshots/main.webp"
+```
+
+ou várias:
+
+``` json
+"screenshots": [
+  "my-app/screenshots/main.webp",
+  "my-app/screenshots/settings.webp"
+]
+```
+
+Também pode apontar para um diretório. O LinuxToys carregará os arquivos
+de imagem compatíveis desse diretório em ordem alfabética.
+
+Os formatos de captura de tela compatíveis são PNG, JPEG, WebP e SVG.
+
+### Ícones
+
+Um valor simples de ícone pode se referir a um nome de ícone GTK ou ao
+resolvedor de ícones existente do LinuxToys:
+
+``` json
+"icon": "applications-utilities"
+```
+
+Uma listagem de repositório também pode usar um SVG ou PNG armazenado
+abaixo de `scripts/lists/`:
+
+``` json
+"icon": "my-app/icon.svg"
+```
+
+Caminhos relativos de ícones são resolvidos a partir do arquivo JSON que
+contém a entrada e não podem sair da árvore de listagens de repositório.
+
+### Doações
+
+``` json
+"donate": "https://example.com/donate"
+```
+
+Uma URL de doação também pode ser representada como um objeto contendo
+`url`.
+
+### Compras e assinaturas
+
+Metadados comerciais podem adicionar ações de compra e assinatura à
+página de um aplicativo de repositório.
+
+Uma compra única:
+
+``` json
+"purchase": {
+  "url": "https://example.com/buy",
+  "price": 49.99
 }
 ```
 
-O campo `license` é opcional e deve ser uma string contendo no máximo **20 caracteres**.
+Uma assinatura:
 
-Use o identificador curto ou abreviação comumente reconhecida para a licença:
-
-```json
-"license": "GPLv3"
-```
-
-```json
-"license": "MIT"
-```
-
-```json
-"license": "Apache-2.0"
-```
-
-Evite escrever o nome completo da licença:
-
-```json
-"license": "GNU General Public License v3"
-```
-
-Nomes extensos são intencionalmente rejeitados para manter a informação da licença compacta quando exibida ao lado do nome do aplicativo.
-
-Espaços em branco no início e no final são ignorados, mas um valor vazio não é válido.
-
-### Aplicativos Pagos e Assinaturas
-
-Aplicativos que exigem pagamento podem oferecer opções de compra única, assinatura ou ambas através do campo `purchase`.
-
-O LinuxToys oferece suporte a:
-
-* compras únicas;
-* assinaturas;
-* preços localizados;
-* múltiplos níveis de compra;
-* múltiplos níveis de assinatura;
-* múltiplos períodos de assinatura;
-* diferentes URLs de compra para níveis ou períodos de assinatura individuais.
-
-As ações de compra, assinatura e doação são exibidas separadamente na página do aplicativo, portanto um aplicativo pode oferecer qualquer combinação entre elas.
-
-#### Compras Únicas
-
-Para uma compra única simples, forneça uma `url` e um `price` base:
-
-```json
+``` json
 "purchase": {
-  "url": "https://example.org/buy",
-  "price": 19.99
-}
-```
-
-O `price` é um valor numérico especificado em **dólares americanos (USD)** e funciona como preço de contingência.
-
-O LinuxToys o exibe diretamente no botão de compra:
-
-```text
-Comprar · $19.99
-```
-
-Uma URL de compra também pode ser fornecida sem informações de preço:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy"
-}
-```
-
-Nesse caso, o LinuxToys simplesmente exibe **Comprar**.
-
-#### Preços Localizados
-
-Preços localizados podem ser fornecidos através de `prices`:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy",
-  "price": 19.99,
-  "prices": {
-    "BRL": 59.90,
-    "EUR": 17.99,
-    "GBP": 15.99
-  }
-}
-```
-
-As chaves em `prices` correspondem aos códigos internacionais de moeda informados pelo `locale int_curr_symbol` do sistema, como `BRL`, `EUR` e `GBP`.
-
-Quando um preço localizado correspondente está disponível, o LinuxToys o utiliza no lugar do preço base em USD. O símbolo da moeda exibido é obtido através de `locale currency_symbol`.
-
-Por exemplo, um sistema cuja localidade monetária informa `BRL` pode exibir:
-
-```text
-Comprar · R$59.90
-```
-
-enquanto um sistema configurado para `EUR` pode exibir:
-
-```text
-Comprar · €17.99
-```
-
-Não é necessário fornecer uma entrada `USD` em `prices`. O `price` base já representa o preço em USD e serve como valor de contingência.
-
-Caso a moeda do usuário não esteja presente em `prices`, a localidade monetária não possa ser determinada ou o `locale` não esteja disponível, o LinuxToys utiliza o preço base em USD e o símbolo `$`.
-
-Os preços localizados são fornecidos diretamente pelo desenvolvedor. **O LinuxToys não realiza conversão de moedas.**
-
-#### Compras por Níveis
-
-Aplicativos com múltiplas edições ou níveis de compra podem utilizar `tiers`:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy",
-  "tiers": [
-    {
-      "name": "Standard",
-      "price": 19.99,
-      "prices": {
-        "BRL": 59.90,
-        "EUR": 17.99
-      }
-    },
-    {
-      "name": "Pro",
-      "price": 39.99,
-      "prices": {
-        "BRL": 119.90,
-        "EUR": 35.99
-      }
-    }
-  ]
-}
-```
-
-Quando múltiplas opções de compra estão disponíveis, o LinuxToys exibe o menor preço disponível no botão principal:
-
-```text
-Comprar · a partir de $19.99
-```
-
-O botão se torna um menu suspenso através do qual o usuário pode selecionar o nível desejado.
-
-Cada nível oferece suporte ao mesmo mecanismo de preços localizados através do seu próprio campo `prices`.
-
-Um nível também pode fornecer sua própria `url`:
-
-```json
-"purchase": {
-  "url": "https://example.org/buy",
-  "tiers": [
-    {
-      "name": "Standard",
-      "price": 19.99,
-      "url": "https://example.org/buy/standard"
-    },
-    {
-      "name": "Pro",
-      "price": 39.99,
-      "url": "https://example.org/buy/pro"
-    }
-  ]
-}
-```
-
-Selecionar um nível abre sua respectiva URL. Caso um nível não forneça uma `url`, a `purchase.url` principal é utilizada como contingência.
-
-Isso permite que os desenvolvedores direcionem todas as opções para uma página de preços em comum ou enviem o usuário diretamente à página de compra da opção selecionada.
-
-### Assinaturas
-
-Para uma assinatura simples com um único preço, utilize `sub_price`:
-
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
+  "url": "https://example.com/subscribe",
   "sub_price": 9.99
 }
 ```
 
-O LinuxToys exibe:
+As duas opções podem ser oferecidas juntas:
 
-```text
-Assinar · $9.99
-```
-
-Preços de assinatura localizados podem ser fornecidos através de `sub_prices`:
-
-```json
+``` json
 "purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_price": 9.99,
-  "sub_prices": {
-    "BRL": 29.90,
-    "EUR": 8.99
-  }
+  "url": "https://example.com/pricing",
+  "price": 49.99,
+  "sub_price": 9.99
 }
 ```
 
-`sub_price` é o preço base em USD, enquanto `sub_prices` segue as mesmas regras de localização e contingência utilizadas por `price` e `prices`.
+O LinuxToys também oferece suporte a preços localizados, níveis de
+compra, níveis de assinatura e períodos de assinatura. Mantenha modelos
+comerciais simples quando possível; use as formas com níveis apenas
+quando os preços reais do aplicativo exigirem isso.
 
-#### Períodos de Assinatura
+Os metadados comerciais descrevem o destino de compra ou assinatura do
+próprio desenvolvedor. O LinuxToys não se torna o processador do
+pagamento.
 
-Quando um aplicativo oferece vários períodos de cobrança, utilize `sub_periods`.
+## Localização
 
-Cada período especifica sua duração através de `months`:
+Listagens de repositório podem manter suas descrições voltadas ao
+usuário separadas dos metadados de instalação.
 
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_periods": [
-    {
-      "months": 1,
-      "price": 9.99
-    },
-    {
-      "months": 6,
-      "price": 54.99
-    },
-    {
-      "months": 12,
-      "price": 99.99
-    }
-  ]
-}
-```
+Uma listagem pode referenciar um catálogo JSON de descrições no mesmo
+diretório:
 
-O valor de `months` é um número inteiro positivo que representa a duração daquela opção de assinatura em meses.
-
-Quando múltiplos períodos estão disponíveis, o LinuxToys exibe o menor preço fornecido no botão de assinatura:
-
-```text
-Assinar · a partir de $9.99
-```
-
-O usuário pode então selecionar o período de cobrança desejado através do menu suspenso.
-
-Cada período também pode fornecer preços localizados:
-
-```json
+``` json
 {
-  "months": 12,
-  "price": 99.99,
-  "prices": {
-    "BRL": 299.90,
-    "EUR": 89.99
-  }
-}
-```
-
-Um período de cobrança pode opcionalmente fornecer sua própria URL:
-
-```json
-{
-  "months": 12,
-  "price": 99.99,
-  "url": "https://example.org/subscribe/yearly"
-}
-```
-
-Caso nenhuma URL específica para o período seja fornecida, o LinuxToys utiliza a `purchase.url` principal como contingência.
-
-#### Assinaturas por Níveis
-
-Aplicativos podem combinar níveis de assinatura com períodos de cobrança através de `sub_tiers`:
-
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_tiers": [
-    {
-      "name": "Standard",
-      "periods": [
-        {
-          "months": 1,
-          "price": 4.99
-        },
-        {
-          "months": 12,
-          "price": 49.99
-        }
-      ]
-    },
-    {
-      "name": "Pro",
-      "periods": [
-        {
-          "months": 1,
-          "price": 9.99
-        },
-        {
-          "months": 12,
-          "price": 99.99
-        }
-      ]
-    }
-  ]
-}
-```
-
-O LinuxToys combina as informações de nível e período de cobrança no menu suspenso de assinatura, enquanto exibe antecipadamente o menor preço fornecido:
-
-```text
-Assinar · a partir de $4.99
-```
-
-Por exemplo, o menu pode conter opções correspondentes a:
-
-```text
-Standard · 1 mês · $4.99
-Standard · 12 meses · $49.99
-Pro · 1 mês · $9.99
-Pro · 12 meses · $99.99
-```
-
-Preços localizados podem ser especificados independentemente para cada período através de `prices`.
-
-#### URLs de Assinatura
-
-Níveis de assinatura e períodos de cobrança individuais podem opcionalmente fornecer suas próprias URLs.
-
-Uma URL para todo o nível pode ser especificada desta forma:
-
-```json
-{
-  "name": "Pro",
-  "url": "https://example.org/subscribe/pro",
-  "periods": [
-    {
-      "months": 1,
-      "price": 9.99
-    },
-    {
-      "months": 12,
-      "price": 99.99
-    }
-  ]
-}
-```
-
-Períodos individuais podem substituir essa URL:
-
-```json
-{
-  "name": "Pro",
-  "url": "https://example.org/subscribe/pro",
-  "periods": [
-    {
-      "months": 1,
-      "price": 9.99,
-      "url": "https://example.org/subscribe/pro/monthly"
-    },
-    {
-      "months": 12,
-      "price": 99.99,
-      "url": "https://example.org/subscribe/pro/yearly"
-    }
-  ]
-}
-```
-
-O LinuxToys determina o destino das opções de assinatura na seguinte ordem:
-
-1. a `url` do período de cobrança, quando fornecida;
-2. a `url` do nível de assinatura, quando fornecida;
-3. a `purchase.url` principal.
-
-Isso possibilita criar links diretos para opções individuais de compra sem a necessidade de criar entradas separadas no LinuxToys.
-
-#### Níveis de Assinatura sem Múltiplos Períodos
-
-Um nível de assinatura não precisa definir uma lista `periods`. Um nível com uma única opção de cobrança pode fornecer seu preço diretamente:
-
-```json
-"purchase": {
-  "url": "https://example.org/subscribe",
-  "sub_tiers": [
-    {
-      "name": "Standard",
-      "months": 1,
-      "price": 4.99
-    },
-    {
-      "name": "Pro",
-      "months": 1,
-      "price": 9.99
-    }
-  ]
-}
-```
-
-Caso `months` seja omitido nesse tipo de nível, o LinuxToys o considera uma opção de um mês.
-
-### Oferecendo Compras e Assinaturas Simultaneamente
-
-Compras únicas e assinaturas são independentes e podem ser oferecidas pelo mesmo aplicativo:
-
-```json
-"purchase": {
-  "url": "https://example.org/pricing",
-  "tiers": [
-    {
-      "name": "Standard",
-      "price": 29.99
-    },
-    {
-      "name": "Pro",
-      "price": 49.99
-    }
-  ],
-  "sub_tiers": [
-    {
-      "name": "Standard",
-      "periods": [
-        {
-          "months": 1,
-          "price": 4.99
-        },
-        {
-          "months": 12,
-          "price": 49.99
-        }
-      ]
-    },
-    {
-      "name": "Pro",
-      "periods": [
-        {
-          "months": 1,
-          "price": 9.99
-        },
-        {
-          "months": 12,
-          "price": 99.99
-        }
-      ]
-    }
-  ]
-}
-```
-
-O LinuxToys mantém as duas ações separadas:
-
-```text
-Comprar · a partir de $29.99
-Assinar · a partir de $4.99
-```
-
-Cada botão fornece seu próprio menu suspenso quando múltiplas opções estão disponíveis.
-
-### Doações
-
-Links de doação permanecem independentes das opções pagas de compra e assinatura:
-
-```json
-"donate": "https://example.org/donate"
-```
-
-Portanto, um aplicativo pode oferecer simultaneamente as ações Comprar, Assinar e Doar.
-
-### Exemplo Completo
-
-Uma entrada de repositório utilizando compras por níveis, assinaturas por níveis, preços localizados, URLs específicas para cada opção e doações pode ter a seguinte aparência:
-
-```json
-[
-  {
-    "name": "Example App",
-    "developer": "Example Company",
-    "repo": "https://example.org",
-    "category": "office",
-    "icon": "./example.svg",
-    "type": "url",
-    "urls": {
-      "appimage": "https://example.org/releases/example.AppImage"
-    },
-    "descriptions": "descriptions.json",
-    "screenshots": "screenshots/",
-    "purchase": {
-      "url": "https://example.org/pricing",
-      "tiers": [
-        {
-          "name": "Standard",
-          "price": 29.99,
-          "prices": {
-            "BRL": 149.90,
-            "EUR": 27.99
-          },
-          "url": "https://example.org/buy/standard"
-        },
-        {
-          "name": "Pro",
-          "price": 49.99,
-          "prices": {
-            "BRL": 249.90,
-            "EUR": 46.99
-          },
-          "url": "https://example.org/buy/pro"
-        }
-      ],
-      "sub_tiers": [
-        {
-          "name": "Standard",
-          "periods": [
-            {
-              "months": 1,
-              "price": 4.99,
-              "prices": {
-                "BRL": 24.90,
-                "EUR": 4.49
-              },
-              "url": "https://example.org/subscribe/standard/monthly"
-            },
-            {
-              "months": 12,
-              "price": 49.99,
-              "prices": {
-                "BRL": 249.90,
-                "EUR": 44.99
-              },
-              "url": "https://example.org/subscribe/standard/yearly"
-            }
-          ]
-        },
-        {
-          "name": "Pro",
-          "url": "https://example.org/subscribe/pro",
-          "periods": [
-            {
-              "months": 1,
-              "price": 9.99,
-              "prices": {
-                "BRL": 49.90,
-                "EUR": 8.99
-              }
-            },
-            {
-              "months": 12,
-              "price": 99.99,
-              "prices": {
-                "BRL": 499.90,
-                "EUR": 89.99
-              }
-            }
-          ]
-        }
-      ]
-    },
-    "donate": "https://example.org/donate"
-  }
-]
-```
-
-Essa configuração produz ações separadas de Comprar, Assinar e Doar, permitindo ao LinuxToys apresentar os preços localizados apropriados e direcionar os usuários ao destino escolhido pelo desenvolvedor para cada opção paga.
-
-Com a seguinte estrutura de diretórios:
-
-```text
-scripts/lists/example/
-├── repository.json
-├── descriptions.json
-├── example.svg
-└── screenshots/
-    ├── 01-main.webp
-    ├── 02-project.webp
-    └── 03-settings.webp
-```
-
-E:
-
-```json
-{
-  "description_tag": "example_desc",
-  "description_long_tag": "example_long",
-
-  "en": {
-    "example_desc": "A short description of Example App.",
-    "example_long": "A detailed explanation of Example App, its purpose, and the features available to the user."
-  },
-
-  "pt": {
-    "example_desc": "Uma descrição curta do Example App.",
-    "example_long": "Uma explicação detalhada do Example App, sua finalidade e os recursos disponíveis para o usuário."
-  }
-}
-```
-
-### Quando uma Página de Aplicativo é Exibida?
-
-Uma página de aplicativo é habilitada automaticamente quando a entrada fornece pelo menos um recurso de página de aplicativo:
-
-* uma descrição longa;
-* uma ou mais capturas de tela válidas;
-* uma URL de compra; ou
-* uma URL de doação.
-
-Não é necessário habilitá-la explicitamente com uma opção adicional.
-
-Se nenhum desses elementos estiver presente, selecionar o aplicativo segue o fluxo padrão de instalação do LinuxToys.
-
-### Comportamento em Checklists
-
-As páginas de aplicativos afetam apenas a ativação individual de um aplicativo.
-
-Se um aplicativo for selecionado individualmente em uma checklist, sua página de aplicativo será aberta normalmente quando estiver disponível.
-
-Quando o usuário realiza uma **instalação de múltiplos aplicativos por checklist**, as páginas de aplicativos são ignoradas intencionalmente. O LinuxToys segue diretamente para o fluxo normal de instalação em lote, evitando que várias páginas de aplicativos interrompam uma operação de checklist.
-
-Abrir a página de um aplicativo individual não limpa as seleções já feitas pelo usuário na checklist.
-
-### Recomendações
-
-Mantenha a descrição curta concisa, pois ela é utilizada na interface normal do LinuxToys e no cabeçalho da página do aplicativo. Utilize a descrição longa para fornecer contexto adicional, apresentar os principais recursos, informar sobre compatibilidade ou incluir outros detalhes que ajudem o usuário a decidir se deseja instalar o aplicativo.
-
-Para aplicativos com descrições longas traduzidas, dê preferência a um arquivo `descriptions.json` local do repositório. Isso mantém textos específicos do aplicativo fora dos arquivos principais de tradução do LinuxToys e permite que a lista de repositório, as capturas de tela, o ícone e as descrições sejam mantidos em conjunto.
-
-Uma página de aplicativo é opcional. Pacotes simples que precisam apenas de um nome e uma descrição curta geralmente devem continuar utilizando o fluxo padrão de instalação.
-
----
-
-## Exemplo completo
-
-O exemplo abaixo demonstra a maior parte dos recursos atualmente suportados pelas listas de repositórios:
-
-```json
-{
-  "name": "example-app",
-  "repo": "https://github.com/example/example-app",
-  "description": "A cross-platform example application.",
-  "description_tag": "example_app_desc",
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
   "category": "utilities",
-  "icon": "./icon.svg",
+  "descriptions": "descriptions.json",
+  "description_tag": "my_app_desc",
+  "long-description_tag": "my_app_long"
+}
+```
 
-  "type": "url",
+O catálogo de descrições deve ser um arquivo JSON no mesmo diretório do
+JSON da listagem de repositório.
 
-  "urls": {
-    "deb": "https://downloads.example.org/example-app-amd64.deb",
-    "rpm": "https://downloads.example.org/example-app-x86_64.rpm",
-    "pkg.tar.zst": "https://downloads.example.org/example-app-x86_64.pkg.tar.zst",
-    "appimage": "https://downloads.example.org/ExampleApp-x86_64.AppImage"
+Um catálogo pode fornecer traduções como:
+
+``` json
+{
+  "description_tag": "my_app_desc",
+  "description_long_tag": "my_app_long",
+  "en": {
+    "my_app_desc": "A short description.",
+    "my_app_long": "my-app/description.md"
   },
+  "pt-BR": {
+    "my_app_desc": "Uma descrição curta.",
+    "my_app_long": "my-app/description-br.md"
+  }
+}
+```
 
-  "os": [
-    "debian",
-    "ubuntu",
-    "deepin",
-    "zorin",
-    "pika",
-    "fedora",
-    "rhel",
-    "suse",
-    "ostree",
-    "ublue",
-    "arch",
-    "cachy",
-    "manjaro"
-  ],
+Para entradas localizadas do catálogo, o LinuxToys procura primeiro pelo
+locale atual, depois pelo idioma-base e, por fim, pelo inglês.
 
-  "desktop": [
-    "gnome",
-    "plasma"
-  ],
+Um valor localizado de descrição longa pode apontar para um arquivo
+Markdown, permitindo que cada idioma use um documento separado.
 
-  "hardware": {
-    "gpu": [
-      "amd",
-      "intel",
-      "nvidia"
-    ]
-  },
+## Um exemplo completo
 
-  "systemd": "yes",
-  "container": "deny",
+O exemplo a seguir combina um AppImage hospedado no Git com metadados de
+compatibilidade, uma dependência nativa, conteúdo rico para a página do
+aplicativo e um link de doação:
 
+``` json
+{
+  "name": "Meu App",
+  "repo": "https://github.com/example/my-app",
+  "category": "utilities",
+  "description": "Um aplicativo portátil para desktop.",
+  "package-name": "MyApp-*.AppImage",
+  "icon": "my-app/icon.svg",
+  "license": "GPL-3.0",
+  "os": ["!steamos"],
   "dependencies": [
     {
       "type": "native",
       "package-name": {
-        "debian": [
-          "curl",
-          "git"
-        ],
-        "fedora": [
-          "curl",
-          "git"
-        ],
-        "arch": [
-          "curl",
-          "git"
-        ],
-        "all": "curl"
+        "debian": "example-helper",
+        "ubuntu": "example-helper",
+        "fedora": "example-helper",
+        "arch": "example-helper",
+        "all": "example-helper"
       }
     }
   ],
-
-  "overrides": {
-    "pre": {
-      "script": "example-app/pre-install.sh"
-    },
-
-    "flatpak": [],
-
-    "post": {
-      "script": "example-app/post-install.sh"
-    }
-  },
-
-  "services": {
-    "system": [
-      "example-app.service"
-    ],
-    "user": [
-      "example-app-tray.service"
-    ]
-  }
+  "long-description": "my-app/description.md",
+  "screenshots": "my-app/screenshots",
+  "donate": "https://example.com/donate"
 }
 ```
 
-Uma estrutura de diretórios correspondente poderia ser:
+Não use um exemplo completo como se fosse um modelo que precisa ser
+totalmente preenchido. A maioria dos aplicativos deve precisar de bem
+menos campos.
 
-```text
-scripts/lists/example-app/
-├── app.json
-├── icon.svg
-├── pre-install.sh
-└── post-install.sh
+## Estrutura do repositório
+
+Os recursos de uma listagem de repositório podem ficar junto ao JSON que
+os declara.
+
+Por exemplo:
+
+``` text
+scripts/
+└── lists/
+    └── my-app/
+        ├── app.json
+        ├── descriptions.json
+        ├── icon.svg
+        ├── description.md
+        ├── description-br.md
+        ├── pre-install.sh
+        ├── post-install.sh
+        └── screenshots/
+            ├── main.webp
+            └── settings.webp
 ```
 
----
-<a id="minimal-examples"></a>
+Ícones locais, capturas de tela, descrições Markdown e scripts de hook
+são resolvidos com verificações de segurança de caminho para impedir que
+as entradas saiam da árvore de listagens de repositório.
 
-## Exemplos mínimos
+## Diretrizes de projeto
 
-### Release do GitHub
+Prefira metadados declarativos a lógica shell. Se o LinuxToys já tiver
+um campo para o que o aplicativo precisa, use esse campo em vez de
+reproduzir o comportamento em um hook.
 
-```json
-{
-  "name": "example",
-  "repo": "developer/example",
-  "description": "An example application.",
-  "category": "utilities"
-}
-```
+Prefira AppStream para aplicativos já representados pelo Flathub ou por
+repositórios nativos compatíveis.
 
-### Flathub
+Prefira a descoberta de lançamentos Git quando o upstream publicar
+assets de lançamento adequados. Use entradas `url` diretas quando o
+local de download precisar ser declarado explicitamente.
 
-```json
-{
-  "name": "example",
-  "repo": "https://github.com/developer/example",
-  "description": "An example application.",
-  "category": "utilities",
-  "type": "flathub",
-  "package-name": "com.example.Application"
-}
-```
+Use restrições de compatibilidade apenas quando necessário. Uma
+declaração `os`, desktop, hardware, WSL, contêiner ou systemd
+desnecessariamente restrita impede que usuários com sistemas compatíveis
+vejam o aplicativo.
 
-### Pacote nativo
+Use hooks pre/post para as partes da instalação que não podem ser
+expressas declarativamente. Mantenha esses hooks pequenos e fáceis de
+auditar.
 
-```json
-{
-  "name": "example",
-  "repo": "https://example.org",
-  "description": "An example application.",
-  "category": "utilities",
-  "type": "native",
-  "package-name": {
-    "debian": "example",
-    "fedora": "example",
-    "arch": "example"
-  }
-}
-```
+Trate a página do aplicativo como parte da integração. Uma descrição
+útil, capturas de tela, informações de licença e links do desenvolvedor
+ajudam os usuários a entender o aplicativo antes de instalá-lo.
 
-### URLs diretas de pacotes
+## Referência de campos
 
-```json
-{
-  "name": "example",
-  "repo": "https://example.org",
-  "description": "An example application.",
-  "category": "utilities",
-  "type": "url",
-  "urls": {
-    "deb": "https://example.org/download/example.deb",
-    "rpm": "https://example.org/download/example.rpm",
-    "appimage": "https://example.org/download/Example.AppImage"
-  }
-}
-```
+| Campo | Finalidade |
+| --- | --- |
+| `name` | Nome de exibição do aplicativo. |
+| `repo` | URL do projeto/fonte upstream. |
+| `category` | Identificador de categoria do LinuxToys. |
+| `description` | Descrição curta do aplicativo. |
+| `type` | Tipo de instalação; o padrão é `git`. |
+| `package-name` | Nome do pacote, asset binário exato ou seletor de asset de lançamento, dependendo de `type`. |
+| `urls` | URLs diretas de pacotes/downloads para entradas `url`. |
+| `make-source` | Fonte `git` ou `tar` para uma entrada `make`. |
+| `make-command` | Comando de instalação Make personalizado. |
+| `os` | Regras de inclusão/exclusão de compatibilidade por sistema operacional. |
+| `desktop` | Compatibilidade com ambientes de desktop. |
+| `systemd` | Exige ou exclui systemd. |
+| `wsl` | Restrição exclusiva para WSL ou para ambientes que não sejam WSL. |
+| `container` | Permite ou impede execução em contêineres. |
+| `hardware` | Requisitos de compatibilidade de CPU/GPU. |
+| `dependencies` | Pré-requisitos nativos ou do Flathub. |
+| `overrides` | Hooks pre/post, overrides Flatpak e comportamento do escopo Flatpak. |
+| `services` | Unidades systemd de sistema/usuário a habilitar e iniciar. |
+| `icon` | Ícone GTK/LinuxToys ou SVG/PNG local do repositório. |
+| `license` | Identificador curto de licença. |
+| `developer` | Desenvolvedor ou empresa exibido na página do aplicativo. |
+| `long-description` | Texto de descrição rica ou arquivo Markdown local do repositório. |
+| `screenshots` | Capturas de tela locais do repositório ou diretório de capturas. |
+| `donate` | Destino de doação. |
+| `purchase` | Metadados de compra/assinatura. |
+| `descriptions` | Catálogo de localização no mesmo diretório. |
+| `description_tag` | Chave de localização da descrição curta. |
+| `long-description_tag` | Chave de localização da descrição longa. |
 
----
-
-## Comportamento de validação
-
-As entradas de listas de repositórios são validadas antes de aparecerem no LinuxToys.
-
-Uma entrada é silenciosamente ignorada quando seus campos obrigatórios estão ausentes, seu tipo de instalação é inválido ou inutilizável, seus requisitos de compatibilidade não correspondem à máquina atual, um pacote nativo ou URL não pode ser resolvido para o host, uma dependência não pode ser satisfeita, um override está malformado, sua definição de serviços é inválida, sua configuração de container é inválida ou seu `name` duplica uma entrada carregada anteriormente.
-
-Isso significa que desenvolvedores devem testar suas entradas de lista de repositório em todas as classes de sistema que pretendem suportar.
-
-Uma entrada de lista de repositório é exposta ao restante do LinuxToys de forma semelhante a um script normal do LinuxToys. O LinuxToys gera uma identidade virtual no formato:
-
-```text
-repo://NAME
-```
-
-e materializa um script shell temporário apenas quando a entrada precisa ser executada.
-
-Instalações provenientes de listas de repositórios são marcadas como reversíveis e participam do fluxo normal de instalação e transações do LinuxToys.
-
----
-
-## Escolhendo um método de instalação
-
-Use `git` quando seu projeto publica artefatos instaláveis através de releases compatíveis com o parser de releases do LinuxToys.
-
-Use `flathub` quando Flatpak for o método de distribuição pretendido.
-
-Use `native` quando a aplicação já estiver disponível nos repositórios normais das distribuições.
-
-Use `url` quando você publicar pacotes diretamente e quiser que o LinuxToys selecione o formato mais adequado para cada distribuição.
-
-Dependências, campos de compatibilidade, serviços e overrides podem então ser adicionados sobre esses tipos de instalação conforme necessário.
-
-Mantenha as entradas o mais simples possível. As listas de repositórios são destinadas a aplicações que possam ser instaladas de forma declarativa. Se o processo de instalação de uma aplicação exigir uma quantidade significativa de lógica personalizada, um script tradicional do LinuxToys ainda pode ser a forma de integração mais apropriada.
+Os campos de overlay do AppStream estão intencionalmente fora do escopo
+deste documento.

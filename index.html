@@ -14,11 +14,12 @@
 <meta name="twitter:image" content="https://dev.linux.toys/assets/card.webp">
 <meta name="twitter:image:alt" content="LinuxToys Developer Portal">
 
-<meta content="#0a0c10" name="theme-color"/>
+<meta name="theme-color" content="#f7f7f5" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#0f0f11" media="(prefers-color-scheme: dark)"/>
 <title>LinuxToys for Developers</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="assets/linuxtoys.svg" rel="icon" type="image/svg+xml"/>
 <link href="home/styles.css" rel="stylesheet">
 <script>
@@ -68,9 +69,11 @@
 </span>
 </a>
 <div class="header-actions">
+<nav class="header-nav" aria-label="Primary navigation">
 <a class="header-link" data-i18n="navStart" href="documentation.html">Get started</a>
 <a class="header-link" data-i18n="navMainsite" href="https://linux.toys">Meet LinuxToys</a>
-        <a
+        </nav>
+<a
           class="github-button"
           href="https://github.com/psygreg/linuxtoys"
           target="_blank"
@@ -92,9 +95,23 @@
             <path d="M3 5h18v14H3V5Zm2 2v.5l7 5 7-5V7H5Zm14 10V9.95l-7 5-7-5V17h14Z"/>
           </svg>
         </a>
-<div aria-label="Language selector" class="language-switcher" role="group">
-<button aria-pressed="true" class="lang-button active" data-lang="en" type="button">EN</button>
-<button aria-pressed="false" class="lang-button" data-lang="pt-BR" type="button">PT-BR</button>
+<div class="header-preferences">
+<button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme">
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3.5"/>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/>
+            </svg>
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.2 15.1A8.5 8.5 0 0 1 8.9 3.8 8.5 8.5 0 1 0 20.2 15.1Z"/>
+            </svg>
+          </button>
+<details class="language-switcher language-dropdown">
+<summary class="language-current" aria-label="Language selector">PT</summary>
+<div class="language-menu" role="menu">
+<a class="language-option" href="#" data-lang="en" role="menuitem">EN</a>
+<a class="language-option active" href="#" data-lang="pt-BR" role="menuitem" aria-current="true">PT</a>
+</div>
+</details>
 </div>
 </div>
 </header>
@@ -103,37 +120,12 @@
 <div class="hero-copy">
 <h1 data-i18n="heroTitle">Ship your app without shipping the complexity.</h1>
 <p class="hero-lead" data-i18n="heroLead">LinuxToys gives developers a simple, declarative way to distribute applications across dozens of Linux distributions while keeping installation behavior under their control.</p>
-<div aria-label="LinuxToys developer highlights" class="hero-stats">
-<div class="stat">
-<strong>40+</strong>
-<span data-i18n="statDistros">Linux distributions</span>
-</div>
-<div class="stat">
-<strong data-i18n="statTimeValue">~1 min</strong>
-<span data-i18n="statTime">for the simplest setup</span>
-</div>
-<div class="stat">
-<strong data-i18n="statUsersValue">Thousands</strong>
-<span data-i18n="statUsers">of recurring users</span>
+<div class="hero-actions">
+<a class="button button-primary" data-i18n="butStart" href="documentation.html">Get started</a>
 </div>
 </div>
-</div>
-<div aria-label="Example developer configuration" class="hero-panel">
-<div class="panel-topbar">
-<span></span><span></span><span></span>
-<div data-i18n="panelLabel">Repository entry</div>
-</div>
-<pre><code>{
-  <span class="key">"name"</span>: <span class="value">"YourApp"</span>,
-  <span class="key">"description"</span>: <span class="value">"YourApp's short description."</span>,
-  <span class="key">"repo"</span>: <span class="value">"github.com/you/yourapp"</span>,
-  <span class="key">"category"</span>: <span class="value">"office"</span>,
-  <span class="key">"icon"</span>: <span class="value">"./yourapp.svg"</span>,
-}</code></pre>
-<div class="panel-note">
-<span aria-hidden="true" class="status-dot"></span>
-<span data-i18n="panelNote">That can be enough to start shipping.</span>
-</div>
+<div class="hero-visual">
+<img class="hero-screenshot" data-theme-image src="assets/app-page.webp" alt="LinuxToys developer integration"/>
 </div>
 </section>
 <section class="section intro-section" id="features">
@@ -150,7 +142,7 @@
 <div>
 <h3 data-i18n="easyTitle">Ship in minutes</h3>
 <p data-i18n="easyText">The simplest LinuxToys integration needs little more than a GitHub repository and a released AppImage. There is no packaging maze to solve before you can reach users.</p>
-<a class="feature-link" href="documentation.html#quick-start"><span data-i18n="easyLink">Learn about the quick start</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="documentation.html"><span data-i18n="easyLink">Learn about the quick start</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 <article class="feature-card">
@@ -160,7 +152,7 @@
 <div>
 <h3 data-i18n="declarativeTitle">Declarative deployment</h3>
 <p data-i18n="declarativeText">You define how your application should be installed. LinuxToys turns that declaration into a repeatable deployment flow, replacing scattered installation instructions with a consistent experience.</p>
-<a class="feature-link" href="documentation.html#declarative-deployment"><span data-i18n="declarativeLink">Explore deployment definitions</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="documentation.html#appstream-applications"><span data-i18n="declarativeLink">Explore deployment definitions</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 <article class="feature-card">
@@ -170,17 +162,7 @@
 <div>
 <h3 data-i18n="reachTitle">Massive Linux reach</h3>
 <p data-i18n="reachText">LinuxToys runs across more than 40 Linux distributions and serves thousands of recurring users, helping your application reach a broad range of systems from one integration point.</p>
-<a class="feature-link" href="documentation.html#multi-distro"><span data-i18n="reachLink">See platform coverage</span><span aria-hidden="true">→</span></a>
-</div>
-</article>
-<article class="feature-card feature-card-wide">
-<div aria-hidden="true" class="feature-icon">
-<svg viewbox="0 0 24 24"><path d="M5 5h14v10H9l-4 4V5Zm4 4h6m-6 3h4"></path></svg>
-</div>
-<div>
-<h3 data-i18n="feedbackTitle">A direct feedback loop</h3>
-<p data-i18n="feedbackText">When LinuxToys becomes an official distributor of your GitHub-hosted app, users can send useful reports through its bug reporting flow and issue tracker, helping upstream developers see real-world problems faster.</p>
-<a class="feature-link" href="documentation.html#official-support"><span data-i18n="feedbackLink">Learn about official distribution</span><span aria-hidden="true">→</span></a>
+<a class="feature-link" href="documentation.html#linuxtoys-install-links"><span data-i18n="reachLink">See platform coverage</span><span aria-hidden="true">→</span></a>
 </div>
 </article>
 <article class="feature-card feature-card-wide">
@@ -198,45 +180,19 @@
 <section class="section app-pages-section" id="app-pages">
 <div class="app-pages-layout">
 <div class="app-pages-visual">
-<img src="assets/app-page-screenshot.webp" alt="LinuxToys app page example"/>
+<img class="app-page-screenshot" data-theme-image src="assets/commercial-app.webp" alt="Commercial app page in LinuxToys"/>
 </div>
 <div class="app-pages-copy">
 <div class="eyebrow" data-i18n="appPagesEyebrow">Present your app at its best</div>
 <h2 data-i18n="appPagesTitle">Give users the context they need before they install.</h2>
 <p data-i18n="appPagesText">App pages let you present a richer description and screenshots directly inside LinuxToys, helping users understand what your application does, what makes it useful, and what they can expect before starting the installation.</p>
 <p data-i18n="appPagesCommerceText">At your discretion, the same page can also lead users directly to a donation or purchase option, giving your project a natural way to support funding or commercial distribution without interrupting the LinuxToys experience.</p>
-<a class="feature-link" href="repositorylists.html#app-pages"><span data-i18n="appPagesLink">Learn how to configure app pages</span><span aria-hidden="true">→</span></a>
-</div>
-</div>
-</section>
-<section class="section workflow-section" id="how-it-works">
-<div class="section-heading compact">
-<div class="eyebrow" data-i18n="workflowEyebrow">A simple path to distribution</div>
-<h2 data-i18n="workflowTitle">From release to LinuxToys in three steps.</h2>
-</div>
-<div class="steps">
-<div class="step">
-<div class="step-number">01</div>
-<h3 data-i18n="step1Title">Publish</h3>
-<p data-i18n="step1Text">Release your application through the channel that already fits your project, such as GitHub Releases.</p>
-</div>
-<div aria-hidden="true" class="step-divider"></div>
-<div class="step">
-<div class="step-number">02</div>
-<h3 data-i18n="step2Title">Declare</h3>
-<p data-i18n="step2Text">Describe the package or procedure LinuxToys should use, with optional compatibility rules and hooks.</p>
-</div>
-<div aria-hidden="true" class="step-divider"></div>
-<div class="step">
-<div class="step-number">03</div>
-<h3 data-i18n="step3Title">Reach users</h3>
-<p data-i18n="step3Text">LinuxToys handles the user-facing installation flow across supported distributions and tracks what was changed.</p>
+<a class="feature-link" href="documentation.html#purchases-and-subscriptions"><span data-i18n="appPagesLink">Learn how to configure app pages</span><span aria-hidden="true">→</span></a>
 </div>
 </div>
 </section>
 <section class="cta-section">
 <div>
-<div class="eyebrow" data-i18n="ctaEyebrow">Ready to integrate?</div>
 <h2 data-i18n="ctaTitle">Your Linux distribution story can start with one file.</h2>
 <p data-i18n="ctaText">Start with the minimal configuration today, then expand into compatibility rules, hooks, and fully custom procedures only when your application needs them.</p>
 </div>

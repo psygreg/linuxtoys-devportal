@@ -5,41 +5,45 @@ const translations = {
     navWhy: "Why LinuxToys",
     navStart: "Documentation",
     navMainsite: "Meet LinuxToys",
+    butStart: "Get started now",
     eyebrow: "Built for Linux developers",
-    heroTitle: "Ship your app without shipping the complexity.",
-    heroLead: "LinuxToys gives developers a simple, declarative way to distribute applications across dozens of Linux distributions while keeping installation behavior under their control.",
+    heroTitle: "Easy for you. Even more so for the user.",
+    heroLead: "Bring your app to dozens of Linux distributions in whatever way makes the most sense for your project — automatically through repositories, directly through binaries or tarballs, with custom procedures, or through direct installation links.",
     heroPrimary: "See how it works",
     heroSecondary: "Explore developer features",
-    statDistros: "Linux distributions",
-    statTimeValue: "~1 min",
-    statTime: "for the simplest setup",
-    statUsersValue: "Thousands",
-    statUsers: "of recurring users",
+    statEff: "Effortless",
+    statDistros: "discovery from Flathub and distro repos",
+    statTimeValue: "Package-free",
+    statTime: "binaries and tarballs welcome",
+    statUsersValue: "Powerful",
+    statUsers: "custom installation with core libraries",
+    statURI: "Direct links",
+    statURIlink: "your app truly one click away",
     panelLabel: "Repository entry",
     panelNote: "That can be enough to start shipping.",
-    featuresEyebrow: "Why developers use LinuxToys",
-    featuresTitle: "Distribution that feels like part of your release process.",
-    featuresLead: "From a single AppImage to custom install workflows, LinuxToys scales with the needs of your project while preserving a consistent experience for users.",
-    easyTitle: "Ship in minutes",
-    easyText: "The simplest LinuxToys integration needs little more than a GitHub repository. There is no packaging maze to solve before you can reach your users, so you can focus on developing your app to its best.",
-    easyLink: "Learn about the quick start",
-    declarativeTitle: "Declarative deployment",
-    declarativeText: "You define how your application should be installed. LinuxToys turns that declaration into a repeatable deployment flow, replacing scattered installation instructions with a consistent experience, everywhere.",
-    declarativeLink: "Explore deployment definitions",
-    reachTitle: "Massive Linux reach",
-    reachText: "LinuxToys runs across more than 40 Linux distributions and serves thousands of recurring users, helping your application reach a broad range of systems from one integration point.",
-    reachLink: "See platform coverage",
-    feedbackTitle: "A direct feedback loop",
-    feedbackText: "When LinuxToys becomes an official distributor of your GitHub-hosted app, users can send useful feedback through its bug reporting flow and issue tracker, helping you see real-world problems faster and giving you the information you need to improve your app while preserving your users' privacy.",
-    feedbackLink: "Learn about official distribution",
-    scriptsTitle: "Simple where you want, powerful where you need",
-    scriptsText: "Use pre-install, post-install, or complete procedure scripts when your application needs more than the standard repository listing. LinuxToys core libraries simplify common operations and automatically track them so users can cleanly revert an installation later.",
+    featuresEyebrow: "Why ship with LinuxToys",
+    featuresTitle: "Your app, the way you intended",
+    featuresLead: "Leave installation instructions in the past while having control over the installation process - no more disgruntled and confused users.",
+    easyTitle: "Ship it your way",
+    easyText: "From just adding it to Flathub or distribution repositories to custom installation procedures and funding, open-source or commercial apps, LinuxToys covers it all.",
+    easyLink: "Quick start",
+    declarativeTitle: "AppStream integration",
+    declarativeText: "Apps shipped through Flathub or main distribution repositories are automatically listed.",
+    declarativeLink: "Learn how it works",
+    reachTitle: "LinuxToys URI",
+    reachText: "Your app one click away from its users - for real.",
+    reachLink: "Add it to your website now",
+    feedbackTitle: "Find new customers",
+    feedbackText: "Set purchase and subscription prices to display in your app page, and let users acquire those directly from you. LinuxToys demands no fees or compensation of any kind.",
+    feedbackLink: "Features for commercial software",
+    scriptsTitle: "Powerful where you need",
+    scriptsText: "Use pre-install, post-install, or complete procedure scripts where you need - LinuxToys core libraries simplify common operations and automatically track them so users can cleanly revert an installation later.",
     scriptsLink: "Build custom install procedures",
-    appPagesEyebrow: "Present your app at its best",
-    appPagesTitle: "Give users the context they need before they install.",
-    appPagesText: "App pages let you present a richer description and screenshots directly inside LinuxToys, helping users understand what your application does, what makes it useful, and what they can expect before starting the installation.",
-    appPagesCommerceText: "At your discretion, the same page can also lead users directly to a donation or purchase option, giving your project a natural way to support funding or commercial distribution without interrupting the LinuxToys experience.",
-    appPagesLink: "Learn how to configure app pages",
+    appPagesEyebrow: "Reach your customers",
+    appPagesTitle: "Everything you need for commercial software.",
+    appPagesText: "Beyond supporting entirely custom installation procedures and distribution format flexibility, LinuxToys allows you to offer purchases and subscriptions of your software with links to your payment service directly in your app's page.",
+    appPagesCommerceText: "We do not demand any fee or compensation for that.",
+    appPagesLink: "Features for commercial software",
     workflowEyebrow: "A simple path to distribution",
     workflowTitle: "Ship to your users in three steps.",
     step1Title: "Publish",
@@ -50,7 +54,7 @@ const translations = {
     step3Text: "LinuxToys handles the user-facing installation flow across supported distributions and tracks what was changed.",
     ctaEyebrow: "Ready to integrate?",
     ctaTitle: "Leave installation instructions in the past.",
-    ctaText: "Start with the minimal configuration today, then expand into compatibility rules, hooks, and fully custom procedures only when your application needs them.",
+    ctaText: "Get started now: for most cases, it's just adding a LinuxToys' URI button to your website!",
     ctaButton: "Open the developer documentation",
     footerTagline: "Developer Portal",
     footerText: "Linux software distribution made easy."
@@ -61,41 +65,45 @@ const translations = {
     navWhy: "Por que LinuxToys",
     navStart: "Documentação",
     navMainsite: "Conheça o LinuxToys",
+    butStart: "Começar agora",
     eyebrow: "Feito para desenvolvedores Linux",
-    heroTitle: "Leve seu app aos usuários sem levar a complexidade junto.",
-    heroLead: "O LinuxToys oferece aos desenvolvedores uma forma simples e declarativa de distribuir aplicativos em dezenas de distribuições Linux, mantendo o controle sobre como a instalação deve funcionar.",
+    heroTitle: "Fácil para você. Ainda mais para o usuário.",
+    heroLead: "Leve seu aplicativo a dezenas de distribuições Linux, do jeito que fizer mais sentido para o seu projeto — automaticamente através de repositórios, diretamente por binários ou tarballs, com procedimentos personalizados e links diretos para instalação.",
     heroPrimary: "Veja como funciona",
     heroSecondary: "Conheça os recursos",
-    statDistros: "distribuições Linux",
-    statTimeValue: "~1 min",
-    statTime: "na configuração mais simples",
-    statUsersValue: "Milhares",
-    statUsers: "de usuários recorrentes",
+    statEff: "Sem esforço",
+    statDistros: "descoberta da Flathub e repositórios de distro",
+    statTimeValue: "Sem pacotes",
+    statTime: "binários e tarballs são bem-vindos",
+    statUsersValue: "Poderosa ",
+    statUsers: "instalação customizada com bibliotecas",
+    statURI: "Links diretos",
+    statURIlink: "seu app a um clique de distância",
     panelLabel: "Entrada de repositório",
     panelNote: "Isso já pode ser suficiente para começar.",
-    featuresEyebrow: "Por que desenvolvedores usam o LinuxToys",
-    featuresTitle: "Distribuição que se integra ao seu processo de lançamento.",
-    featuresLead: "De um único AppImage a fluxos de instalação personalizados, o LinuxToys acompanha as necessidades do seu projeto sem abrir mão de uma experiência consistente para os usuários.",
-    easyTitle: "Publique em minutos",
-    easyText: "A integração mais simples com o LinuxToys precisa de pouco mais do que um repositório no GitHub. Você não precisa enfrentar um labirinto de empacotamento antes de chegar aos seus usuários, então pode se concentrar em desenvolver seu aplicativo ao seu máximo.",
-    easyLink: "Conheça o guia rápido",
-    declarativeTitle: "Distribuição declarativa",
-    declarativeText: "Você define como seu aplicativo deve ser instalado. O LinuxToys transforma essa definição em um fluxo reproduzível, substituindo instruções espalhadas por uma experiência consistente, em todos os lugares.",
-    declarativeLink: "Veja as definições de implantação",
-    reachTitle: "Grande alcance no Linux",
-    reachText: "O LinuxToys é compatível com mais de 40 distribuições Linux e possui milhares de usuários recorrentes, permitindo que seu aplicativo alcance uma grande variedade de sistemas a partir de uma única integração.",
-    reachLink: "Veja a cobertura de plataformas",
-    feedbackTitle: "Um canal direto de feedback",
-    feedbackText: "Quando o LinuxToys se torna um distribuidor oficial do seu aplicativo hospedado no GitHub, os usuários podem enviar feedback útil pelo sistema de bugs e pelo issue tracker, ajudando os desenvolvedores upstream a enxergar problemas reais com mais rapidez e te dando as informações que precisa para tornar seu app cada vez melhor enquanto preserva a privacidade de seus usuários.",
-    feedbackLink: "Saiba mais sobre distribuição oficial",
-    scriptsTitle: "Simples onde você quer, poderoso onde você precisa",
-    scriptsText: "Use scripts de pré-instalação, pós-instalação ou procedimentos completos quando seu aplicativo precisar de mais do que a listagem de repositório padrão. As bibliotecas centrais do LinuxToys simplificam operações comuns e registram as alterações automaticamente para permitir uma remoção limpa depois.",
+    featuresEyebrow: "Por que distribuir com LinuxToys",
+    featuresTitle: "Seu aplicativo, do jeito que você planejou",
+    featuresLead: "Deixe as instruções de instalação no passado sem abrir mão do controle sobre o processo — chega de usuários frustrados e confusos.",
+    easyTitle: "Distribua do seu jeito",
+    easyText: "Desde simplesmente disponibilizar seu aplicativo no Flathub ou nos repositórios das distribuições até procedimentos de instalação personalizados e formas de financiamento, seja ele de código aberto ou comercial, o LinuxToys dá conta de tudo.",
+    easyLink: "Primeiros passos",
+    declarativeTitle: "Integração com AppStream",
+    declarativeText: "Aplicativos distribuídos pelo Flathub ou pelos principais repositórios das distribuições são listados automaticamente.",
+    declarativeLink: "Saiba como funciona",
+    reachTitle: "URI do LinuxToys",
+    reachText: "Seu aplicativo a um clique de distância dos usuários — de verdade.",
+    reachLink: "Adicione ao seu site agora",
+    feedbackTitle: "Encontre novos clientes",
+    feedbackText: "Defina preços de compra e assinatura para exibir na página do seu aplicativo e permita que os usuários façam a aquisição diretamente com você. O LinuxToys não exige taxas ou qualquer tipo de compensação.",
+    feedbackLink: "Recursos para software comercial",
+    scriptsTitle: "Poderoso onde você precisa",
+    scriptsText: "Use scripts de pré-instalação, pós-instalação ou procedimentos completos onde precisar — as bibliotecas principais do LinuxToys simplificam operações comuns e as registram automaticamente para que os usuários possam reverter a instalação de forma limpa posteriormente.",
     scriptsLink: "Crie procedimentos de instalação personalizados",
-    appPagesEyebrow: "Apresente seu aplicativo da melhor forma",
-    appPagesTitle: "Dê aos usuários o contexto de que precisam antes de instalar.",
-    appPagesText: "As páginas de aplicativos permitem apresentar uma descrição mais completa e capturas de tela diretamente no LinuxToys, ajudando os usuários a entender o que seu aplicativo faz, por que ele é útil e o que esperar antes de iniciar a instalação.",
-    appPagesCommerceText: "A seu critério, a mesma página também pode levar o usuário diretamente a uma opção de doação ou compra, oferecendo ao projeto uma forma natural de apoiar seu financiamento ou distribuição comercial sem interromper a experiência do LinuxToys.",
-    appPagesLink: "Saiba como configurar páginas de aplicativos",
+    appPagesEyebrow: "Atinja os seus clientes",
+    appPagesTitle: "Tudo que precisa para software comercial.",
+    appPagesText: "Além do suporte a procedimentos de instalação totalmente customizados e flexibilidade de formatos de distribuição, o LinuxToys também permite oferecer venda e assinatura do seu software com links para o seu serviço de pagamentos diretamente na página do aplicativo.",
+    appPagesCommerceText: "Não exigimos qualquer taxa ou compensação por isso.",
+    appPagesLink: "Recursos para software comercial",
     workflowEyebrow: "Um caminho simples até a distribuição",
     workflowTitle: "Leve seu app aos seus usuários em três passos.",
     step1Title: "Publique",
@@ -106,14 +114,14 @@ const translations = {
     step3Text: "O LinuxToys cuida do fluxo de instalação para o usuário nas distribuições suportadas e registra o que foi alterado.",
     ctaEyebrow: "Pronto para integrar?",
     ctaTitle: "Deixe instruções de instalação no passado.",
-    ctaText: "Comece hoje com a configuração mínima e adicione regras de compatibilidade, hooks e procedimentos totalmente personalizados apenas quando seu aplicativo precisar.",
+    ctaText: "Comece agora: na maioria dos casos, é só adicionar um botão com a URI do LinuxToys ao seu site!",
     ctaButton: "Abrir a documentação do desenvolvedor",
     footerTagline: "Portal do Desenvolvedor",
     footerText: "Distribua seu software no Linux sem complicação."
   }
 };
 
-const languageButtons = document.querySelectorAll(".lang-button");
+const languageOptions = document.querySelectorAll(".language-option[data-lang]");
 const translatableElements = document.querySelectorAll("[data-i18n]");
 
 function applyLanguage(lang) {
@@ -126,18 +134,24 @@ function applyLanguage(lang) {
     const key = element.dataset.i18n;
     if (dictionary[key]) element.textContent = dictionary[key];
   });
-
-  languageButtons.forEach((button) => {
-    const active = button.dataset.lang === lang;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
+  languageOptions.forEach((option) => {
+    const active = option.dataset.lang === lang;
+    option.classList.toggle("active", active);
+    if (active) option.setAttribute("aria-current", "true");
+    else option.removeAttribute("aria-current");
   });
+  const languageCurrent = document.querySelector(".language-current");
+  if (languageCurrent) languageCurrent.textContent = lang === "pt-BR" ? "PT" : "EN";
 
   localStorage.setItem("linuxtoys-dev-lang", lang);
 }
 
-languageButtons.forEach((button) => {
-  button.addEventListener("click", () => applyLanguage(button.dataset.lang));
+languageOptions.forEach((option) => {
+  option.addEventListener("click", (event) => {
+    event.preventDefault();
+    applyLanguage(option.dataset.lang);
+    option.closest("details")?.removeAttribute("open");
+  });
 });
 
 function getInitialLanguage() {
@@ -159,3 +173,78 @@ function getInitialLanguage() {
 }
 
 applyLanguage(getInitialLanguage());
+
+
+const themeToggle = document.querySelector(".theme-toggle");
+const themePreference = window.matchMedia("(prefers-color-scheme: dark)");
+
+function getEffectiveTheme() {
+  const explicit = document.documentElement.dataset.theme;
+  if (explicit === "light" || explicit === "dark") return explicit;
+  return themePreference.matches ? "dark" : "light";
+}
+
+function updateThemeImages(root = document) {
+  const isLight = getEffectiveTheme() === "light";
+  const isPortuguese = document.documentElement.lang === "pt-BR";
+
+  root.querySelectorAll("img[data-theme-image]").forEach((img) => {
+    const original = img.dataset.themeBaseSrc || img.getAttribute("src");
+    if (!original) return;
+
+    // Store a language/theme-neutral base once. The naming convention is:
+    // name.webp, name-light.webp, name-br.webp, name-br-light.webp.
+    const cleanBase = original
+      .replace(/-br-light\.webp(?=([?#]|$))/i, ".webp")
+      .replace(/-light\.webp(?=([?#]|$))/i, ".webp")
+      .replace(/-br\.webp(?=([?#]|$))/i, ".webp");
+
+    img.dataset.themeBaseSrc = cleanBase;
+
+    const suffix = `${isPortuguese ? "-br" : ""}${isLight ? "-light" : ""}`;
+    img.src = cleanBase.replace(/\.webp(?=([?#]|$))/i, `${suffix}.webp`);
+  });
+}
+
+function updateThemeUI() {
+  const theme = getEffectiveTheme();
+
+  if (themeToggle) {
+    themeToggle.setAttribute("aria-label", theme === "dark" ? "Use light theme" : "Use dark theme");
+    themeToggle.setAttribute("title", theme === "dark" ? "Light theme" : "Dark theme");
+  }
+
+  updateThemeImages();
+}
+
+function applySavedTheme() {
+  const saved = localStorage.getItem("linuxtoys-theme");
+  if (saved === "light" || saved === "dark") {
+    document.documentElement.dataset.theme = saved;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
+  updateThemeUI();
+}
+
+themeToggle?.addEventListener("click", () => {
+  const next = getEffectiveTheme() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("linuxtoys-theme", next);
+  updateThemeUI();
+});
+
+themePreference.addEventListener?.("change", () => {
+  if (!document.documentElement.dataset.theme) updateThemeUI();
+});
+
+new MutationObserver((mutations) => {
+  if (mutations.some((mutation) => mutation.attributeName === "data-theme")) {
+    updateThemeUI();
+  }
+}).observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ["data-theme"],
+});
+
+applySavedTheme();

@@ -7,7 +7,7 @@
   --border: rgba(255, 255, 255, 0.10);
   --border-strong: rgba(255, 255, 255, 0.16);
   --text: #f7f9fc;
-  --muted: #a9b3c2;
+  --muted: #a6a6ad;
   --accent: #ff6a3d;
   --accent-strong: #ff9a72;
   --accent-soft: rgba(255, 106, 61, 0.12);
@@ -96,12 +96,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 25px;
 }
 
 .header-link {
-  color: #c8d0dc;
-  font-size: .88rem;
+  color: #a6a6ad;
+  font-size: .82rem;
   font-weight: 500;
   transition: color .2s ease;
 }
@@ -136,7 +136,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(370px, .88fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   gap: 72px;
   align-items: center;
   min-height: 680px;
@@ -344,26 +344,17 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
 
 .app-pages-visual {
   position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-xl);
-  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.018));
-  box-shadow: var(--shadow);
-}
-
-.app-pages-visual::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025);
+  min-width: 0;
+  overflow: visible;
 }
 
 .app-pages-visual img {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
+  border-radius: 16px;
+  filter: drop-shadow(0 22px 32px rgba(0, 0, 0, .12));
 }
 
 .app-pages-copy h2 {
@@ -502,4 +493,992 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
   height: 19px;
   fill: currentColor;
   stroke: none;
+}
+
+
+/* =========================================================
+   2026 visual refresh — aligned with the main LinuxToys site
+   ========================================================= */
+
+:root {
+  color-scheme: light dark;
+  --bg: #f7f7f5;
+  --bg-soft: #efefed;
+  --panel: #ffffff;
+  --panel-strong: #ffffff;
+  --border: rgba(20,20,22,.11);
+  --border-strong: rgba(20,20,22,.18);
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --accent: #1d1d1f;
+  --accent-strong: #1d1d1f;
+  --accent-soft: rgba(20,20,22,.055);
+  --blue: #55555b;
+  --surface-hover: rgba(20,20,22,.05);
+  --header-bg: rgba(247,247,245,.86);
+  --shadow: 0 18px 55px rgba(0,0,0,.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0f11;
+    --bg-soft: #161618;
+    --panel: #1b1b1e;
+    --panel-strong: #1c1c1f;
+    --border: rgba(255,255,255,.10);
+    --border-strong: rgba(255,255,255,.17);
+    --text: #f4f4f5;
+    --muted: #a6a6ad;
+    --accent: #f4f4f5;
+    --accent-strong: #f4f4f5;
+    --accent-soft: rgba(255,255,255,.07);
+    --blue: #c7c7cc;
+    --surface-hover: rgba(255,255,255,.055);
+    --header-bg: rgba(15,15,17,.86);
+    --shadow: 0 20px 60px rgba(0,0,0,.28);
+  }
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f0f11;
+  --bg-soft: #161618;
+  --panel: #1b1b1e;
+  --panel-strong: #1c1c1f;
+  --border: rgba(255,255,255,.10);
+  --border-strong: rgba(255,255,255,.17);
+  --text: #f4f4f5;
+  --muted: #a6a6ad;
+  --accent: #f4f4f5;
+  --accent-strong: #f4f4f5;
+  --accent-soft: rgba(255,255,255,.07);
+  --blue: #c7c7cc;
+  --surface-hover: rgba(255,255,255,.055);
+  --header-bg: rgba(15,15,17,.86);
+  --shadow: 0 20px 60px rgba(0,0,0,.28);
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f7f7f5;
+  --bg-soft: #efefed;
+  --panel: #ffffff;
+  --panel-strong: #ffffff;
+  --border: rgba(20,20,22,.11);
+  --border-strong: rgba(20,20,22,.18);
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --accent: #1d1d1f;
+  --accent-strong: #1d1d1f;
+  --accent-soft: rgba(20,20,22,.055);
+  --blue: #55555b;
+  --surface-hover: rgba(20,20,22,.05);
+  --header-bg: rgba(247,247,245,.86);
+  --shadow: 0 18px 55px rgba(0,0,0,.08);
+}
+
+html { background: var(--bg); }
+
+body {
+  font-family: "Roboto Slab", Georgia, serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+body::before { display: none; }
+
+.site-header,
+.site-footer,
+.button,
+.eyebrow,
+.stat,
+.panel-topbar,
+.panel-note,
+.language-switcher,
+.theme-toggle,
+.github-button,
+.header-link,
+.brand-copy {
+  font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.site-header {
+  min-height: 78px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-logo { width: 38px; height: 38px; }
+.brand-copy strong { color: var(--text); }
+.brand-copy span, .header-link { color: var(--muted); }
+.header-link:hover { color: var(--text); }
+
+.header-actions { gap: 10px; }
+
+.github-button,
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.github-button:hover,
+.theme-toggle:hover {
+  transform: translateY(-1px);
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-icon-moon { display: none; }
+html[data-theme="dark"] .theme-icon-sun { display: none; }
+html[data-theme="dark"] .theme-icon-moon { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-icon-sun { display: none; }
+  :root:not([data-theme="light"]) .theme-icon-moon { display: block; }
+}
+html[data-theme="light"] .theme-icon-sun { display: block; }
+html[data-theme="light"] .theme-icon-moon { display: none; }
+
+.language-switcher {
+  border-color: var(--border);
+  background: transparent;
+}
+.lang-button { color: var(--muted); }
+.lang-button.active {
+  color: var(--bg);
+  background: var(--text);
+}
+
+h1, h2, h3, h4, h5, h6 { color: var(--text); }
+.hero-lead,
+.section-heading p,
+.feature-card p,
+.app-pages-copy p,
+.step p,
+.cta-section p { color: var(--muted); }
+
+.eyebrow {
+  color: var(--text);
+  border-color: var(--border);
+  background: var(--accent-soft);
+}
+
+.button-primary {
+  color: var(--bg);
+  background: var(--text);
+  border-color: var(--text);
+}
+.button-secondary {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: transparent;
+}
+
+.hero-panel,
+.feature-card,
+.cta-section {
+  border-color: var(--border);
+  background: var(--panel);
+  box-shadow: none;
+}
+.hero-panel::before { display: none; }
+
+.panel-topbar,
+.panel-note { color: var(--muted); border-color: var(--border); }
+.panel-topbar > span { background: color-mix(in srgb, var(--text) 18%, transparent); }
+.panel-note { background: var(--bg-soft); }
+pre { color: var(--text); }
+.key, .value { color: var(--text); }
+
+.feature-icon {
+  color: var(--text);
+  border-color: var(--border);
+  background: var(--bg-soft);
+}
+.feature-link { color: var(--text); }
+
+.app-pages-visual {
+  min-width: 0;
+  overflow: visible;
+}
+.app-pages-visual img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 16px;
+  filter: drop-shadow(0 22px 32px rgba(0,0,0,.12));
+}
+
+.step-number { color: var(--muted); }
+.step-divider, .site-footer { border-color: var(--border); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .app-pages-visual img {
+    filter: drop-shadow(0 24px 34px rgba(0,0,0,.30));
+  }
+}
+
+html[data-theme="dark"] .app-pages-visual img {
+  filter: drop-shadow(0 24px 34px rgba(0,0,0,.30));
+}
+
+@media (max-width: 620px) {
+  .site-header { min-height: 68px; }
+  .github-button, .theme-toggle { width: 34px; height: 34px; flex-basis: 34px; }
+}
+
+
+/* Header detail pass */
+.site-header {
+  background: transparent;
+  border-bottom: 0;
+  box-shadow: none;
+}
+.site-header::before {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Borderless icon controls, matching the main LinuxToys header. */
+.github-button,
+.theme-toggle {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+.github-button:hover,
+.theme-toggle:hover {
+  transform: none;
+  border: 0;
+  background: var(--surface-hover);
+}
+
+/* Compact language dropdown. */
+.language-switcher {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.language-select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 58px;
+  height: 34px;
+  padding: 0 25px 0 12px;
+  border: 0;
+  border-radius: 17px;
+  outline: 0;
+  color: var(--text);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%) calc(100% - 13px) 14px / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%) calc(100% - 9px) 14px / 5px 5px no-repeat,
+    var(--surface-hover);
+  font: 600 .74rem/1 "Roboto", system-ui, sans-serif;
+  cursor: pointer;
+}
+.language-select:hover {
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text) 50%) calc(100% - 13px) 14px / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--text) 50%, transparent 50%) calc(100% - 9px) 14px / 5px 5px no-repeat,
+    var(--surface-hover);
+}
+.language-select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--text) 30%, transparent);
+  outline-offset: 2px;
+}
+.language-select option {
+  color: var(--text);
+  background: var(--panel);
+}
+@media (max-width: 620px) {
+  .github-button,
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+  .language-select {
+    min-width: 54px;
+    height: 32px;
+    border-radius: 16px;
+  }
+}
+
+
+/* Main-site header parity */
+.header-actions {
+  gap: 10px;
+}
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  min-width: 0;
+  margin-right: 0;
+}
+.header-preferences {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: 4px;
+  flex: 0 0 auto;
+}
+
+/* Hero highlights belong to the editorial content, not the UI chrome. */
+.stat {
+  font-family: "Roboto Slab", Georgia, serif;
+}
+
+/* Match the main page's indicator behavior:
+   dark page -> sun (switch to light), light page -> moon (switch to dark). */
+.theme-icon-sun { display: none; }
+.theme-icon-moon { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-icon-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-icon-moon { display: none; }
+}
+html[data-theme="dark"] .theme-icon-sun { display: block; }
+html[data-theme="dark"] .theme-icon-moon { display: none; }
+html[data-theme="light"] .theme-icon-sun { display: none; }
+html[data-theme="light"] .theme-icon-moon { display: block; }
+
+/* Same compact language dropdown used by the main page. */
+.language-dropdown {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+}
+.language-dropdown > summary {
+  list-style: none;
+}
+.language-dropdown > summary::-webkit-details-marker {
+  display: none;
+}
+.language-current {
+  min-width: 58px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--text);
+  background: var(--bg-soft);
+  font: 600 .68rem/1 "Roboto", system-ui, sans-serif;
+  cursor: pointer;
+  user-select: none;
+}
+.language-current::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-1px) rotate(45deg);
+  opacity: .65;
+  transition: transform .18s ease;
+}
+.language-dropdown[open] .language-current::after {
+  transform: translateY(2px) rotate(225deg);
+}
+.language-current:hover {
+  background: var(--surface-hover);
+}
+.language-current:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+.language-menu {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 52px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--panel-strong);
+  box-shadow: 0 14px 36px rgba(0,0,0,.18);
+}
+.language-option {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 9px;
+  color: var(--muted);
+  font: 600 .72rem/1 "Roboto", system-ui, sans-serif;
+}
+.language-option:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+.language-option.active {
+  color: var(--text);
+}
+
+/* Retire the previous native-select implementation. */
+.language-select { display: none !important; }
+
+@media (max-width: 1100px) {
+  .header-nav { gap: 16px; }
+  .header-actions { gap: 7px; }
+}
+
+@media (max-width: 980px) {
+  .header-nav { display: none; }
+  .header-actions { margin-left: auto; }
+}
+
+@media (max-width: 680px) {
+  .header-actions { gap: 3px; }
+  .header-preferences { gap: 1px; margin-left: 0; }
+  .language-current {
+    min-width: 52px;
+    min-height: 34px;
+    padding-inline: 8px;
+  }
+  .language-menu {
+    top: calc(100% + 6px);
+    min-width: 104px;
+  }
+}
+
+@media (max-width: 430px) {
+  .language-current {
+    min-width: 50px;
+    min-height: 32px;
+    padding-inline: 7px;
+    font-size: .65rem;
+  }
+}
+
+/* Final header parity pass — match linux.toys header typography and tones exactly. */
+.site-header {
+  font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.site-header::before {
+  background: var(--header-bg);
+  border-bottom-color: var(--border);
+}
+
+.brand-copy strong {
+  color: var(--text);
+  font-size: .98rem;
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+.brand-copy span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .70rem;
+  font-weight: 400;
+}
+.header-link {
+  color: var(--muted);
+  font-family: "Roboto", system-ui, sans-serif;
+  font-size: .82rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.header-link:hover { color: var(--text); }
+
+.github-button,
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  color: var(--muted);
+  font-family: "Roboto", system-ui, sans-serif;
+}
+.github-button:hover,
+.theme-toggle:hover { color: var(--text); }
+.github-button svg { width: 19px; height: 19px; }
+.theme-toggle svg { width: 18px; height: 18px; stroke-width: 1.7; }
+
+.language-current {
+  min-width: 58px;
+  min-height: 36px;
+  color: var(--text);
+  background: var(--bg-soft);
+  font-family: "Roboto", system-ui, sans-serif;
+  font-size: .68rem;
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .language-current { background: #161618; }
+}
+html[data-theme="dark"] .language-current { background: #161618; }
+html[data-theme="light"] .language-current { background: var(--bg-soft); }
+.language-option {
+  font-family: "Roboto", system-ui, sans-serif;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .header-link { font-size: .77rem; }
+}
+
+
+/* Exact main-page icon geometry + vertical alignment */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.theme-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Keep all non-language header items on the exact same centerline.
+   The language dropdown already has the correct geometry. */
+.header-actions,
+.header-nav,
+.header-preferences {
+  align-items: center;
+}
+
+.header-link,
+.github-button,
+.mail-button,
+.theme-toggle {
+  align-self: center;
+}
+
+.header-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  line-height: 1;
+}
+
+.github-button,
+.mail-button {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  padding: 0;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.github-button svg,
+.mail-button svg {
+  display: block;
+  margin: 0;
+}
+
+.header-preferences {
+  min-height: 36px;
+}
+
+/* Do not alter the already-correct dropdown centerline. */
+.language-dropdown,
+.language-current {
+  align-self: center;
+}
+
+@media (max-width: 680px) {
+  .header-link { min-height: 34px; }
+  .github-button,
+  .mail-button,
+  .theme-toggle {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+  .header-preferences { min-height: 34px; }
+}
+
+@media (max-width: 430px) {
+  .header-link { min-height: 32px; }
+  .github-button,
+  .mail-button,
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+  .header-preferences { min-height: 32px; }
+}
+
+
+/* Final header micro-alignment against the main LinuxToys header.
+   The navigation text sits one physical pixel higher; icon controls and the
+   language pill keep their existing centerline. */
+.header-nav {
+  transform: translateY(-1px);
+}
+
+/* The main header leaves slightly more air between the theme control and
+   language pill than the developer-portal header previously did. */
+.header-preferences {
+  gap: 9px;
+}
+
+/* Preserve the compact mobile spacing used by the main responsive header. */
+@media (max-width: 680px) {
+  .header-nav {
+    transform: none;
+  }
+
+  .header-preferences {
+    gap: 3px;
+  }
+}
+
+@media (max-width: 430px) {
+  .header-preferences {
+    gap: 1px;
+  }
+}
+
+
+/* Shared main-site header palette — no header-specific color abstraction. */
+.brand-copy strong {
+  color: var(--text);
+}
+.brand-copy span,
+.header-link,
+.github-button,
+.mail-button,
+.theme-toggle {
+  color: var(--muted);
+}
+.header-link:hover,
+.github-button:hover,
+.mail-button:hover,
+.theme-toggle:hover {
+  color: var(--text);
+}
+.language-current {
+  color: var(--text);
+  background: var(--bg-soft);
+}
+
+/* Match the main site's small-text rasterization. */
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Compact feature cards for the shorter developer-portal copy. */
+.feature-card {
+  min-height: 220px;
+  padding: 24px;
+}
+
+.feature-card-wide {
+  min-height: 190px;
+}
+
+.feature-card h3 {
+  margin-bottom: 9px;
+}
+
+.feature-card p {
+  margin-bottom: 8px;
+}
+
+.feature-link {
+  margin-top: 6px;
+}
+
+/* Match the main site's neutral interaction language: no legacy orange tint. */
+.feature-card:hover {
+  transform: none;
+  border-color: var(--border-strong);
+  background: var(--panel);
+}
+
+.feature-link span:last-child {
+  color: var(--muted);
+}
+
+.feature-link:hover {
+  color: var(--text);
+}
+
+.feature-link:hover span:last-child {
+  color: var(--text);
+  transform: translateX(3px);
+}
+
+@media (max-width: 620px) {
+  .feature-card,
+  .feature-card-wide {
+    min-height: 0;
+  }
+}
+
+/* Main-site feature-card hover behavior + theme-aware surface tint. */
+.feature-card {
+  transition: transform .25s ease, border-color .25s ease, background .25s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+/* The two half-width cards need less vertical breathing room than wide cards. */
+.feature-card:not(.feature-card-wide) {
+  min-height: 195px;
+}
+
+@media (max-width: 620px) {
+  .feature-card:not(.feature-card-wide) {
+    min-height: 0;
+  }
+}
+
+/* Exact main-site feature-card hover surface.
+   The refined main-site rule overrides transform/border, but intentionally
+   leaves this earlier gradient as the hover background. */
+.feature-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  background: linear-gradient(
+    180deg,
+    rgba(80, 86, 81, .025),
+    rgba(255, 255, 255, .018)
+  );
+}
+
+
+/* Main-site section flow: spacing separates content, not horizontal rules. */
+.section {
+  border-top: 0;
+}
+
+
+/* Final main-site parity: frameless eyebrow labels + matching section rhythm. */
+.eyebrow {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .045em;
+}
+
+/* Main site uses 108px of vertical breathing room on both sides of sections. */
+.section {
+  padding: 108px 0;
+  border-top: 0;
+}
+
+/* Keep the first content section from inheriting older portal-specific offsets. */
+.intro-section {
+  padding-top: 108px;
+}
+
+/* Match the main site's tighter mobile rhythm. */
+@media (max-width: 680px) {
+  .section,
+  .intro-section {
+    padding-top: 88px;
+    padding-bottom: 88px;
+  }
+}
+
+
+/* Developer hero visual */
+.hero-actions {
+  margin-top: 28px;
+}
+
+.hero-visual {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-screenshot {
+  display: block;
+  width: 100%;
+  max-width: 620px;
+  height: auto;
+  margin-inline: auto;
+  border-radius: 18px;
+}
+
+@media (max-width: 900px) {
+  .hero-visual {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .hero-screenshot {
+    max-width: 100%;
+  }
+}
+
+/* Commercial repository listing example */
+.commerce-code-viewer {
+  width: 100%;
+  max-width: 620px;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  background: #1b1b1e;
+  color: #f4f4f5;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
+  font-family: "Roboto", system-ui, sans-serif;
+}
+
+.commerce-code-example {
+  padding: 22px 24px 24px;
+}
+
+.commerce-code-label {
+  margin-bottom: 14px;
+  color: #a6a6ad;
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .045em;
+}
+
+.commerce-code-example pre {
+  margin: 0;
+  overflow-x: auto;
+  color: #f4f4f5;
+  background: transparent;
+  font: 500 .88rem/1.65 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.commerce-code-example code {
+  font: inherit;
+}
+
+.commerce-code-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, .10);
+}
+
+/* Dark site theme -> light example viewer */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .commerce-code-viewer {
+    border-color: rgba(20, 20, 22, .11);
+    background: #ffffff;
+    color: #1d1d1f;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, .08);
+  }
+
+  :root:not([data-theme="light"]) .commerce-code-label {
+    color: #6e6e73;
+  }
+
+  :root:not([data-theme="light"]) .commerce-code-example pre {
+    color: #1d1d1f;
+  }
+
+  :root:not([data-theme="light"]) .commerce-code-divider {
+    background: rgba(20, 20, 22, .11);
+  }
+}
+
+html[data-theme="dark"] .commerce-code-viewer {
+  border-color: rgba(20, 20, 22, .11);
+  background: #ffffff;
+  color: #1d1d1f;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, .08);
+}
+
+html[data-theme="dark"] .commerce-code-label {
+  color: #6e6e73;
+}
+
+html[data-theme="dark"] .commerce-code-example pre {
+  color: #1d1d1f;
+}
+
+html[data-theme="dark"] .commerce-code-divider {
+  background: rgba(20, 20, 22, .11);
+}
+
+@media (max-width: 680px) {
+  .commerce-code-example {
+    padding: 18px 20px 20px;
+  }
 }

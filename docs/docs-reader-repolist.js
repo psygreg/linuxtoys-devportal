@@ -34,7 +34,7 @@ const uiTranslations = {
   }
 };
 
-const languageButtons = document.querySelectorAll(".lang-button");
+const languageOptions = document.querySelectorAll(".language-option[data-lang]");
 const uiElements = document.querySelectorAll("[data-ui-i18n]");
 const content = document.getElementById("markdown-content");
 const status = document.getElementById("docs-status");
@@ -48,14 +48,7 @@ let currentLanguage = "en";
 let headingObserver = null;
 
 function getInitialLanguage() {
-  const savedLanguage = localStorage.getItem("linuxtoys-dev-lang");
-  if (savedLanguage === "en" || savedLanguage === "pt-BR") return savedLanguage;
-
-  const browserLanguages = navigator.languages?.length
-    ? navigator.languages
-    : [navigator.language];
-
-  return browserLanguages.some(lang => lang?.toLowerCase().startsWith("pt"))
+  return document.documentElement.lang === "pt-BR"
     ? "pt-BR"
     : "en";
 }
@@ -73,11 +66,21 @@ function translateInterface(lang) {
     if (dictionary[key]) element.textContent = dictionary[key];
   });
 
-  languageButtons.forEach(button => {
-    const active = button.dataset.lang === lang;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
+  languageOptions.forEach(option => {
+    const active = option.dataset.lang === lang;
+    option.classList.toggle("active", active);
+
+    if (active) {
+      option.setAttribute("aria-current", "true");
+    } else {
+      option.removeAttribute("aria-current");
+    }
   });
+
+  const languageCurrent = document.querySelector(".language-current");
+  if (languageCurrent) {
+    languageCurrent.textContent = lang === "pt-BR" ? "PT" : "EN";
+  }
 }
 
 function slugify(text, usedIds) {
@@ -100,7 +103,8 @@ function slugify(text, usedIds) {
 function configureMarked() {
   marked.setOptions({
     gfm: true,
-    breaks: false
+    breaks: false,
+    pedantic: false
   });
 }
 
@@ -112,7 +116,8 @@ function renderMarkdown(markdown) {
   // accidental or malicious HTML from becoming executable in the portal.
   content.innerHTML = DOMPurify.sanitize(rendered, {
     USE_PROFILES: { html: true },
-    ADD_ATTR: ["target", "rel"]
+    ADD_TAGS: ["table", "thead", "tbody", "tfoot", "tr", "th", "td"],
+    ADD_ATTR: ["target", "rel", "align"]
   });
 
   decorateHeadings();
@@ -296,7 +301,6 @@ function setLoadError(path) {
 
 async function loadDocumentation(lang, { preservePosition = false } = {}) {
   currentLanguage = lang === "pt-BR" ? "pt-BR" : "en";
-  localStorage.setItem("linuxtoys-dev-lang", currentLanguage);
 
   translateInterface(currentLanguage);
   setLoading();
@@ -379,13 +383,6 @@ function updateReadingProgress() {
   progressBar.style.width = `${(travelled / maxScroll) * 100}%`;
 }
 
-languageButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    const lang = button.dataset.lang;
-    if (lang !== currentLanguage) loadDocumentation(lang);
-  });
-});
-
 mobileTocToggle.addEventListener("click", () => {
   const open = sidebar.classList.toggle("open");
   mobileTocToggle.setAttribute("aria-expanded", String(open));
@@ -403,3 +400,74 @@ window.addEventListener("resize", () => {
 });
 
 loadDocumentation(getInitialLanguage());
+
+
+const themeToggle = document.querySelector(".theme-toggle");
+const themePreference = window.matchMedia("(prefers-color-scheme: dark)");
+
+function getEffectiveTheme() {
+  const explicit = document.documentElement.dataset.theme;
+  if (explicit === "light" || explicit === "dark") return explicit;
+  return themePreference.matches ? "dark" : "light";
+}
+
+function updateThemeImages(root = document) {
+  const isLight = getEffectiveTheme() === "light";
+
+  root.querySelectorAll("img").forEach((img) => {
+    const src = img.dataset.themeBaseSrc || img.getAttribute("src");
+    if (!src || !/\.webp(?:[?#]|$)/i.test(src)) return;
+
+    const base = src.replace(/-light\.webp(?=([?#]|$))/i, ".webp");
+    img.dataset.themeBaseSrc = base;
+    img.src = isLight
+      ? base.replace(/\.webp(?=([?#]|$))/i, "-light.webp")
+      : base;
+  });
+}
+
+function updateThemeUI() {
+  const theme = getEffectiveTheme();
+
+  if (themeToggle) {
+    themeToggle.setAttribute("aria-label", theme === "dark" ? "Use light theme" : "Use dark theme");
+    themeToggle.setAttribute("title", theme === "dark" ? "Light theme" : "Dark theme");
+  }
+
+  updateThemeImages();
+}
+
+
+new MutationObserver((mutations) => {
+  const hasImages = mutations.some((mutation) =>
+    [...mutation.addedNodes].some((node) =>
+      node.nodeType === 1 &&
+      (node.matches?.("img") || node.querySelector?.("img"))
+    )
+  );
+
+  if (hasImages) updateThemeImages();
+}).observe(document.body, { childList: true, subtree: true });
+
+function applySavedTheme() {
+  const saved = localStorage.getItem("linuxtoys-theme");
+  if (saved === "light" || saved === "dark") {
+    document.documentElement.dataset.theme = saved;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
+  updateThemeUI();
+}
+
+themeToggle?.addEventListener("click", () => {
+  const next = getEffectiveTheme() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("linuxtoys-theme", next);
+  updateThemeUI();
+});
+
+themePreference.addEventListener?.("change", () => {
+  if (!document.documentElement.dataset.theme) updateThemeUI();
+});
+
+applySavedTheme();

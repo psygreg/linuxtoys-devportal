@@ -339,11 +339,11 @@
 
 .markdown-body th {
   color: var(--text);
-  background: rgba(255,255,255,.035);
+  background: var(--bg-soft);
   font-weight: 700;
 }
 
-.markdown-body tr:last-child td { border-bottom: 0; }
+.markdown-body tbody tr:last-child td { border-bottom: 0; }
 
 .markdown-body hr {
   height: 1px;
@@ -468,4 +468,96 @@
 
 @media (prefers-reduced-motion: reduce) {
   .docs-spinner { animation-duration: 1.5s; }
+}
+
+
+/* 2026 visual refresh — documentation surfaces */
+.docs-main { padding-top: 64px; }
+
+.docs-sidebar {
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.toc-kicker,
+.toc-link,
+.toc-empty { color: var(--muted); }
+
+.toc { border-left-color: var(--border); }
+.toc-link:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+.toc-link.active {
+  color: var(--text);
+  background: var(--accent-soft);
+}
+.toc-link.active::before,
+.reading-progress span {
+  background: var(--text);
+  box-shadow: none;
+}
+
+.markdown-panel {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.markdown-body {
+  padding: 0;
+  color: var(--text);
+  font-family: "Roboto Slab", Georgia, serif;
+  line-height: 1.82;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6,
+.markdown-body strong,
+.markdown-body b { color: var(--text); }
+
+.markdown-body p,
+.markdown-body li { color: var(--text); }
+
+.markdown-body a { color: var(--text); text-decoration-color: var(--border-strong); }
+.markdown-body a:hover { text-decoration-color: var(--text); }
+
+.markdown-body blockquote {
+  color: var(--muted);
+  border-left-color: var(--border-strong);
+  background: var(--bg-soft);
+}
+
+.markdown-body code {
+  color: var(--text);
+  border-color: var(--border);
+  background: var(--bg-soft);
+}
+
+.markdown-body pre {
+  color: #e7e7ea;
+  border-color: rgba(255,255,255,.12);
+  background: #0f0f11;
+  box-shadow: none;
+}
+
+.markdown-body pre code { color: inherit; background: transparent; }
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 0;
+  box-shadow: var(--shadow);
+}
+
+.docs-status { color: var(--muted); }
+.docs-status code {
+  color: var(--text);
+  background: var(--bg-soft);
 }

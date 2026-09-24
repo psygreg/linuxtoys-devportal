@@ -1,424 +1,334 @@
 # LinuxToys Developer Documentation
 
-LinuxToys is a Linux application designed to make installing, configuring and managing software and system features simple for users across a wide range of Linux distributions.
+LinuxToys can integrate applications through several different paths. For most desktop applications, the right starting point is **AppStream**.
 
-For developers, LinuxToys provides a distribution layer that can take care of much of the Linux-specific work normally required to deliver software to users: distribution and hardware compatibility, package formats, dependencies, installation procedures, updates, system integration and removal.
+> **If your application is available through Flathub or a supported distribution's native repositories, this is the only integration guide you need.**
 
-You do **not** need to learn the entire LinuxToys development interface to distribute an application through it.
+LinuxToys discovers those applications through AppStream and turns their existing metadata into LinuxToys app pages and installation entries. You do not need to create a separate LinuxToys package definition simply to make the same application available through LinuxToys.
 
-LinuxToys supports everything from simple application packages to complex system features, so its developer APIs include tools for many specialized situations and quirks. Most applications only need a small subset of these capabilities.
+## Choose your integration path
 
-The first step is choosing the appropriate integration method.
+### Your application is available through AppStream
 
----
+Stay on this page if your application is available through **Flathub** or a supported distribution repository and has usable AppStream metadata. LinuxToys discovers the application, places it in the appropriate category, presents its metadata, and installs it from sources available on the user's system.
 
-<a id="quick-start"></a>
+You only need LinuxToys-specific metadata when you want to extend that existing AppStream entry with an **AppStream overlay**.
 
-## Quick Start
+### Your application is distributed independently
 
-LinuxToys repository lists support several distribution methods, so if you want to save time, you can get to it straight away. You generally do not need to learn all of them — choose the one that matches how your application is already packaged or released upstream.
+Use [Repository Lists](repositorylists.html) when the application is not adequately provided through AppStream and LinuxToys needs its own installation definition.
 
-### Which One Should I Use?
+Repository Lists cover software distributed through sources such as Git releases, AppImages, direct download URLs, tarballs, standalone binaries, or source repositories requiring a build step.
 
-| Your current release workflow                          | Recommended method    |
-| ------------------------------------------------------ | --------------------- |
-| Available in distribution repositories                 | `native`              |
-| Published on Flathub                                   | `flathub`             |
-| Available as a standard package on a GitHub repository | `git`                 |
-| GitHub Releases provide one executable                 | `bin`                 |
-| You host a single executable at a direct URL           | `url` → `bin`         |
-| You host `.deb`, `.rpm`, AppImage, or similar packages | `url`                 |
-| You distribute a prebuilt multi-file archive           | `tar` / `url` → `tar` |
+### You are integrating a LinuxToys or system feature
 
-Whenever possible, **follow the application's existing upstream release workflow**. LinuxToys' different repository-list methods exist to adapt to how software is already distributed, rather than requiring developers to create a LinuxToys-specific package format.
-
-Once you have identified the appropriate method, look for a shortcut to it below for its complete schema, compatibility options, hooks, translations, and advanced features. If you wish to set up a full app page, with a longer description, screenshots and donate or purchase button, check also [how to set up a LinuxToys app page](repositorylists.html#app-pages).
-
-### Native Packages
-
-**Choose this if your application is available through Linux distribution repositories.**
-
-The `native` type lets LinuxToys install the appropriate package using the host distribution's package manager. Package names can be defined for different distributions when they differ between ecosystems.
-
-**Best for:** applications already packaged for distributions such as Arch Linux, Fedora, Debian, Ubuntu, openSUSE, and their derivatives.
-
-**Repository-list type:** `native`
-
-[Learn about native packages](repositorylists.html#native-packages)
-
-### Flathub
-
-**Choose this if your application is published on Flathub.**
-
-If you already distribute your application as a Flatpak through Flathub, LinuxToys can install it directly using its Flatpak application ID.
-
-This is usually the simplest option for applications whose primary Linux distribution method is Flathub.
-
-**Best for:** applications officially distributed through Flathub.
-
-**Repository-list type:** `flathub`
-
-[Learn about Flathub applications](repositorylists.html#flathub-package)
-
-### Git Releases
-
-**Choose this if your application publishes ready-made Linux packages through GitHub Releases.**
-
-The `git` type lets LinuxToys inspect the latest stable release of the upstream repository, automatically select the appropriate packaged asset for the user's system, download it, and install it.
-
-This is useful when you already publish installable Linux packages as release assets and want LinuxToys to follow your latest releases automatically, without maintaining a fixed download URL for every new version.
-
-**Best for:** projects publishing ready-made packages such as `.deb`, `.rpm`, AppImage, Flatpak bundles, or other supported package formats through GitHub Releases.
-
-**Repository-list type:** `git`
-
-[Learn about Git release installations](repositorylists.html#git-package)
-
-### Standalone Binaries
-
-**Choose this if your releases provide a single ready-to-run executable.**
-
-LinuxToys can download a standalone binary, install it under the user's local LinuxToys application directory, make it executable, and automatically create its application-menu shortcut.
-
-For GitHub Releases, use the `bin` type and provide the exact release asset filename. If the filename contains the release version, `$APP_GIT_VERSION` can be used as a placeholder.
-
-Standalone binaries available through a stable direct URL can instead be provided using the `bin` option under `urls`.
-
-**Best for:** self-contained applications distributed as one executable, including extensionless Linux binaries.
-
-**Repository-list type:** `bin` for GitHub Releases, or `url` with a `bin` URL.
-
-[Learn about single-binary applications](repositorylists.html#single-binary)
-
-### Direct URLs
-
-**Choose this if you publish ready-made packages outside distribution repositories.**
-
-The `url` type lets LinuxToys download installable files directly from upstream URLs. This is useful when you publish packages yourself instead of relying on the host distribution's repositories, typically the case for proprietary software.
-
-URL entries can also account for different distributions or systems when different downloads are required.
-
-**Best for:** upstream-hosted `.deb`, `.rpm`, AppImage, Flatpak bundles, and other supported downloadable package formats.
-
-**Repository-list type:** `url`
-
-[Learn about URL installations](repositorylists.html#url-fetching)
-
-### Tarballs
-
-**Choose this if your application is distributed as a prebuilt archive containing multiple files.**
-
-LinuxToys can download and extract application tarballs while keeping their contents together under the user's local LinuxToys application directory.
-
-Because the contents and required setup of archives vary between projects, tarball installations require a post-installation script to complete the application's setup.
-
-**Best for:** portable prebuilt applications distributed as `.tar.gz`, `.tar.xz`, or similar archives rather than a single executable.
-
-**Repository-list type:** `tar`, or `url` with a `tar` URL.
-
-[Learn about tarball installations](repositorylists.html#tarball-package)
+Use [Core Libraries](corelibraries.html) when implementing a system-level LinuxToys feature or custom procedure that belongs in LinuxToys itself rather than describing a distributable application.
 
 ---
 
-<a id="multi-distro"></a>
+## AppStream applications
 
-## What LinuxToys Provides
+AppStream is the preferred integration path for ordinary applications already distributed through established Linux software sources.
 
-Linux software distribution can quickly become complicated when an application needs to support several distributions, package managers, desktop environments or hardware configurations.
+LinuxToys consumes AppStream catalogs from supported native repositories and Flathub, adapts their components to the LinuxToys catalog, and applies its compatibility and source-selection rules. The application remains defined by the software sources where it is actually distributed.
 
-LinuxToys provides common infrastructure for handling these differences while presenting users with a consistent installation experience.
+### What LinuxToys gets from AppStream
 
-Depending on the integration, LinuxToys can handle tasks such as:
+Good upstream AppStream metadata can provide LinuxToys with the information needed to present an application without a separate LinuxToys listing, including:
 
-* detecting the user's distribution and system characteristics;
-* restricting features to compatible systems;
-* selecting appropriate packages for different distributions;
-* installing native packages, Flatpaks, AppImages and other release formats;
-* downloading packages directly from upstream releases;
-* installing dependencies;
-* running pre-installation and post-installation procedures;
-* integrating applications into the LinuxToys interface;
-* tracking changes made during installation;
-* reverting supported installations and system changes;
-* managing services and other system components;
-* handling distribution-specific package management differences;
-* supporting hardware- or desktop-specific features.
+- application name and summary;
+- icon;
+- developer information;
+- license;
+- homepage and other project links;
+- long description;
+- screenshots;
+- categories and application type;
+- release information and other AppStream metadata.
 
-Many of these facilities exist because LinuxToys also distributes drivers, system utilities, compatibility layers, performance features and other software that requires considerably more system integration than a typical desktop application.
+The exact information shown depends on what is available in the AppStream component. Maintaining complete, accurate upstream AppStream metadata is therefore the first step toward a good LinuxToys listing.
 
-**A normal application package will usually need only a fraction of them.**
+### Categories
 
----
+LinuxToys maps standard AppStream/Desktop Menu categories into its own catalog. Both broad categories and more specific additional categories are considered.
 
-## Choosing an Integration Method
+Describe the application accurately using the normal AppStream category system rather than adding LinuxToys-specific categories to upstream metadata.
 
-LinuxToys provides two primary ways for developers to integrate software.
+### Native packages and Flathub
 
-### Repository Lists
+The same AppStream application may be available from more than one installation source. LinuxToys can combine those representations into one application experience and select an appropriate source according to its source-selection rules. Where applicable, the app page can expose a source selector.
 
-**Start here for most applications.**
+Do **not** create a Repository List merely because your application exists both natively and on Flathub. Let AppStream represent the application and LinuxToys handle the available sources.
 
-Repository Lists provide a declarative way to describe software that LinuxToys can install. Instead of writing an installation script, you describe the application, where it comes from, what package should be installed and any relevant compatibility requirements.
+### App pages
 
-They are well suited to applications that are already distributed through conventional channels, including applications with:
+AppStream applications are presented through LinuxToys app pages. Depending on available metadata and application state, a page can include its description, screenshots, developer and license information, project links, ratings, installation source, installation controls, and an **Open** action for an installed application that can be launched.
 
-* native packages for one or more Linux distributions;
-* Flatpak releases;
-* AppImage releases;
-* packages published through upstream release systems;
-* packages hosted directly by the developer;
-* straightforward dependencies;
-* simple compatibility requirements;
-* small pre-installation or post-installation steps.
+![app page](/assets/app-page.webp)
 
-Repository Lists allow LinuxToys to perform the installation using its existing infrastructure rather than requiring every developer to implement package management and system detection independently.
-
-They can also express more advanced conditions when necessary, including distribution, architecture, CPU, GPU, desktop environment and other compatibility requirements.
-
-For many applications, a Repository List entry may be the **only LinuxToys-specific integration code you need to maintain**.
-
-### Core Library and Full Scripts
-
-Use a full LinuxToys script when your software requires a procedure that cannot be adequately described as a package installation.
-
-LinuxToys' Core Library provides reusable Bash functions and system information for these more complex integrations.
-
-This is appropriate for features that need to perform operations such as:
-
-* complex installation or migration procedures;
-* extensive system configuration;
-* conditional operations based on the host system;
-* filesystem changes that need to be tracked for removal;
-* systemd service management;
-* bootloader or boot configuration changes;
-* unusual package-management procedures;
-* multiple dependent installation stages;
-* calling other LinuxToys features;
-* custom rollback or cleanup behavior;
-* specialized handling for distribution or hardware quirks.
-
-The Core Library exists so these scripts can use the same compatibility detection, package-management abstraction, transaction tracking and system integration infrastructure used by LinuxToys itself.
-
-A full script is therefore considerably more powerful than a Repository List—but most application developers **do not need that additional complexity**.
+LinuxToys also tracks installed state and integrates AppStream installations with its installation queue and removal flow.
 
 ---
 
-<a id="official-support"></a>
+## AppStream overlays
 
-## Oferring Official Support
+Most AppStream applications need no LinuxToys-specific definition.
 
-Developers may also contact the LinuxToys project to request **official support** status for their applications.
+An **AppStream overlay** adds reviewed, application-specific information or installation behavior on top of an existing AppStream component. It **does not create a new application** and does not replace its normal AppStream installation source.
 
-Officially supported applications are identified as such within LinuxToys, distinguishing integrations maintained in collaboration with their upstream developers. This status also creates a more direct channel between LinuxToys users and the project responsible for the application.
+The target is declared with `appstream-name`:
 
-Advantages of official support include:
-
-* visual identification of the application as officially supported within LinuxToys;
-* greater visibility and easier recognition by users;
-* more efficient forwarding of application-specific issues to the upstream developer;
-* the ability to receive relevant information collected by the LinuxToys bug reporting system, making it easier to investigate issues encountered by users;
-* closer collaboration with the LinuxToys project to maintain and improve the integration over time.
-
-Official support **does not require an application to use every LinuxToys integration feature**. An application distributed through a simple Repository List can receive official support just as a more complex integration can.
-
-If you are interested in providing official support for your application through LinuxToys, inform the project maintainers in your *pull request*.
-
----
-
-## Install with LinuxToys
-
-LinuxToys provides a custom URI scheme that allows websites to request the installation of software available through LinuxToys. This makes it possible for upstream developers to provide an **Install with LinuxToys** button directly on their websites.
-
-The URI follows this format:
-
-```text
-linuxtoys://install/<name>
-```
-
-For example, a repository-list entry named `Hardinfo2` can be opened with:
-
-```text
-linuxtoys://install/Hardinfo2
-```
-
-Names containing spaces must use standard URI percent-encoding. For example:
-
-```text
-linuxtoys://install/Amethyst%20Mod%20Manager
-```
-
-Opening an installation URI does **not** immediately install the requested software. LinuxToys will open and present the requested application to the user for confirmation before proceeding.
-
-### Adding an "Install with LinuxToys" button
-
-We offer a standard button picture that you may use for simplicity sake. You can obtain a ready-to-go english version by saving the image below. We used the *Adwaita Sans Bold* font for its text.
-
-![English button](/assets/installwithlinuxtoys_en.webp)
-
-We also offer a blank version of this button if you wish to make it for another language or using a different font. If you wish, get it by saving the image below.
-
-![Blank button](/assets/installwithlinuxtoys_base.webp)
-
-A basic button can be added with:
-
-```html
-<a href="linuxtoys://install/Hardinfo2">
-    <img
-        src="/assets/installwithlinuxtoys-en.webp"
-        alt="Install with LinuxToys"
-    >
-</a>
-```
-
-This results in the button image acting as the link that launches LinuxToys.
-
-You don't **have** to use the standard button. The LinuxToys URI format can be used for a custom button or link at your discretion.
-
-### Providing a fallback for users without LinuxToys
-
-Web browsers do not provide a standard way for an ordinary link to determine whether a custom URI handler is installed. If the page where the button is being used permits JavaScript, a short fallback can redirect the visitor to the LinuxToys website when the URI cannot be opened:
-
-```html
-<a href="linuxtoys://install/Hardinfo2"
-   onclick="installWithLinuxToys(event, 'Hardinfo2')">
-    <img
-        src="/assets/installwithlinuxtoys-en.webp"
-        alt="Install with LinuxToys"
-    >
-</a>
-
-<script>
-function installWithLinuxToys(event, name) {
-    event.preventDefault();
-
-    const uri = `linuxtoys://install/${encodeURIComponent(name)}`;
-    let pageHidden = false;
-
-    const onVisibilityChange = () => {
-        if (document.hidden) {
-            pageHidden = true;
-        }
-    };
-
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    window.location.href = uri;
-
-    setTimeout(() => {
-        document.removeEventListener("visibilitychange", onVisibilityChange);
-
-        if (!pageHidden) {
-            window.location.href = "https://linux.toys/";
-        }
-    }, 1500);
+```json
+{
+  "appstream-name": "org.example.App"
 }
-</script>
 ```
 
-To use the button for another LinuxToys repository-list entry, replace `Hardinfo2` with its `name`:
+Use the application's AppStream component ID. A trailing `.desktop` is normalized by LinuxToys and is not required.
+
+AppStream overlays intentionally support only:
+
+```text
+appstream-name
+purchase
+dependencies
+overrides
+```
+
+They are not general-purpose Repository Lists.
+
+### Dependencies
+
+An overlay can declare prerequisites installed as part of the AppStream application's installation flow.
+
+#### Native dependencies
+
+```json
+{
+  "appstream-name": "org.example.App",
+  "dependencies": [
+    {
+      "type": "native",
+      "package-name": {
+        "debian": "example-helper",
+        "ubuntu": "example-helper",
+        "fedora": "example-helper",
+        "arch": "example-helper"
+      }
+    }
+  ]
+}
+```
+
+Native package names may vary by distribution. A package declaration can also contain multiple package names.
+
+#### Flathub dependencies
+
+```json
+{
+  "appstream-name": "org.example.App",
+  "dependencies": [
+    {
+      "type": "flathub",
+      "package-name": "org.example.Runtime"
+    }
+  ]
+}
+```
+
+Dependencies augment the normal AppStream installation; they do not replace its selected native or Flatpak source.
+
+### Pre- and post-install hooks
+
+Reviewed hooks can run immediately before or after the normal AppStream installation:
+
+```json
+{
+  "appstream-name": "org.example.App",
+  "overrides": {
+    "pre": {
+      "script": "example/pre-install.sh"
+    },
+    "post": {
+      "script": "example/post-install.sh"
+    }
+  }
+}
+```
+
+Hook scripts are repository-local resources resolved within the Repository List tree. Keep hooks small and use them only for behavior that cannot be represented declaratively.
+
+### Flatpak permission overrides
+
+```json
+{
+  "appstream-name": "org.example.App",
+  "overrides": {
+    "flatpak": [
+      {
+        "scope": "user",
+        "type": "filesystem",
+        "setting": "xdg-download",
+        "target": "org.example.App"
+      }
+    ]
+  }
+}
+```
+
+Supported scopes are `user` and `system`. Supported override types are:
+
+```text
+fs
+name
+dbus
+share
+env
+runtime
+device
+socket
+filesystem
+talk-name
+talk-dbus
+```
+
+AppStream overlays deliberately do **not** support Repository List source-selection controls such as `skip-user`. AppStream source and scope selection remain owned by the AppStream installation flow.
+
+### Purchases and subscriptions
+
+An overlay can add purchase or subscription actions to an existing AppStream app page.
+
+```json
+{
+  "appstream-name": "org.example.App",
+  "purchase": {
+    "url": "https://example.com/buy",
+    "price": 49.99
+  }
+}
+```
+
+For a subscription:
+
+```json
+{
+  "appstream-name": "org.example.App",
+  "purchase": {
+    "url": "https://example.com/subscribe",
+    "sub_price": 9.99
+  }
+}
+```
+
+Both may be declared together. LinuxToys also supports the tiered purchase/subscription metadata used by Repository Lists when required by the application's pricing model.
+
+These actions point to the developer's or company's own destination. LinuxToys does not become the payment processor.
+
+### Combining overlay features
+
+The supported fields can be combined:
+
+```json
+{
+  "appstream-name": "org.example.App",
+  "purchase": {
+    "url": "https://example.com/pricing",
+    "price": 49.99
+  },
+  "dependencies": [
+    {
+      "type": "native",
+      "package-name": {
+        "debian": "example-helper",
+        "fedora": "example-helper",
+        "arch": "example-helper"
+      }
+    }
+  ],
+  "overrides": {
+    "post": {
+      "script": "example/post-install.sh"
+    }
+  }
+}
+```
+
+Start with no overlay at all. Add one only when the existing AppStream entry needs LinuxToys-specific behavior.
+
+---
+
+## LinuxToys install links
+
+LinuxToys exposes a URI scheme that lets websites, documentation and other applications send an installation request directly to LinuxToys.
+
+For an AppStream application, use its stable AppStream component ID:
+
+```text
+linuxtoys://install/org.example.App
+```
+
+This is the recommended form for AppStream applications.
 
 ```html
-<a href="linuxtoys://install/Amethyst%20Mod%20Manager"
-   onclick="installWithLinuxToys(event, 'Amethyst Mod Manager')">
-    <img
-        src="/assets/installwithlinuxtoys-en.webp"
-        alt="Install with LinuxToys"
-    >
+<a href="linuxtoys://install/org.example.App">
+  Install with LinuxToys
 </a>
 ```
 
-`encodeURIComponent()` takes care of encoding spaces and other URI-sensitive characters in the repository-list name.
+LinuxToys resolves the requested target against applications available and compatible on that system and continues through its normal installation experience. Installation links can also target supported curated LinuxToys entries, but AppStream IDs are preferable for AppStream applications because they provide a stable identity independent of the displayed name.
 
-> **Note:** Some Markdown renderers, including platforms that sanitize embedded HTML, may remove `<script>` elements or inline JavaScript. On such platforms, use the basic `linuxtoys://` link instead, or implement the fallback in the JavaScript of the website hosting the rendered documentation.
+### Install with LinuxToys button
 
----
+Use the LinuxToys URI behind an installation button on your project's website, download page or documentation.
 
-## Which Documentation Should I Read?
+#### Ready-to-go English button
 
-The easiest way to decide is to start from what you are trying to distribute.
+<img src="/assets/installwithlinuxtoys_en.webp"
+     alt="Install with LinuxToys"
+     data-no-theme-image>
 
-| Your application or feature...                                       | Start with           |
-| -------------------------------------------------------------------- | -------------------- |
-| Is already available as ordinary Linux packages                      | **Repository Lists** |
-| Is distributed as an AppImage or Flatpak                             | **Repository Lists** |
-| Publishes installable packages through releases or a download server | **Repository Lists** |
-| Needs dependencies installed before the main package                 | **Repository Lists** |
-| Needs simple commands before or after installation                   | **Repository Lists** |
-| Has different packages for different distributions                   | **Repository Lists** |
-| Should only appear on certain hardware, distributions or desktops    | **Repository Lists** |
-| Requires a substantial custom installation procedure                 | **Core Library**     |
-| Makes extensive changes to the operating system                      | **Core Library**     |
-| Needs detailed transaction and rollback handling                     | **Core Library**     |
-| Manages services, boot configuration or other system components      | **Core Library**     |
-| Cannot reasonably be represented as a package plus optional hooks    | **Core Library**     |
+This space is reserved for the official English button asset and its ready-to-copy integration snippet.
 
-<a id="declarative-deployment"></a>
+#### Editable blank button
 
-### → [Repository Lists Documentation](repositorylists.html)
+<img src="/assets/installwithlinuxtoys_base.webp"
+     alt="Install with LinuxToys"
+     data-no-theme-image>
 
-Learn how to describe an application declaratively, define its packages and dependencies, specify compatibility requirements, provide metadata and icons, use supported distribution methods, and add optional installation hooks.
+This space is reserved for the blank button asset intended for localized or otherwise appropriate labels.
 
-**This is the recommended starting point for application developers.**
+```html
+<a href="linuxtoys://install/org.example.App">
+  <img src="install-with-linuxtoys.svg" alt="Install with LinuxToys">
+</a>
+```
 
-### → [Core Library Documentation](corelibraries.html)
-
-Learn how to build complete LinuxToys installation scripts using its compatibility, package-management, filesystem, systemd, boot, system-information and transaction-management facilities.
-
-**Use this when a Repository List is not sufficient for your integration.**
-
-> The filenames above may be adjusted to match the final documentation layout.
+Replace `org.example.App` with the application's real AppStream component ID.
 
 ---
 
-## You Probably Don't Need Everything
+## Applications outside AppStream
 
-Both documentation sets describe capabilities used throughout LinuxToys itself.
+If LinuxToys cannot obtain and install the application through an appropriate AppStream source, use a **Repository List**.
 
-This means you will encounter options that may have little or nothing to do with your application.
+Repository Lists describe applications distributed through Git releases, AppImages, direct URLs, tarballs, standalone binaries, source builds and other supported distribution methods. They can also define compatibility rules, dependencies, hooks, services and rich app-page metadata.
 
-For example, LinuxToys needs to support software ranging from ordinary desktop applications to GPU tooling, drivers, bootloader modifications, compatibility components and low-level system configuration. The infrastructure required for those features is exposed so developers can solve similar problems when necessary.
+Continue with the [Repository Lists documentation](repositorylists.html).
 
-It is **not** a checklist of things every integration should implement.
-
-A developer distributing a conventional application may only need to provide:
-
-1. application metadata;
-2. the upstream repository or package source;
-3. the appropriate package name or release format; and
-4. any compatibility restrictions that genuinely apply.
-
-Everything else can be ignored until your application actually requires it.
-
-The same principle applies to full scripts: use the Core Library functions that solve the problem at hand rather than attempting to incorporate every facility LinuxToys provides.
+Do not create a Repository List for an ordinary application already adequately represented through AppStream unless LinuxToys genuinely needs a separate installation path.
 
 ---
 
-## Prefer the Simplest Integration
+## System integrations and LinuxToys features
 
-When several approaches could accomplish the same result, prefer the one that delegates more work to LinuxToys.
+Not every LinuxToys integration represents an application.
 
-A declarative Repository List is generally preferable to reproducing the same installation procedure in a custom script. It is easier to review, easier to maintain and allows improvements to LinuxToys' package handling and compatibility infrastructure to benefit your application automatically.
+For a system tweak, driver workflow, maintenance operation, platform integration or another feature whose installation logic belongs directly to LinuxToys, use the **Core Libraries** and LinuxToys' script integration model.
 
-Likewise, when a full script is necessary, prefer LinuxToys' Core Library functions over directly implementing distribution-specific commands whenever an appropriate abstraction already exists.
+Continue with the [Core Libraries documentation](corelibraries.html).
 
-This keeps integrations consistent with the rest of LinuxToys and reduces the amount of distribution-specific behavior developers need to maintain themselves.
+The distinction is intentional:
 
----
-
-## Where to Start
-
-For most developers:
-
-**Application → Repository List → LinuxToys handles the installation**
-
-Start with the **[Repository Lists Documentation](repositorylists.html)** and implement only the fields relevant to your application.
-
-For complex system-level integrations:
-
-**Feature → LinuxToys script → Core Library → system**
-
-Start with the **[Core Library Documentation](corelibraries.html)** and use the libraries relevant to the operations your feature needs to perform.
-
-You can always move to a more advanced integration later if the requirements of your software grow.
-
-The goal is not to make developers learn every internal capability of LinuxToys. The goal is to provide enough infrastructure that developers only need to implement the parts that are genuinely specific to their software.
+- **AppStream** describes applications already distributed through supported software sources.
+- **Repository Lists** describe applications LinuxToys must obtain or install through another supported distribution method.
+- **Core Libraries** are for LinuxToys-native procedures and system integrations.
