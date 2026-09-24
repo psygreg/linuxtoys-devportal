@@ -493,6 +493,8 @@ Supported values are:
 ``` text
 gnome
 plasma
+hyprland
+sway
 other
 ```
 

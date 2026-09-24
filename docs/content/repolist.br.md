@@ -502,6 +502,8 @@ Os valores compatíveis são:
 ``` text
 gnome
 plasma
+hyprland
+sway
 other
 ```
 
