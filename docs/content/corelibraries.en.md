@@ -323,6 +323,12 @@ pkg_flat org.example.App
 
 Use the package helpers rather than invoking Flatpak installation directly when you want LinuxToys to manage scope, prerequisites and transaction tracking.
 
+### Snaps
+
+```bash
+pkg_snap application
+```
+
 ### Package files
 
 ```bash
@@ -330,6 +336,7 @@ pkg_fromfile ./package.deb
 pkg_fromfile ./package.rpm
 pkg_fromfile ./package.pkg.tar.zst
 pkg_fromfile ./application.flatpak
+pkg_fromfile ./application.snap
 ```
 
 For a system-scope Flatpak file:

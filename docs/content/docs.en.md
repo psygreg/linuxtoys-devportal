@@ -8,9 +8,9 @@ LinuxToys discovers those applications through AppStream and turns their existin
 
 ## Choose your integration path
 
-### Your application is available through AppStream
+### Your application is available through AppStream or Canonical Snapcraft
 
-Stay on this page if your application is available through **Flathub** or a supported distribution repository and has usable AppStream metadata. LinuxToys discovers the application, places it in the appropriate category, presents its metadata, and installs it from sources available on the user's system.
+Stay on this page if your application is available through **Flathub**, **Canonical Snapcraft** or a supported distribution repository and has usable AppStream metadata. LinuxToys discovers the application, places it in the appropriate category, presents its metadata, and installs it from sources available on the user's system.
 
 You only need LinuxToys-specific metadata when you want to extend that existing AppStream entry with an **AppStream overlay**.
 
@@ -26,11 +26,11 @@ Use [Core Libraries](corelibraries.html) when implementing a system-level LinuxT
 
 ---
 
-## AppStream applications
+## AppStream and Canonical Snapcraft applications
 
 AppStream is the preferred integration path for ordinary applications already distributed through established Linux software sources.
 
-LinuxToys consumes AppStream catalogs from supported native repositories and Flathub, adapts their components to the LinuxToys catalog, and applies its compatibility and source-selection rules. The application remains defined by the software sources where it is actually distributed.
+LinuxToys consumes AppStream catalogs from supported native repositories and Flathub, adapts their components to the LinuxToys catalog, and applies its compatibility and source-selection rules. The application remains defined by the software sources where it is actually distributed. A hybrid approach is used for snaps, using information from both AppStream (if available) and the Snapcraft repository, and are generally treated as an extension of AppStream functionalities.
 
 ### What LinuxToys gets from AppStream
 

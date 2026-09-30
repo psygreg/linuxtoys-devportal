@@ -174,6 +174,7 @@ pacman
 pkg.tar.zst
 flatpak
 appimage
+snap
 tar
 bin
 ```

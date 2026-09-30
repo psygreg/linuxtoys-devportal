@@ -8,9 +8,9 @@ O LinuxToys descobre esses aplicativos pelo AppStream e transforma os metadados 
 
 ## Escolha seu caminho de integração
 
-### Seu aplicativo está disponível pelo AppStream
+### Seu aplicativo está disponível pelo AppStream ou Canonical Snapcraft
 
-Continue nesta página se ele está no **Flathub** ou em um repositório de distribuição compatível e possui metadados AppStream utilizáveis. Metadados específicos do LinuxToys só são necessários quando você quiser estender a entrada existente com um **overlay AppStream**.
+Continue nesta página se ele está no **Flathub**, **Canonical Snapcraft** ou em um repositório de distribuição compatível e possui metadados AppStream utilizáveis. Metadados específicos do LinuxToys só são necessários quando você quiser estender a entrada existente com um **overlay AppStream**.
 
 ### Seu aplicativo é distribuído de forma independente
 
@@ -22,9 +22,9 @@ Use a [Biblioteca Shell](corelibraries.pt-BR.html) para recursos de sistema e pr
 
 ---
 
-## Aplicativos AppStream
+## Aplicativos AppStream e Canonical Snapcraft
 
-O AppStream é o caminho preferencial para aplicativos já distribuídos por fontes de software Linux estabelecidas. O LinuxToys consome catálogos dos repositórios nativos compatíveis e do Flathub, adapta os componentes ao seu catálogo e aplica suas regras de compatibilidade e seleção de fonte.
+O AppStream é o caminho preferencial para aplicativos já distribuídos por fontes de software Linux estabelecidas. O LinuxToys consome catálogos dos repositórios nativos compatíveis e do Flathub, adapta os componentes ao seu catálogo e aplica suas regras de compatibilidade e seleção de fonte. Uma abordagem híbrida é empregada a snaps, usando informações tanto da AppStream (se disponíveis) quando do repositório Snapcraft, e são geralmente tratados como uma extensão dos recursos AppStream.
 
 ### O que o LinuxToys obtém do AppStream
 

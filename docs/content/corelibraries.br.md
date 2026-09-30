@@ -293,6 +293,12 @@ pkg_remove package
 pkg_flat org.example.App
 ```
 
+### Snaps
+
+```bash
+pkg_snap application
+```
+
 ### Arquivos de pacote
 
 ```bash
@@ -300,6 +306,7 @@ pkg_fromfile ./package.deb
 pkg_fromfile ./package.rpm
 pkg_fromfile ./package.pkg.tar.zst
 pkg_fromfile ./application.flatpak
+pkg_fromfile ./application.snap
 ```
 
 Flatpak em escopo de sistema:
