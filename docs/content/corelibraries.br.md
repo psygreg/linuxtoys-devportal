@@ -257,6 +257,55 @@ move_ source destination
 
 Os helpers tentam a operação sem privilégios primeiro e elevam apenas quando necessário.
 
+### Operações de sistema de arquivos no Distrobox
+
+O LinuxToys pode realizar operações de sistema de arquivos com rastreamento de transações dentro de um contêiner Distrobox existente. Esses helpers seguem o mesmo modelo dos helpers normais de sistema de arquivos, mas recebem o nome do contêiner como primeiro argumento.
+
+Crie um arquivo ou prepare um arquivo existente para edição:
+
+```bash
+distrobox_prep_create nome-do-container /caminho/do/arquivo
+distrobox_prep_edit nome-do-container /caminho/do/arquivo
+```
+
+Remova um arquivo ou diretório com rastreamento:
+
+```bash
+distrobox_prep_rm nome-do-container /caminho/do/alvo
+```
+
+Crie ou prepare diretórios:
+
+```bash
+distrobox_prep_dir nome-do-container /caminho/do/diretorio
+distrobox_prep_dir_edit nome-do-container /caminho/do/diretorio
+```
+
+Copie ou mova arquivos e diretórios dentro do contêiner:
+
+```bash
+distrobox_copy_ nome-do-container origem destino
+distrobox_copy_ nome-do-container -r diretorio destino
+distrobox_move_ nome-do-container origem destino
+```
+
+O primeiro argumento sempre identifica o contêiner Distrobox de destino. Os caminhos seguintes se referem a caminhos dentro desse contêiner.
+
+Assim como seus equivalentes no host, os helpers `distrobox_prep_*` registram alterações no mapa de transações do LinuxToys. Dessa forma, alvos recém-criados podem ser removidos automaticamente, enquanto alvos editados ou removidos são preservados em backup e podem ser restaurados durante uma desinstalação ou reversão automática.
+
+Por exemplo:
+
+```bash
+distrobox_prep_dir_edit davincibox /opt/resolve/IOPlugins/example.dvcp.bundle
+distrobox_move_ davincibox \
+    /tmp/example.dvcp.bundle \
+    /opt/resolve/IOPlugins/example.dvcp.bundle
+```
+
+Use esses helpers em vez de comandos `distrobox enter ... cp`, `mv`, `mkdir` ou `rm` diretos quando a alteração no sistema de arquivos deve ser gerenciada e reversível pelo LinuxToys.
+
+Essas operações modificam um contêiner **existente**. Elas são diferentes de `distrobox_created`, que registra que o LinuxToys criou um contêiner Distrobox inteiro para que o próprio contêiner possa ser removido posteriormente.
+
 ## Gerenciamento de pacotes
 
 ### Pacotes nativos

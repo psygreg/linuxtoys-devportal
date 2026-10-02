@@ -283,6 +283,55 @@ move_ source destination
 
 These helpers attempt the operation normally first and escalate only when necessary.
 
+### Distrobox filesystem operations
+
+LinuxToys can perform transaction-aware filesystem operations inside an existing Distrobox container. These helpers follow the same model as the regular filesystem helpers, but take the container name as their first argument.
+
+Create a file or prepare an existing file for editing:
+
+```bash
+distrobox_prep_create container-name /path/to/file
+distrobox_prep_edit container-name /path/to/file
+```
+
+Remove a tracked file or directory:
+
+```bash
+distrobox_prep_rm container-name /path/to/target
+```
+
+Create or prepare directories:
+
+```bash
+distrobox_prep_dir container-name /path/to/directory
+distrobox_prep_dir_edit container-name /path/to/directory
+```
+
+Copy or move files and directories inside the container:
+
+```bash
+distrobox_copy_ container-name source destination
+distrobox_copy_ container-name -r directory destination
+distrobox_move_ container-name source destination
+```
+
+The first argument always identifies the target Distrobox container. Paths after it refer to paths inside that container.
+
+Like their host equivalents, the `distrobox_prep_*` helpers register filesystem changes in the LinuxToys transaction map. Newly created targets can therefore be removed automatically, while edited or removed targets are backed up and can be restored during uninstall or automatic reversion.
+
+For example:
+
+```bash
+distrobox_prep_dir_edit davincibox /opt/resolve/IOPlugins/example.dvcp.bundle
+distrobox_move_ davincibox \
+    /tmp/example.dvcp.bundle \
+    /opt/resolve/IOPlugins/example.dvcp.bundle
+```
+
+Use these helpers instead of raw `distrobox enter ... cp`, `mv`, `mkdir`, or `rm` commands when the filesystem change should be managed and reversible by LinuxToys.
+
+These operations modify an **existing** container. They are distinct from `distrobox_created`, which records that LinuxToys created an entire Distrobox container so that the container itself can later be removed.
+
 ## Package management
 
 The package library abstracts distribution-specific package managers and records supported package operations for reversion.
