@@ -531,6 +531,14 @@ swapfile_created /swapfile
 rclone_mount remote /mount/point
 ```
 
+### Lista de pontos de montagem de armazenamento adicional
+
+```bash
+list_storage_drives
+```
+
+Tem como saída uma lista dos pontos de montagem encontrados, um por linha.
+
 ## Biblioteca de helpers
 
 `helpers.bash` contém utilitários de configuração e detecção mais específicos:

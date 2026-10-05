@@ -589,6 +589,14 @@ swapfile_created /swapfile
 rclone_mount remote /mount/point
 ```
 
+### Additional storage mountpoint listing
+
+```bash
+list_storage_drives
+```
+
+Outputs a list of mountpoints found, one per line.
+
 ## Helpers library
 
 `helpers.bash` contains reusable setup and capability helpers that do not belong to the more general modules.
